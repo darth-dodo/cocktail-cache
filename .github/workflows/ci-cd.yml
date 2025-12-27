@@ -58,16 +58,18 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install dependencies
-        run: uv sync --frozen --dev
+        run: |
+          uv sync --frozen --dev
+          uv pip list | grep -i ruff || echo "ruff not found"
 
       - name: Run Ruff linter
-        run: uv run ruff check src tests
+        run: uv run --frozen ruff check src tests
 
       - name: Run Ruff formatter check
-        run: uv run ruff format --check src tests
+        run: uv run --frozen ruff format --check src tests
 
       - name: Run mypy type checker
-        run: uv run mypy src
+        run: uv run --frozen mypy src
 
   # ===========================================================================
   # Stage 2: Test - Run pytest test suite
@@ -97,7 +99,7 @@ jobs:
         run: uv sync --frozen --dev
 
       - name: Run tests with coverage
-        run: uv run pytest -v --cov=src --cov-report=term-missing --cov-report=xml
+        run: uv run --frozen pytest -v --cov=src --cov-report=term-missing --cov-report=xml
         env:
           # Prevent CrewAI from making actual API calls during tests
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || 'test-key-for-ci' }}
