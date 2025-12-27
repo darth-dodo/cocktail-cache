@@ -13,7 +13,7 @@ repos:
 
   # Python linting and formatting with Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
+    rev: v0.14.10
     hooks:
       - id: ruff
         args: [--fix]
@@ -28,6 +28,7 @@ repos:
           - types-requests
           - types-PyYAML
           - pydantic>=2.0
+          - crewai>=0.86.0
         args:
           - --ignore-missing-imports
           - --disable-error-code=misc

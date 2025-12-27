@@ -1,6 +1,6 @@
 # Cocktail Cache - Implementation Guide
 
-> **Build Order**: Data → Tools → Agents → Crews → Flow → API → UI
+> **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI
 >
 > Each layer depends only on layers above it. Test each before moving on.
 
@@ -15,6 +15,14 @@ uv sync
 cp .env.example .env
 # Add your ANTHROPIC_API_KEY to .env
 
+# Environment Variables
+# Required:
+#   ANTHROPIC_API_KEY=sk-ant-...
+#
+# Optional:
+#   APP_ENV=development      # Options: development, staging, production, test
+#   CREWAI_TRACING=false     # Enable flow tracing for debugging
+
 # Run Tests (339 tests, 87% coverage)
 uv run pytest
 
@@ -26,7 +34,9 @@ uv run pytest tests/crews/
 uv run pytest tests/flows/
 
 # Development Server
-uv run uvicorn src.app.main:app --reload
+uv run uvicorn src.app.main:app --reload --port 8888
+
+# Visit http://localhost:8888 to chat with Raja
 ```
 
 ---
@@ -340,54 +350,104 @@ uv run pytest --cov=src/app      # With coverage
 
 ---
 
-## Week 3: Crews & Flow ✅ COMPLETE
+## Week 3: Crews & Flow (COMPLETE)
 
 ### Crews
 
 ```
 src/app/crews/
 ├── __init__.py          # Exports: create_analysis_crew, create_recipe_crew, run_*
-├── analysis_crew.py     # Cabinet Analyst → Mood Matcher
-└── recipe_crew.py       # Recipe Writer → Bottle Advisor
+├── analysis_crew.py     # Fast mode (Drink Recommender) or Full mode (Cabinet Analyst → Mood Matcher)
+└── recipe_crew.py       # Recipe Writer → Bottle Advisor (bottle advice optional)
 ```
 
-**Crew Implementation (Actual):**
+**Analysis Crew with Fast Mode:**
 
 ```python
 # src/app/crews/analysis_crew.py
 from crewai import Crew, Process, Task
-from src.app.agents import create_cabinet_analyst, create_mood_matcher
+from src.app.agents import create_drink_recommender, create_cabinet_analyst, create_mood_matcher
+from src.app.models import AnalysisOutput
 from src.app.tools import FlavorProfilerTool, RecipeDBTool
 
-def create_analysis_crew() -> Crew:
-    """Create the Analysis Crew for cabinet analysis and mood matching."""
-    recipe_db = RecipeDBTool()
-    flavor_profiler = FlavorProfilerTool()
+def create_analysis_crew(fast_mode: bool = True) -> Crew:
+    """Create the Analysis Crew for finding and ranking drinks.
 
-    cabinet_analyst = create_cabinet_analyst(tools=[recipe_db])
-    mood_matcher = create_mood_matcher(tools=[flavor_profiler])
+    Args:
+        fast_mode: If True (default), uses a single unified agent for faster
+            response (~50% faster). If False, uses two sequential agents.
 
-    analyze_task = Task(
-        description="""Analyze cabinet: {cabinet}. Drink type: {drink_type}.
-        Find all makeable drinks, excluding: {exclude}.""",
-        expected_output="JSON list of makeable drinks with match scores",
-        agent=cabinet_analyst,
-    )
+    Returns:
+        Configured Crew ready for execution.
 
-    match_task = Task(
-        description="""Rank candidates for mood: {mood}.
-        Skill level: {skill_level}. Exclude: {exclude}.""",
-        expected_output="Ranked list ordered by mood fit",
-        agent=mood_matcher,
-        context=[analyze_task],  # Dependency on analyze_task
-    )
+    Performance:
+        - Fast mode: 1 LLM call, ~2-3 seconds
+        - Full mode: 2 LLM calls, ~4-5 seconds
+    """
+    if fast_mode:
+        # Single agent with both tools - 1 LLM call
+        recipe_db = RecipeDBTool()
+        flavor_profiler = FlavorProfilerTool()
+        drink_recommender = create_drink_recommender(tools=[recipe_db, flavor_profiler])
 
-    return Crew(
-        agents=[cabinet_analyst, mood_matcher],
-        tasks=[analyze_task, match_task],
-        process=Process.sequential,
-        verbose=False,
-    )
+        unified_task = Task(
+            description="Find and rank the best drinks...",
+            expected_output="AnalysisOutput JSON",
+            agent=drink_recommender,
+            output_pydantic=AnalysisOutput,
+        )
+        return Crew(agents=[drink_recommender], tasks=[unified_task], ...)
+    else:
+        # Two agents - 2 LLM calls (more detailed)
+        # Cabinet Analyst → Mood Matcher pipeline
+        ...
+
+def run_analysis_crew(inputs: dict, fast_mode: bool = True) -> AnalysisOutput:
+    """Run the Analysis Crew with the given inputs.
+
+    Args:
+        inputs: Dict with cabinet, mood, constraints, etc.
+        fast_mode: If True (default), uses single-agent mode.
+
+    Returns:
+        AnalysisOutput with ranked drink candidates.
+    """
+    crew = create_analysis_crew(fast_mode=fast_mode)
+    return crew.kickoff(inputs=inputs)
+```
+
+**Recipe Crew with Optional Bottle Advice:**
+
+```python
+# src/app/crews/recipe_crew.py
+def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
+    """Create the Recipe Crew.
+
+    Args:
+        include_bottle_advice: When False, skips the bottle advisor task
+            to save processing time. Defaults to True.
+
+    Returns:
+        Configured Crew ready for execution.
+
+    Performance:
+        - With bottle advice: 2 LLM calls, ~3-4 seconds
+        - Without bottle advice: 1 LLM call, ~2 seconds
+    """
+    ...
+
+def run_recipe_crew(inputs: dict, include_bottle_advice: bool = True) -> RecipeCrewOutput:
+    """Run the Recipe Crew with the given inputs.
+
+    Args:
+        inputs: Dict with selected drink, cabinet, skill_level, etc.
+        include_bottle_advice: If True (default), includes bottle recommendations.
+
+    Returns:
+        RecipeCrewOutput with recipe and optional bottle advice.
+    """
+    crew = create_recipe_crew(include_bottle_advice=include_bottle_advice)
+    return crew.kickoff(inputs=inputs)
 ```
 
 ### Flow
@@ -416,6 +476,11 @@ class CocktailFlowState(BaseModel):
 class CocktailFlow(Flow[CocktailFlowState]):
     """Main flow orchestrating Analysis → Recipe crews."""
 
+    def __init__(self, fast_mode: bool = True, include_bottle_advice: bool = True):
+        super().__init__()
+        self.fast_mode = fast_mode
+        self.include_bottle_advice = include_bottle_advice
+
     @start()
     def receive_input(self) -> CocktailFlowState:
         # Normalize inputs, validate cabinet
@@ -424,7 +489,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
     @listen(receive_input)
     def analyze(self) -> CocktailFlowState:
         # Run Analysis Crew, parse results
-        crew = create_analysis_crew()
+        crew = create_analysis_crew(fast_mode=self.fast_mode)
         result = crew.kickoff(inputs={...})
         # Update state.candidates
         return self.state
@@ -437,15 +502,37 @@ class CocktailFlow(Flow[CocktailFlowState]):
     @listen(select)
     def generate_recipe(self) -> CocktailFlowState:
         # Run Recipe Crew, parse results
-        crew = create_recipe_crew()
+        crew = create_recipe_crew(include_bottle_advice=self.include_bottle_advice)
         result = crew.kickoff(inputs={...})
         return self.state
 
 # Convenience functions
-def run_cocktail_flow(...) -> CocktailFlowState:
-    """Run the complete cocktail recommendation flow."""
-    flow = CocktailFlow()
-    return flow.kickoff(inputs={...})
+def run_cocktail_flow(
+    cabinet: list[str],
+    mood: str,
+    fast_mode: bool = True,
+    include_bottle_advice: bool = True,
+    **kwargs
+) -> CocktailFlowState:
+    """Run the complete cocktail recommendation flow.
+
+    Args:
+        cabinet: List of available ingredients.
+        mood: User's mood or occasion description.
+        fast_mode: If True (default), uses single-agent analysis for faster response.
+        include_bottle_advice: If True (default), includes next bottle recommendations.
+        **kwargs: Additional parameters (constraints, skill_level, etc.)
+
+    Returns:
+        CocktailFlowState with complete recommendation.
+
+    Performance Modes:
+        - fast_mode=True, include_bottle_advice=False: ~3-4 seconds (2 LLM calls)
+        - fast_mode=True, include_bottle_advice=True: ~5 seconds (3 LLM calls)
+        - fast_mode=False, include_bottle_advice=True: ~8 seconds (4 LLM calls)
+    """
+    flow = CocktailFlow(fast_mode=fast_mode, include_bottle_advice=include_bottle_advice)
+    return flow.kickoff(inputs={"cabinet": cabinet, "mood": mood, **kwargs})
 
 def request_another(state: CocktailFlowState) -> CocktailFlowState:
     """Handle 'show me something else' by adding to rejected list."""
@@ -461,84 +548,91 @@ def request_another(state: CocktailFlowState) -> CocktailFlowState:
 
 ---
 
-## Week 4: API & Integration
+## Week 4: API & UI (COMPLETE)
 
-### FastAPI Routes
+### Chat Interface with Raja
+
+The application uses a conversational chat interface instead of a traditional form.
+Raja, the AI mixologist, guides users through the recommendation process.
+
+**Key Features:**
+- Conversational flow: Cabinet -> Mood -> Skill -> Recommendations
+- Mixology facts loading screen (20 cocktail history facts)
+- Collapsible recipe sections for easy mobile viewing
+- "Try Another" and "I Made This" actions
+
+### FastAPI Endpoints
 
 ```python
 # src/app/routers/api.py
 
-@router.post("/recommend")
+@router.post("/api/recommend")
 async def recommend(request: RecommendRequest):
-    state = CocktailFlowState(
-        session_id=str(uuid.uuid4()),
-        cabinet=request.cabinet,
-        mood=request.mood,
-        constraints=request.constraints,
-        drink_type=request.drink_type,  # "cocktail" | "mocktail" | "both"
-        skill_level=request.skill_level,  # "beginner" | "intermediate" | "adventurous"
-        recent_history=request.recent_history  # Recipe IDs from local storage
-    )
-    flow = CocktailFlow()
-    result = flow.kickoff(state)
-    return {"session_id": state.session_id, "recommendation": result}
+    """Get drink recommendation based on cabinet and mood."""
+    # Uses fast_mode=True by default for ~50% faster response
+    ...
 
-@router.post("/another")
+@router.post("/api/another")
 async def another(request: AnotherRequest):
-    # Get session, add rejected, re-run flow
-    pass
-
-@router.post("/made")
-async def mark_made(request: MarkMadeRequest):
-    """Called when user clicks 'I made this'. Client-side adds to history."""
-    return {"status": "ok", "recipe_id": request.recipe_id, "made_at": datetime.now()}
+    """Get alternative recommendation, excluding previous."""
+    ...
 ```
 
-### Session Management
+### Deployment (COMPLETE)
+
+**Render.com Configuration** (`render.yaml`):
+- Auto-deploy on push to main branch
+- Python 3.12 with uv package manager
+- Health check endpoint at `/health`
+- Environment variables for API keys
+
+**GitHub Actions CI/CD** (`.github/workflows/ci-cd.yml`):
+- Lint and type checking (ruff, mypy)
+- Test suite with coverage reporting
+- Automatic deployment trigger to Render
+
+### Structured Pydantic Models
+
+The crews use typed Pydantic models for reliable I/O:
 
 ```python
-# Simple in-memory for MVP
-sessions: dict[str, CocktailFlowState] = {}
+# src/app/models/crew_io.py
 
-# YAGNI: Redis only if we need persistence
+class AnalysisOutput(BaseModel):
+    """Output from Analysis Crew."""
+    candidates: list[DrinkCandidate]
+    total_found: int
+    mood_summary: str
+
+class RecipeOutput(BaseModel):
+    """Output from Recipe Writer."""
+    id: str
+    name: str
+    ingredients: list[RecipeIngredient]
+    method: list[RecipeStep]
+    technique_tips: list[TechniqueTip]
+    ...
+
+class BottleAdvisorOutput(BaseModel):
+    """Output from Bottle Advisor."""
+    recommendations: list[BottleRecommendation]
+    total_new_drinks: int
+
+class RecipeCrewOutput(BaseModel):
+    """Combined output from Recipe Crew."""
+    recipe: RecipeOutput
+    bottle_advice: BottleAdvisorOutput
 ```
 
 ---
 
-## Week 5: UI & Deploy
+## Week 5-6: Polish & Documentation
 
-### HTMX Frontend
-
-```html
-<form hx-post="/api/recommend"
-      hx-target="#result"
-      hx-indicator="#loading">
-
-  <!-- Drink type toggle: Cocktail / Mocktail / Both -->
-  {% include "components/drink_type_toggle.html" %}
-
-  <!-- Skill level selector -->
-  {% include "components/skill_selector.html" %}
-
-  <!-- Cabinet grid with collapsible categories -->
-  {% include "components/cabinet_grid.html" %}
-
-  <!-- Mood buttons -->
-  {% include "components/mood_selector.html" %}
-
-  <!-- Hidden: Recent history from local storage -->
-  <input type="hidden" id="recent-history" name="recent_history" value="">
-
-  <button type="submit">Make Me Something</button>
-</form>
-
-<div id="result">
-  <!-- Recipe card renders here (includes "I made this" button) -->
-</div>
-
-<!-- Recently Made sidebar/section -->
-{% include "components/history_list.html" %}
-```
+### Remaining Tasks
+- [ ] Error handling for edge cases
+- [ ] Performance optimization profiling
+- [ ] User guide documentation
+- [ ] Demo video/screenshots
 
 **Local Storage Schema:**
 
@@ -653,9 +747,24 @@ Tool Tests (30%)   - Deterministic tool tests
 
 | Metric | Target | How |
 |--------|--------|-----|
-| Time to recommendation | <8s | Pre-compute, limit LLM calls to 4 |
-| Cost per request | <$0.10 | Use Haiku where possible |
-| Mobile Lighthouse | 90+ | HTMX, minimal JS |
+| Time to recommendation | <5s (fast mode) | Single-agent analysis, optional bottle advice |
+| Cost per request | <$0.05 | Fast mode uses 2-3 LLM calls vs 4 |
+| Mobile Lighthouse | 90+ | Vanilla JS, minimal dependencies |
+
+### Configuration Options
+
+| Parameter | Default | Effect |
+|-----------|---------|--------|
+| `fast_mode` | `True` | Uses unified Drink Recommender (1 LLM call) vs Cabinet Analyst + Mood Matcher (2 LLM calls) |
+| `include_bottle_advice` | `True` | When False, skips bottle advisor step saving 1 LLM call |
+
+### Performance by Mode
+
+| Mode | LLM Calls | Latency | Best For |
+|------|-----------|---------|----------|
+| Fast + no bottle | 2 | ~3-4s | Quick recommendations |
+| Fast + bottle (default) | 3 | ~5s | Standard experience |
+| Full + bottle | 4 | ~8s | Detailed analysis |
 
 ---
 
@@ -684,41 +793,44 @@ Tool Tests (30%)   - Deterministic tool tests
 - [x] Model tests passing (`uv run pytest tests/models/`)
 - [x] 212 tests total, 90% coverage
 
-### Week 3 ✅ COMPLETE
-- [x] Analysis Crew (Cabinet Analyst → Mood Matcher)
-- [x] Recipe Crew (Recipe Writer → Bottle Advisor)
+### Week 3 (COMPLETE)
+- [x] Analysis Crew with fast mode (Drink Recommender) and full mode
+- [x] Recipe Crew with optional bottle advice
+- [x] Structured Pydantic outputs (AnalysisOutput, RecipeOutput, BottleAdvisorOutput)
 - [x] Flow orchestration (CocktailFlow with state management)
 - [x] "Show me something else" rejection workflow
 - [x] Crew tests passing (`uv run pytest tests/crews/`)
 - [x] Flow tests passing (`uv run pytest tests/flows/`)
 - [x] 127 new tests, 339 total tests, 87% coverage
 
-### Week 4
-- [ ] API endpoints (including /made)
-- [ ] Session management
-- [ ] Integration tests (`uv run pytest tests/integration/`)
-- [ ] <8s latency
-- [ ] Local storage (cabinet + skill + history)
-- [ ] Recipe history UI
+### Week 4 (COMPLETE)
+- [x] API endpoints (/recommend, /another)
+- [x] Session management (in-memory)
+- [x] Fast mode enabled by default (~50% faster)
+- [x] Chat UI with Raja the AI Mixologist
+- [x] Mixology facts loading screen (20 facts)
+- [x] Fixed ingredient IDs matching database
+- [x] Mobile responsive design
 
-### Week 5
-- [ ] HTMX frontend
-- [ ] Drink type toggle (Cocktail/Mocktail/Both)
-- [ ] Skill level selector
-- [ ] "I made this" button + history list
-- [ ] Mobile responsive
-- [ ] `render.yaml` configured
-- [ ] Deployed to Render
+### Week 5 (COMPLETE)
+- [x] Conversational chat interface (not HTMX form)
+- [x] Drink type toggle (Cocktail/Mocktail/Both)
+- [x] Skill level selector
+- [x] "Try Another" and "I Made This" buttons
+- [x] Collapsible recipe sections
+- [x] `render.yaml` configured with proper uv commands
+- [x] GitHub Actions CI/CD workflow
+- [x] Deployed to Render
 
-### Week 6
-- [ ] Error handling
-- [ ] Edge cases (empty history, no mocktails match, etc.)
-- [ ] Documentation
-- [ ] Ready for users
+### Week 6 (IN PROGRESS)
+- [ ] Error handling for edge cases
+- [ ] Performance optimization profiling
+- [ ] User documentation
+- [ ] Demo video/screenshots
 
 ---
 
-*Implementation Guide v1.2*
+*Implementation Guide v1.4*
 *Applies BLUEPRINT.md patterns to Cocktail Cache*
-*Updated: Week 1 complete, uv for package management, Render for deployment*
+*Updated: Fast mode parameters, bottle advice toggle, environment configuration*
 *Last Updated: 2025-12-27*

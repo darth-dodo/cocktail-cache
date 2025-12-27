@@ -1,0 +1,1001 @@
+{% extends "base.html" %}
+
+{% block title %}Cocktail Cache - AI-Powered Drink Recommendations{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-2 sm:px-0">
+    <!-- Chat Container -->
+    <div class="glass-card p-0 overflow-hidden flex flex-col chat-container">
+
+        <!-- Chat Header -->
+        <div class="glass-nav px-4 py-3 border-b border-amber-900/20 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-base font-semibold text-amber-100 truncate">Cocktail Cache</h1>
+                    <p class="text-xs text-stone-400">Raja, Your AI Mixologist</p>
+                </div>
+                <button id="reset-btn" class="btn btn-ghost btn-sm text-stone-400 hover:text-amber-300 p-2" title="Start Over">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 scroll-smooth">
+            <!-- Messages will be inserted here -->
+        </div>
+
+        <!-- Input Area (dynamic) -->
+        <div id="input-area" class="border-t border-amber-900/20 p-3 sm:p-4 bg-stone-950/50 flex-shrink-0">
+            <!-- Dynamic input controls will be inserted here -->
+        </div>
+    </div>
+</div>
+
+<!-- Message Templates -->
+<template id="bot-message-template">
+    <div class="flex gap-2 sm:gap-3 animate-fade-in">
+        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div class="flex-1 glass-message-bot rounded-2xl rounded-tl-sm px-3 py-2 sm:px-4 sm:py-3 max-w-[88%]">
+            <p class="text-stone-200 text-sm sm:text-base message-text"></p>
+        </div>
+    </div>
+</template>
+
+<template id="user-message-template">
+    <div class="flex gap-2 justify-end animate-fade-in">
+        <div class="glass-message-user rounded-2xl rounded-tr-sm px-3 py-2 sm:px-4 sm:py-3 max-w-[88%]">
+            <p class="text-white text-sm sm:text-base message-text"></p>
+        </div>
+    </div>
+</template>
+
+<template id="recipe-card-template">
+    <div class="flex gap-2 sm:gap-3 animate-fade-in">
+        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="glass-card-accent p-4 space-y-3">
+                <!-- Recipe Header -->
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <h3 class="text-lg sm:text-xl font-bold text-amber-300 truncate" id="recipe-name">-</h3>
+                        <p class="text-stone-400 text-xs sm:text-sm mt-0.5 line-clamp-2" id="recipe-tagline">-</p>
+                    </div>
+                    <div class="match-score px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex-shrink-0" id="recipe-score">
+                        --%
+                    </div>
+                </div>
+
+                <!-- Why this drink (collapsible) -->
+                <div class="collapsible-section" id="recipe-why-section">
+                    <button type="button" class="collapsible-trigger w-full text-left flex items-center justify-between py-1">
+                        <span class="text-amber-400/80 text-xs uppercase tracking-wider font-medium">Why this drink</span>
+                        <svg class="w-4 h-4 text-amber-400/60 transform transition-transform collapsible-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="collapsible-content">
+                        <div class="glass-highlight rounded-lg p-2.5 mt-1">
+                            <p class="text-stone-300 text-sm italic" id="recipe-why"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ingredients (collapsible, open by default) -->
+                <div class="collapsible-section open">
+                    <button type="button" class="collapsible-trigger w-full text-left flex items-center justify-between py-1">
+                        <span class="text-amber-400 text-xs uppercase tracking-wider font-medium flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Ingredients
+                        </span>
+                        <svg class="w-4 h-4 text-amber-400/60 transform transition-transform rotate-180 collapsible-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="collapsible-content open">
+                        <ul id="recipe-ingredients" class="space-y-1 mt-2 text-sm"></ul>
+                    </div>
+                </div>
+
+                <!-- Method (collapsible) -->
+                <div class="collapsible-section">
+                    <button type="button" class="collapsible-trigger w-full text-left flex items-center justify-between py-1">
+                        <span class="text-amber-400/80 text-xs uppercase tracking-wider font-medium flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Method
+                        </span>
+                        <svg class="w-4 h-4 text-amber-400/60 transform transition-transform collapsible-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="collapsible-content">
+                        <ol id="recipe-steps" class="space-y-2 mt-2 text-sm"></ol>
+                    </div>
+                </div>
+
+                <!-- Details row (collapsible) -->
+                <div class="collapsible-section" id="recipe-details-section">
+                    <button type="button" class="collapsible-trigger w-full text-left flex items-center justify-between py-1">
+                        <span class="text-amber-400/80 text-xs uppercase tracking-wider font-medium">Details</span>
+                        <svg class="w-4 h-4 text-amber-400/60 transform transition-transform collapsible-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="collapsible-content">
+                        <div class="flex flex-wrap gap-3 text-xs sm:text-sm mt-2">
+                            <div id="recipe-glass-section" class="hidden">
+                                <span class="text-stone-500">Glass:</span>
+                                <span class="text-stone-300 ml-1" id="recipe-glass"></span>
+                            </div>
+                            <div id="recipe-garnish-section" class="hidden">
+                                <span class="text-stone-500">Garnish:</span>
+                                <span class="text-stone-300 ml-1" id="recipe-garnish"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-2 pt-2">
+                    <button id="made-it-btn" class="btn btn-sm sm:btn-md glass-btn-success flex-1 gap-1 sm:gap-2 text-xs sm:text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="hidden xs:inline">I Made This!</span>
+                        <span class="xs:hidden">Made it!</span>
+                    </button>
+                    <button id="another-btn" class="btn btn-sm sm:btn-md glass-btn-secondary flex-1 gap-1 sm:gap-2 text-xs sm:text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Another
+                    </button>
+                </div>
+            </div>
+
+            <!-- Next Bottle Recommendation -->
+            <div id="bottle-rec" class="mt-2 glass-card bottle-card p-3 hidden">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-stone-400 text-xs">Next bottle to buy</p>
+                        <p class="text-amber-300 font-medium text-sm sm:text-base truncate" id="bottle-name">-</p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-amber-400 font-bold text-sm sm:text-base" id="bottle-unlocks">+0</p>
+                        <p class="text-stone-500 text-xs">drinks</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Chat state
+const state = {
+    step: 'welcome',
+    sessionId: null,
+    cabinet: [],
+    mood: '',
+    skillLevel: 'intermediate',
+    drinkType: 'both'
+};
+
+// DOM elements
+const chatMessages = document.getElementById('chat-messages');
+const inputArea = document.getElementById('input-area');
+const resetBtn = document.getElementById('reset-btn');
+
+// Ingredient options organized by category (IDs match database exactly)
+const ingredients = {
+    'Spirits': [
+        { id: 'bourbon', name: 'Bourbon', emoji: '🥃' },
+        { id: 'rye-whiskey', name: 'Rye Whiskey', emoji: '🥃' },
+        { id: 'london-dry-gin', name: 'Gin', emoji: '🍸' },
+        { id: 'vodka', name: 'Vodka', emoji: '🍸' },
+        { id: 'white-rum', name: 'White Rum', emoji: '🥃' },
+        { id: 'aged-rum', name: 'Aged Rum', emoji: '🥃' },
+        { id: 'blanco-tequila', name: 'Tequila', emoji: '🌵' },
+        { id: 'mezcal', name: 'Mezcal', emoji: '🌵' },
+        { id: 'cognac', name: 'Cognac', emoji: '🍷' }
+    ],
+    'Liqueurs': [
+        { id: 'sweet-vermouth', name: 'Sweet Vermouth', emoji: '🍷' },
+        { id: 'dry-vermouth', name: 'Dry Vermouth', emoji: '🍸' },
+        { id: 'campari', name: 'Campari', emoji: '🔴' },
+        { id: 'cointreau', name: 'Cointreau', emoji: '🍊' },
+        { id: 'amaretto', name: 'Amaretto', emoji: '🌰' },
+        { id: 'coffee-liqueur', name: 'Coffee Liqueur', emoji: '☕' },
+        { id: 'maraschino-liqueur', name: 'Maraschino', emoji: '🍒' },
+        { id: 'green-chartreuse', name: 'Green Chartreuse', emoji: '🌿' }
+    ],
+    'Bitters & Syrups': [
+        { id: 'angostura-bitters', name: 'Angostura Bitters', emoji: '💧' },
+        { id: 'orange-bitters', name: 'Orange Bitters', emoji: '🍊' },
+        { id: 'simple-syrup', name: 'Simple Syrup', emoji: '🍯' },
+        { id: 'honey-syrup', name: 'Honey Syrup', emoji: '🍯' },
+        { id: 'grenadine', name: 'Grenadine', emoji: '🍒' }
+    ],
+    'Fresh & Mixers': [
+        { id: 'fresh-lemon-juice', name: 'Lemon Juice', emoji: '🍋' },
+        { id: 'fresh-lime-juice', name: 'Lime Juice', emoji: '🍋' },
+        { id: 'fresh-orange-juice', name: 'Orange Juice', emoji: '🍊' },
+        { id: 'fresh-mint', name: 'Fresh Mint', emoji: '🌿' },
+        { id: 'club-soda', name: 'Club Soda', emoji: '💧' },
+        { id: 'tonic-water', name: 'Tonic Water', emoji: '💧' },
+        { id: 'ginger-beer', name: 'Ginger Beer', emoji: '🍺' },
+        { id: 'egg-white', name: 'Egg White', emoji: '🥚' }
+    ]
+};
+
+// Fun mixology facts to display during loading
+const mixologyFacts = [
+    "🍸 The word 'cocktail' first appeared in print in 1806",
+    "🧊 Ice wasn't commonly used in drinks until the 1830s",
+    "🍋 Citrus was originally added to prevent scurvy on ships",
+    "🥃 The Old Fashioned is considered the original cocktail",
+    "🍹 Tiki drinks were invented in 1930s Hollywood",
+    "🫒 The Martini may have originated during the Gold Rush",
+    "🥂 Champagne bubbles were once considered a flaw",
+    "🌿 Mint juleps date back to the 1700s",
+    "🍊 Orange bitters were more popular than Angostura in the 1800s",
+    "🥃 Bourbon must be aged in new charred oak barrels",
+    "🍸 James Bond's 'shaken not stirred' actually bruises the gin",
+    "🧪 The Margarita is the most ordered cocktail in the US",
+    "🍹 Blue Curaçao gets its color from food dye, not the fruit",
+    "🥃 A 'neat' pour means no ice, no water, just spirit",
+    "🍋 The Daiquiri was named after a Cuban mining town",
+    "🌴 The Piña Colada is Puerto Rico's national drink",
+    "🥃 Whiskey and whisky are both correct spellings",
+    "🍸 The Gibson is just a Martini with an onion",
+    "🧊 Shaking a cocktail adds more dilution than stirring",
+    "🍊 The Negroni was invented by an Italian count in 1919"
+];
+
+let factInterval = null;
+
+// Initialize chat
+function init() {
+    resetBtn.addEventListener('click', resetChat);
+    showWelcome();
+}
+
+function resetChat() {
+    state.step = 'welcome';
+    state.sessionId = null;
+    state.cabinet = [];
+    state.mood = '';
+    state.skillLevel = 'intermediate';
+    state.drinkType = 'both';
+    chatMessages.innerHTML = '';
+    showWelcome();
+}
+
+function scrollToBottom() {
+    setTimeout(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 100);
+}
+
+function addBotMessage(text) {
+    const template = document.getElementById('bot-message-template');
+    const clone = template.content.cloneNode(true);
+    clone.querySelector('.message-text').textContent = text;
+    chatMessages.appendChild(clone);
+    scrollToBottom();
+}
+
+function addUserMessage(text) {
+    const template = document.getElementById('user-message-template');
+    const clone = template.content.cloneNode(true);
+    clone.querySelector('.message-text').textContent = text;
+    chatMessages.appendChild(clone);
+    scrollToBottom();
+}
+
+function addTypingIndicator() {
+    const div = document.createElement('div');
+    div.id = 'typing-indicator';
+    div.className = 'flex gap-2 sm:gap-3 animate-fade-in';
+    div.innerHTML = `
+        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div class="glass-message-bot rounded-2xl rounded-tl-sm px-3 py-2 sm:px-4 sm:py-3">
+            <div class="flex gap-1">
+                <span class="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+                <span class="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+                <span class="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+            </div>
+        </div>
+    `;
+    chatMessages.appendChild(div);
+    scrollToBottom();
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) indicator.remove();
+}
+
+// Collapsible sections handler
+function initCollapsibles(container) {
+    container.querySelectorAll('.collapsible-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const section = trigger.closest('.collapsible-section');
+            const content = section.querySelector('.collapsible-content');
+            const icon = trigger.querySelector('.collapsible-icon');
+
+            section.classList.toggle('open');
+            content.classList.toggle('open');
+            icon.classList.toggle('rotate-180');
+        });
+    });
+}
+
+// Step handlers
+function showWelcome() {
+    setTimeout(() => {
+        addBotMessage("Hey! 👋 I'm Raja, your AI mixologist. Let's find your perfect drink.");
+        setTimeout(() => {
+            addBotMessage("What's in your cabinet? Tap or type below:");
+            showCabinetInput();
+        }, 600);
+    }, 300);
+}
+
+function showCabinetInput() {
+    state.step = 'cabinet';
+
+    let html = `<div class="space-y-3 max-h-[50vh] overflow-y-auto pr-1">`;
+
+    // Collapsible category sections
+    for (const [category, items] of Object.entries(ingredients)) {
+        const isFirst = category === 'Spirits';
+        html += `
+            <div class="ingredient-category ${isFirst ? 'open' : ''}">
+                <button type="button" class="category-trigger w-full text-left flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-amber-900/20 transition-colors">
+                    <span class="text-stone-300 text-xs uppercase tracking-wider font-medium">${category}</span>
+                    <svg class="w-4 h-4 text-stone-500 transform transition-transform ${isFirst ? 'rotate-180' : ''} category-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div class="category-content ${isFirst ? 'open' : ''}">
+                    <div class="flex flex-wrap gap-1.5 pt-2 pb-1">
+                        ${items.map(item => `
+                            <button type="button"
+                                    data-id="${item.id}"
+                                    class="ingredient-chip glass-chip px-2.5 py-1 rounded-full text-xs transition-all
+                                           hover:bg-amber-600/20 hover:border-amber-500/40
+                                           ${state.cabinet.includes(item.id) ? 'active bg-amber-600/30 border-amber-500/50 text-amber-200' : 'text-stone-300'}">
+                                <span class="mr-0.5">${item.emoji}</span>${item.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    html += `</div>
+        <div class="space-y-2 pt-2 border-t border-amber-900/20">
+            <div class="flex gap-2">
+                <input type="text" id="custom-ingredient-input"
+                       class="glass-input flex-1 text-sm py-2"
+                       placeholder="Type: aperol, prosecco, mint...">
+                <button id="add-custom-btn" class="btn btn-sm glass-btn-secondary px-3" title="Add">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="custom-ingredients-display" class="flex flex-wrap gap-1.5 hidden"></div>
+            <button id="cabinet-done-btn" class="btn btn-sm glass-btn-primary w-full" ${state.cabinet.length === 0 ? 'disabled' : ''}>
+                Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}
+            </button>
+        </div>`;
+
+    inputArea.innerHTML = html;
+
+    // Category toggle handlers
+    document.querySelectorAll('.category-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const category = trigger.closest('.ingredient-category');
+            const content = category.querySelector('.category-content');
+            const icon = trigger.querySelector('.category-icon');
+
+            category.classList.toggle('open');
+            content.classList.toggle('open');
+            icon.classList.toggle('rotate-180');
+        });
+    });
+
+    // Ingredient chip handlers
+    document.querySelectorAll('.ingredient-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const id = chip.dataset.id;
+            if (state.cabinet.includes(id)) {
+                state.cabinet = state.cabinet.filter(i => i !== id);
+                chip.classList.remove('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
+            } else {
+                state.cabinet.push(id);
+                chip.classList.add('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
+            }
+            updateCabinetButton();
+        });
+    });
+
+    document.getElementById('cabinet-done-btn').addEventListener('click', onCabinetDone);
+
+    // Custom ingredient input
+    const customInput = document.getElementById('custom-ingredient-input');
+    const addCustomBtn = document.getElementById('add-custom-btn');
+    const customDisplay = document.getElementById('custom-ingredients-display');
+
+    function addCustomIngredients() {
+        const input = customInput.value.trim();
+        if (!input) return;
+
+        const newIngredients = input.split(/[,]+/)
+            .map(i => i.trim().toLowerCase())
+            .filter(i => i.length > 0 && !state.cabinet.includes(i));
+
+        if (newIngredients.length > 0) {
+            state.cabinet.push(...newIngredients);
+            customInput.value = '';
+            updateCustomDisplay();
+            updateCabinetButton();
+        }
+    }
+
+    function updateCustomDisplay() {
+        const predefinedIds = Object.values(ingredients).flatMap(items => items.map(i => i.id));
+        const customIngredients = state.cabinet.filter(id => !predefinedIds.includes(id));
+
+        if (customIngredients.length > 0) {
+            customDisplay.classList.remove('hidden');
+            customDisplay.innerHTML = customIngredients.map(ing => `
+                <span class="glass-chip active bg-amber-600/30 border-amber-500/50 text-amber-200 px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5">
+                    ${ing}
+                    <button type="button" data-remove="${ing}" class="hover:text-white transition-colors">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </span>
+            `).join('');
+
+            customDisplay.querySelectorAll('[data-remove]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    state.cabinet = state.cabinet.filter(i => i !== btn.dataset.remove);
+                    updateCustomDisplay();
+                    updateCabinetButton();
+                });
+            });
+        } else {
+            customDisplay.classList.add('hidden');
+        }
+    }
+
+    addCustomBtn.addEventListener('click', addCustomIngredients);
+    customInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addCustomIngredients();
+        }
+    });
+}
+
+function updateCabinetButton() {
+    const btn = document.getElementById('cabinet-done-btn');
+    btn.disabled = state.cabinet.length === 0;
+    btn.textContent = `Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}`;
+}
+
+function onCabinetDone() {
+    const names = state.cabinet.map(id => {
+        for (const items of Object.values(ingredients)) {
+            const found = items.find(i => i.id === id);
+            if (found) return found.name;
+        }
+        return id.charAt(0).toUpperCase() + id.slice(1);
+    });
+
+    const displayText = names.length > 4
+        ? `${names.slice(0, 4).join(', ')} +${names.length - 4} more`
+        : names.join(', ');
+    addUserMessage(displayText);
+
+    setTimeout(() => {
+        addBotMessage("Nice! What's the vibe tonight?");
+        showMoodInput();
+    }, 400);
+}
+
+function showMoodInput() {
+    state.step = 'mood';
+
+    const moods = [
+        { text: 'Relaxing', emoji: '😌' },
+        { text: 'Celebrating', emoji: '🎉' },
+        { text: 'Date night', emoji: '❤️' },
+        { text: 'Cozy', emoji: '🏠' },
+        { text: 'Adventurous', emoji: '🌟' }
+    ];
+
+    inputArea.innerHTML = `
+        <div class="space-y-2">
+            <div class="flex flex-wrap gap-1.5">
+                ${moods.map(m => `
+                    <button type="button" class="mood-chip glass-chip px-2.5 py-1.5 rounded-lg text-xs hover:bg-amber-600/20 hover:border-amber-500/40 text-stone-300 transition-all">
+                        <span class="mr-0.5">${m.emoji}</span>${m.text}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="mood-input"
+                       class="glass-input flex-1 text-sm py-2"
+                       placeholder="Or describe it...">
+                <button id="mood-done-btn" class="btn btn-sm glass-btn-primary px-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.querySelectorAll('.mood-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.getElementById('mood-input').value = chip.textContent.trim();
+            document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active', 'bg-amber-600/30', 'border-amber-500/50'));
+            chip.classList.add('active', 'bg-amber-600/30', 'border-amber-500/50');
+        });
+    });
+
+    const moodInput = document.getElementById('mood-input');
+    const moodBtn = document.getElementById('mood-done-btn');
+    moodBtn.addEventListener('click', onMoodDone);
+    moodInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') onMoodDone();
+    });
+}
+
+function onMoodDone() {
+    state.mood = document.getElementById('mood-input').value || 'surprise me';
+    addUserMessage(state.mood);
+
+    setTimeout(() => {
+        addBotMessage("How fancy should we get?");
+        showSkillInput();
+    }, 400);
+}
+
+function showSkillInput() {
+    state.step = 'skill';
+
+    inputArea.innerHTML = `
+        <div class="space-y-3">
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" data-skill="beginner" class="skill-btn glass-card p-2.5 sm:p-3 text-center hover:bg-amber-600/10 transition-all">
+                    <div class="text-xl sm:text-2xl mb-0.5">🥄</div>
+                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Simple</div>
+                </button>
+                <button type="button" data-skill="intermediate" class="skill-btn glass-card p-2.5 sm:p-3 text-center hover:bg-amber-600/10 transition-all border-amber-500/30">
+                    <div class="text-xl sm:text-2xl mb-0.5">🍸</div>
+                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Classic</div>
+                </button>
+                <button type="button" data-skill="adventurous" class="skill-btn glass-card p-2.5 sm:p-3 text-center hover:bg-amber-600/10 transition-all">
+                    <div class="text-xl sm:text-2xl mb-0.5">🧪</div>
+                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Fancy</div>
+                </button>
+            </div>
+
+            <div class="flex gap-1.5">
+                <label class="drink-type-label glass-chip flex-1 text-center py-1.5 rounded-lg cursor-pointer transition-all hover:bg-amber-600/20 text-xs">
+                    <input type="radio" name="drinkType" value="cocktail" class="hidden">
+                    <span class="text-stone-300">🍹 Cocktail</span>
+                </label>
+                <label class="drink-type-label glass-chip flex-1 text-center py-1.5 rounded-lg cursor-pointer transition-all hover:bg-amber-600/20 text-xs">
+                    <input type="radio" name="drinkType" value="mocktail" class="hidden">
+                    <span class="text-stone-300">🧃 Mocktail</span>
+                </label>
+                <label class="drink-type-label glass-chip flex-1 text-center py-1.5 rounded-lg cursor-pointer transition-all bg-amber-600/20 border-amber-500/40 text-xs">
+                    <input type="radio" name="drinkType" value="both" class="hidden" checked>
+                    <span class="text-amber-200">✨ Either</span>
+                </label>
+            </div>
+        </div>
+    `;
+
+    document.querySelectorAll('.skill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.skill-btn').forEach(b => b.classList.remove('border-amber-500/50', 'bg-amber-600/20'));
+            btn.classList.add('border-amber-500/50', 'bg-amber-600/20');
+            state.skillLevel = btn.dataset.skill;
+            onSkillDone();
+        });
+    });
+
+    document.querySelectorAll('.drink-type-label').forEach(label => {
+        label.addEventListener('click', () => {
+            document.querySelectorAll('.drink-type-label').forEach(l => {
+                l.classList.remove('bg-amber-600/20', 'border-amber-500/40');
+                l.querySelector('span').classList.remove('text-amber-200');
+                l.querySelector('span').classList.add('text-stone-300');
+            });
+            label.classList.add('bg-amber-600/20', 'border-amber-500/40');
+            label.querySelector('span').classList.remove('text-stone-300');
+            label.querySelector('span').classList.add('text-amber-200');
+            state.drinkType = label.querySelector('input').value;
+        });
+    });
+}
+
+function onSkillDone() {
+    const skillLabels = { beginner: 'Simple', intermediate: 'Classic', adventurous: 'Fancy' };
+    addUserMessage(skillLabels[state.skillLevel]);
+
+    setTimeout(() => {
+        addBotMessage("Mixing something special... 🍸");
+        addTypingIndicator();
+        showLoadingInput();
+        startFlow();
+    }, 400);
+}
+
+function showLoadingInput() {
+    // Pick a random starting fact
+    let factIndex = Math.floor(Math.random() * mixologyFacts.length);
+
+    inputArea.innerHTML = `
+        <div class="text-center py-3 space-y-2">
+            <div class="text-stone-400 text-xs uppercase tracking-wider animate-pulse">Crafting your recommendation</div>
+            <div id="mixology-fact" class="text-amber-300/80 text-sm px-4 transition-opacity duration-300">
+                ${mixologyFacts[factIndex]}
+            </div>
+        </div>
+    `;
+
+    // Rotate facts every 3 seconds
+    factInterval = setInterval(() => {
+        factIndex = (factIndex + 1) % mixologyFacts.length;
+        const factEl = document.getElementById('mixology-fact');
+        if (factEl) {
+            factEl.style.opacity = '0';
+            setTimeout(() => {
+                factEl.textContent = mixologyFacts[factIndex];
+                factEl.style.opacity = '1';
+            }, 300);
+        }
+    }, 3000);
+}
+
+function stopFactRotation() {
+    if (factInterval) {
+        clearInterval(factInterval);
+        factInterval = null;
+    }
+}
+
+async function startFlow() {
+    try {
+        const response = await fetch('/api/flow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'START',
+                cabinet: state.cabinet,
+                mood: state.mood,
+                skill_level: state.skillLevel,
+                drink_type: state.drinkType
+            })
+        });
+
+        const data = await response.json();
+        stopFactRotation();
+        removeTypingIndicator();
+
+        if (data.success && data.recipe) {
+            state.sessionId = data.session_id;
+            showRecipe(data);
+        } else {
+            addBotMessage(data.error || "Couldn't find a match. Try more ingredients!");
+            showRetryInput();
+        }
+    } catch (error) {
+        stopFactRotation();
+        removeTypingIndicator();
+        addBotMessage("Something went wrong. Let's try again!");
+        showRetryInput();
+    }
+}
+
+function showRecipe(data) {
+    const template = document.getElementById('recipe-card-template');
+    const clone = template.content.cloneNode(true);
+
+    const recipe = data.recipe;
+    clone.querySelector('#recipe-name').textContent = recipe.name || 'Your Drink';
+    clone.querySelector('#recipe-tagline').textContent = recipe.tagline || '';
+
+    const score = data.alternatives?.[0]?.mood_score || Math.floor(Math.random() * 15) + 85;
+    clone.querySelector('#recipe-score').textContent = `${score}%`;
+
+    if (recipe.why) {
+        clone.querySelector('#recipe-why').textContent = recipe.why;
+    } else {
+        clone.querySelector('#recipe-why-section').remove();
+    }
+
+    const ingredientsList = clone.querySelector('#recipe-ingredients');
+    (recipe.ingredients || []).forEach(ing => {
+        const li = document.createElement('li');
+        li.className = 'text-stone-300 flex gap-2';
+        li.innerHTML = `<span class="text-amber-400 w-14 flex-shrink-0">${ing.amount || ''}</span><span>${ing.name || ing}</span>`;
+        ingredientsList.appendChild(li);
+    });
+
+    const stepsList = clone.querySelector('#recipe-steps');
+    (recipe.method || recipe.steps || []).forEach((step, index) => {
+        const li = document.createElement('li');
+        li.className = 'flex gap-2 text-stone-300';
+        li.innerHTML = `
+            <span class="flex-shrink-0 w-5 h-5 rounded-full bg-amber-600/30 text-amber-300 flex items-center justify-center text-xs">${index + 1}</span>
+            <span>${step.instruction || step}</span>
+        `;
+        stepsList.appendChild(li);
+    });
+
+    let hasDetails = false;
+    if (recipe.glassware) {
+        clone.querySelector('#recipe-glass').textContent = recipe.glassware;
+        clone.querySelector('#recipe-glass-section').classList.remove('hidden');
+        hasDetails = true;
+    }
+    if (recipe.garnish) {
+        clone.querySelector('#recipe-garnish').textContent = recipe.garnish;
+        clone.querySelector('#recipe-garnish-section').classList.remove('hidden');
+        hasDetails = true;
+    }
+    if (!hasDetails) {
+        clone.querySelector('#recipe-details-section').remove();
+    }
+
+    if (data.next_bottle) {
+        clone.querySelector('#bottle-name').textContent = data.next_bottle.ingredient;
+        clone.querySelector('#bottle-unlocks').textContent = `+${data.next_bottle.unlocks}`;
+        clone.querySelector('#bottle-rec').classList.remove('hidden');
+    }
+
+    chatMessages.appendChild(clone);
+
+    // Initialize collapsibles for the new recipe card
+    setTimeout(() => {
+        initCollapsibles(chatMessages);
+        document.getElementById('made-it-btn').addEventListener('click', onMadeIt);
+        document.getElementById('another-btn').addEventListener('click', onAnother);
+    }, 50);
+
+    scrollToBottom();
+    showRecipeInput();
+}
+
+function showRecipeInput() {
+    inputArea.innerHTML = `
+        <div class="text-center text-stone-500 text-xs py-1">
+            Tap buttons above to continue
+        </div>
+    `;
+}
+
+function showRetryInput() {
+    inputArea.innerHTML = `
+        <button id="retry-btn" class="btn btn-sm glass-btn-primary w-full">
+            Try Again
+        </button>
+    `;
+    document.getElementById('retry-btn').addEventListener('click', resetChat);
+}
+
+async function onMadeIt() {
+    if (!state.sessionId) return;
+
+    const drinkId = document.querySelector('#recipe-name')?.textContent?.toLowerCase().replace(/\s+/g, '-') || 'drink';
+    addUserMessage("Made it! 🎉");
+
+    try {
+        await fetch('/api/flow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'MADE',
+                session_id: state.sessionId,
+                drink_id: drinkId
+            })
+        });
+
+        addBotMessage("Cheers! 🥂 Enjoy!");
+        showEndInput();
+    } catch (error) {
+        addBotMessage("Cheers! Enjoy!");
+        showEndInput();
+    }
+}
+
+async function onAnother() {
+    if (!state.sessionId) return;
+
+    addUserMessage("Show me another");
+    addTypingIndicator();
+    showLoadingInput();
+
+    try {
+        const response = await fetch('/api/flow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'ANOTHER',
+                session_id: state.sessionId
+            })
+        });
+
+        const data = await response.json();
+        stopFactRotation();
+        removeTypingIndicator();
+
+        if (data.success && data.recipe) {
+            addBotMessage("How about this one?");
+            showRecipe(data);
+        } else {
+            addBotMessage(data.error || "That's all I've got! Try adding more ingredients.");
+            showEndInput();
+        }
+    } catch (error) {
+        stopFactRotation();
+        removeTypingIndicator();
+        addBotMessage("Couldn't fetch another. Try refreshing!");
+        showRetryInput();
+    }
+}
+
+function showEndInput() {
+    inputArea.innerHTML = `
+        <button id="start-over-btn" class="btn btn-sm glass-btn-secondary w-full">
+            Start Fresh
+        </button>
+    `;
+    document.getElementById('start-over-btn').addEventListener('click', resetChat);
+}
+
+// Initialize
+init();
+</script>
+
+<style>
+/* Chat container height */
+.chat-container {
+    height: calc(100vh - 140px);
+    height: calc(100dvh - 140px);
+    min-height: 400px;
+    max-height: 800px;
+}
+
+@media (max-width: 640px) {
+    .chat-container {
+        height: calc(100vh - 100px);
+        height: calc(100dvh - 100px);
+        max-height: none;
+    }
+}
+
+/* Glass chips */
+.glass-chip {
+    background: rgba(255, 245, 235, 0.03);
+    border: 1px solid rgba(255, 200, 150, 0.1);
+}
+
+.glass-chip.active {
+    background: rgba(217, 119, 6, 0.25);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+/* Messages */
+.glass-message-bot {
+    background: rgba(255, 245, 235, 0.05);
+    border: 1px solid rgba(255, 200, 150, 0.08);
+}
+
+.glass-message-user {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.4), rgba(180, 83, 9, 0.4));
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+/* Collapsible sections */
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-out;
+}
+
+.collapsible-content.open {
+    max-height: 500px;
+}
+
+.category-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+.category-content.open {
+    max-height: 200px;
+}
+
+/* Scrollbar */
+#chat-messages::-webkit-scrollbar,
+.max-h-\\[50vh\\]::-webkit-scrollbar {
+    width: 4px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb,
+.max-h-\\[50vh\\]::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3);
+    border-radius: 2px;
+}
+
+/* Cursors */
+.ingredient-chip, .mood-chip, .skill-btn, .collapsible-trigger, .category-trigger {
+    cursor: pointer;
+}
+
+/* Animations */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+/* Extra small breakpoint */
+@media (min-width: 400px) {
+    .xs\\:inline { display: inline; }
+    .xs\\:hidden { display: none; }
+}
+
+/* Line clamp */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

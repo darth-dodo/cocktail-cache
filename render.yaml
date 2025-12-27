@@ -1,21 +1,103 @@
+# =============================================================================
 # Render Blueprint for Cocktail Cache FastAPI Application
-# https://render.com/docs/blueprint-spec
+# =============================================================================
+# Documentation: https://render.com/docs/blueprint-spec
+#
+# Deployment Instructions:
+# 1. Connect your GitHub repository to Render.com
+# 2. Create a new "Blueprint" and point to this render.yaml
+# 3. Set the required environment variables in Render dashboard:
+#    - ANTHROPIC_API_KEY: Your Anthropic API key for CrewAI agents
+# 4. Deploy!
+#
+# Manual Deployment:
+#   render blueprint apply
+# =============================================================================
 
 services:
+  # ---------------------------------------------------------------------------
+  # Primary Web Service - FastAPI Application
+  # ---------------------------------------------------------------------------
   - type: web
-    name: cocktail-cache-api
+    name: cocktail-cache
     runtime: python
     plan: free
     region: oregon
     branch: main
+
+    # Auto-deploy on push to main branch
     autoDeploy: true
-    buildCommand: pip install uv && uv sync
-    startCommand: uv run uvicorn src.app.main:app --host 0.0.0.0 --port $PORT
+
+    # Build Configuration
+    # Install uv package manager, then sync dependencies (production only)
+    # --no-install-project avoids needing the full project for dependency resolution
+    buildCommand: |
+      pip install uv &&
+      uv sync --frozen --no-dev --no-install-project
+
+    # Start Command
+    # Run uvicorn with production settings
+    # Note: Render provides $PORT automatically
+    startCommand: |
+      uv run uvicorn src.app.main:app --host 0.0.0.0 --port $PORT --workers 1
+
+    # Health Check Configuration
+    # Render will poll this endpoint to verify service health
     healthCheckPath: /health
+
+    # Environment Variables
     envVars:
+      # -----------------------------------------------------------------------
+      # Required: API Keys (set via Render Dashboard - never commit secrets!)
+      # -----------------------------------------------------------------------
       - key: ANTHROPIC_API_KEY
-        sync: false
-      - key: ENVIRONMENT
+        sync: false  # Must be set manually in Render dashboard
+
+      # -----------------------------------------------------------------------
+      # Application Configuration
+      # -----------------------------------------------------------------------
+      - key: APP_ENV
         value: production
+
+      - key: DEBUG
+        value: "false"
+
+      - key: LOG_LEVEL
+        value: INFO
+
+      # -----------------------------------------------------------------------
+      # CrewAI Settings
+      # -----------------------------------------------------------------------
+      - key: CREW_VERBOSE
+        value: "false"  # Disable verbose logging in production
+
+      # -----------------------------------------------------------------------
+      # Session Storage (default: memory for free tier)
+      # -----------------------------------------------------------------------
+      - key: SESSION_BACKEND
+        value: memory
+
+      # Optional: Redis URL for persistent sessions (requires Redis add-on)
+      # - key: REDIS_URL
+      #   fromService:
+      #     type: redis
+      #     name: cocktail-cache-redis
+      #     property: connectionString
+
+      # -----------------------------------------------------------------------
+      # Python Runtime Configuration
+      # -----------------------------------------------------------------------
       - key: PYTHON_VERSION
         value: "3.12"
+
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  # ---------------------------------------------------------------------------
+  # Optional: Redis for Session Persistence (uncomment to enable)
+  # ---------------------------------------------------------------------------
+  # - type: redis
+  #   name: cocktail-cache-redis
+  #   plan: free
+  #   region: oregon
+  #   ipAllowList: []  # Only allow internal connections

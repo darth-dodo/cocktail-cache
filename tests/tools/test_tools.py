@@ -124,9 +124,9 @@ class TestRecipeDBTool:
         result = json.loads(tool._run(cabinet=cabinet, drink_type="cocktails"))
 
         for match in result["matches"]:
-            assert (
-                match["is_mocktail"] is False
-            ), f"Found mocktail {match['name']} in cocktails-only results"
+            assert match["is_mocktail"] is False, (
+                f"Found mocktail {match['name']} in cocktails-only results"
+            )
 
     def test_mocktails_filter_excludes_cocktails(self, tool: RecipeDBTool) -> None:
         """Test that mocktails filter excludes cocktails."""
@@ -142,9 +142,9 @@ class TestRecipeDBTool:
         result = json.loads(tool._run(cabinet=cabinet, drink_type="mocktails"))
 
         for match in result["matches"]:
-            assert (
-                match["is_mocktail"] is True
-            ), f"Found cocktail {match['name']} in mocktails-only results"
+            assert match["is_mocktail"] is True, (
+                f"Found cocktail {match['name']} in mocktails-only results"
+            )
 
     def test_both_filter_includes_cocktails_and_mocktails(
         self, tool: RecipeDBTool
@@ -186,9 +186,9 @@ class TestRecipeDBTool:
 
         if len(result["matches"]) >= 2:
             scores = [m["score"] for m in result["matches"]]
-            assert scores == sorted(
-                scores, reverse=True
-            ), "Matches should be sorted by score descending"
+            assert scores == sorted(scores, reverse=True), (
+                "Matches should be sorted by score descending"
+            )
 
     def test_score_is_ratio_of_available_to_total_ingredients(
         self, tool: RecipeDBTool
@@ -223,9 +223,9 @@ class TestRecipeDBTool:
         # Within each score group, names should be sorted
         for score, names in score_groups.items():
             if len(names) > 1:
-                assert names == sorted(
-                    names
-                ), f"Names within score {score} should be alphabetically sorted"
+                assert names == sorted(names), (
+                    f"Names within score {score} should be alphabetically sorted"
+                )
 
     # -------------------------------------------------------------------------
     # Edge Cases and Input Normalization
@@ -443,9 +443,9 @@ class TestFlavorProfilerTool:
 
         for profile in result["profiles"]:
             balance = profile["analysis"]["balance_score"]
-            assert (
-                0 <= balance <= 100
-            ), f"Balance score {balance} out of range for {profile['id']}"
+            assert 0 <= balance <= 100, (
+                f"Balance score {balance} out of range for {profile['id']}"
+            )
 
     def test_balance_score_calculation_logic(self, tool: FlavorProfilerTool) -> None:
         """Test that balance score reflects flavor distribution."""
@@ -758,9 +758,9 @@ class TestUnlockCalculatorTool:
         # All recommended drinks should be cocktails
         for rec in result["recommendations"]:
             for drink in rec["drinks"]:
-                assert (
-                    drink["is_mocktail"] is False
-                ), f"Found mocktail {drink['name']} in cocktails-only recommendations"
+                assert drink["is_mocktail"] is False, (
+                    f"Found mocktail {drink['name']} in cocktails-only recommendations"
+                )
 
     def test_mocktails_filter(self, tool: UnlockCalculatorTool) -> None:
         """Test filtering recommendations by mocktails only."""
@@ -770,9 +770,9 @@ class TestUnlockCalculatorTool:
         # All recommended drinks should be mocktails
         for rec in result["recommendations"]:
             for drink in rec["drinks"]:
-                assert (
-                    drink["is_mocktail"] is True
-                ), f"Found cocktail {drink['name']} in mocktails-only recommendations"
+                assert drink["is_mocktail"] is True, (
+                    f"Found cocktail {drink['name']} in mocktails-only recommendations"
+                )
 
     def test_both_filter(self, tool: UnlockCalculatorTool) -> None:
         """Test that 'both' filter includes all drink types."""
@@ -829,9 +829,9 @@ class TestUnlockCalculatorTool:
             unlock_counts = [
                 r["new_drinks_unlocked"] for r in result["recommendations"]
             ]
-            assert unlock_counts == sorted(
-                unlock_counts, reverse=True
-            ), "Recommendations should be sorted by unlock count descending"
+            assert unlock_counts == sorted(unlock_counts, reverse=True), (
+                "Recommendations should be sorted by unlock count descending"
+            )
 
     def test_recommendation_includes_drink_details(
         self, tool: UnlockCalculatorTool
@@ -980,6 +980,6 @@ class TestUnlockCalculatorTool:
 
         cabinet_set = {ing.lower() for ing in cabinet}
         for rec in result["recommendations"]:
-            assert (
-                rec["ingredient_id"].lower() not in cabinet_set
-            ), f"Recommended {rec['ingredient_id']} but it's already in cabinet"
+            assert rec["ingredient_id"].lower() not in cabinet_set, (
+                f"Recommended {rec['ingredient_id']} but it's already in cabinet"
+            )

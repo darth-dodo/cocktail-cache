@@ -2,12 +2,14 @@
 
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from src.app.config import get_settings
+from src.app.routers import api_router
 
 # Application paths
 APP_DIR = Path(__file__).parent
@@ -24,6 +26,21 @@ app = FastAPI(
     version="0.1.0",
     debug=settings.DEBUG,
 )
+
+# Configure CORS middleware for development
+# In production, restrict origins to your actual frontend domains
+cors_origins = ["*"] if settings.is_development else []
+if cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Include API router
+app.include_router(api_router, prefix="/api")
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -42,11 +59,10 @@ async def health_check() -> dict:
     }
 
 
-@app.get("/")
-async def root() -> dict:
-    """Root endpoint."""
-    return {
-        "message": "Welcome to Cocktail Cache",
-        "docs": "/docs",
-        "health": "/health",
-    }
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request) -> HTMLResponse:
+    """Render the main cocktail recommendation interface."""
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+    )

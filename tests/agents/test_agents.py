@@ -334,9 +334,9 @@ class TestAgentConsistency:
         """All agents should have substantial backstories."""
         for name, agent in all_agents.items():
             assert agent.backstory is not None, f"{name} has no backstory"
-            assert (
-                len(agent.backstory) > 50
-            ), f"{name} has a suspiciously short backstory"
+            assert len(agent.backstory) > 50, (
+                f"{name} has a suspiciously short backstory"
+            )
 
     def test_all_agents_default_to_empty_tools(self, all_agents):
         """All agents should default to empty tools list."""
