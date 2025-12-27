@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
+    # CrewAI Settings
+    CREWAI_TRACING: bool = False  # Enable CrewAI flow tracing
+
     @property
     def is_development(self) -> bool:
         """Check if running in development mode."""

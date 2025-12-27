@@ -20,6 +20,7 @@ from typing import Any
 from crewai.flow.flow import Flow, listen, start
 from pydantic import BaseModel, Field
 
+from src.app.config import get_settings
 from src.app.crews.analysis_crew import create_analysis_crew
 from src.app.crews.recipe_crew import create_recipe_crew
 from src.app.models import (
@@ -167,6 +168,11 @@ class CocktailFlow(Flow[CocktailFlowState]):
         ... })
         >>> print(result.state.recipe.name)
     """
+
+    def __init__(self) -> None:
+        """Initialize the flow with tracing based on config."""
+        settings = get_settings()
+        super().__init__(tracing=settings.CREWAI_TRACING)
 
     @start()
     def receive_input(self) -> CocktailFlowState:
