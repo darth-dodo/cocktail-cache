@@ -212,39 +212,45 @@ const chatMessages = document.getElementById('chat-messages');
 const inputArea = document.getElementById('input-area');
 const resetBtn = document.getElementById('reset-btn');
 
-// Ingredient options organized by category
+// Ingredient options organized by category (IDs match database exactly)
 const ingredients = {
     'Spirits': [
         { id: 'bourbon', name: 'Bourbon', emoji: '🥃' },
-        { id: 'rye', name: 'Rye', emoji: '🥃' },
-        { id: 'gin', name: 'Gin', emoji: '🍸' },
+        { id: 'rye-whiskey', name: 'Rye Whiskey', emoji: '🥃' },
+        { id: 'london-dry-gin', name: 'Gin', emoji: '🍸' },
         { id: 'vodka', name: 'Vodka', emoji: '🍸' },
-        { id: 'rum', name: 'Rum', emoji: '🥃' },
-        { id: 'tequila', name: 'Tequila', emoji: '🌵' },
+        { id: 'white-rum', name: 'White Rum', emoji: '🥃' },
+        { id: 'aged-rum', name: 'Aged Rum', emoji: '🥃' },
+        { id: 'blanco-tequila', name: 'Tequila', emoji: '🌵' },
         { id: 'mezcal', name: 'Mezcal', emoji: '🌵' },
-        { id: 'brandy', name: 'Brandy', emoji: '🍷' }
+        { id: 'cognac', name: 'Cognac', emoji: '🍷' }
     ],
     'Liqueurs': [
         { id: 'sweet-vermouth', name: 'Sweet Vermouth', emoji: '🍷' },
         { id: 'dry-vermouth', name: 'Dry Vermouth', emoji: '🍸' },
         { id: 'campari', name: 'Campari', emoji: '🔴' },
-        { id: 'triple-sec', name: 'Triple Sec', emoji: '🍊' },
+        { id: 'cointreau', name: 'Cointreau', emoji: '🍊' },
         { id: 'amaretto', name: 'Amaretto', emoji: '🌰' },
-        { id: 'kahlua', name: 'Kahlúa', emoji: '☕' }
+        { id: 'coffee-liqueur', name: 'Coffee Liqueur', emoji: '☕' },
+        { id: 'maraschino-liqueur', name: 'Maraschino', emoji: '🍒' },
+        { id: 'green-chartreuse', name: 'Green Chartreuse', emoji: '🌿' }
     ],
     'Bitters & Syrups': [
-        { id: 'angostura', name: 'Angostura', emoji: '💧' },
+        { id: 'angostura-bitters', name: 'Angostura Bitters', emoji: '💧' },
+        { id: 'orange-bitters', name: 'Orange Bitters', emoji: '🍊' },
         { id: 'simple-syrup', name: 'Simple Syrup', emoji: '🍯' },
-        { id: 'honey', name: 'Honey', emoji: '🍯' }
+        { id: 'honey-syrup', name: 'Honey Syrup', emoji: '🍯' },
+        { id: 'grenadine', name: 'Grenadine', emoji: '🍒' }
     ],
     'Fresh & Mixers': [
-        { id: 'lemon', name: 'Lemon', emoji: '🍋' },
-        { id: 'lime', name: 'Lime', emoji: '🍋' },
-        { id: 'orange', name: 'Orange', emoji: '🍊' },
-        { id: 'mint', name: 'Mint', emoji: '🌿' },
-        { id: 'soda', name: 'Soda', emoji: '💧' },
-        { id: 'tonic', name: 'Tonic', emoji: '💧' },
-        { id: 'ginger-beer', name: 'Ginger Beer', emoji: '🍺' }
+        { id: 'fresh-lemon-juice', name: 'Lemon Juice', emoji: '🍋' },
+        { id: 'fresh-lime-juice', name: 'Lime Juice', emoji: '🍋' },
+        { id: 'fresh-orange-juice', name: 'Orange Juice', emoji: '🍊' },
+        { id: 'fresh-mint', name: 'Fresh Mint', emoji: '🌿' },
+        { id: 'club-soda', name: 'Club Soda', emoji: '💧' },
+        { id: 'tonic-water', name: 'Tonic Water', emoji: '💧' },
+        { id: 'ginger-beer', name: 'Ginger Beer', emoji: '🍺' },
+        { id: 'egg-white', name: 'Egg White', emoji: '🥚' }
     ]
 };
 
