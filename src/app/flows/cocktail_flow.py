@@ -454,7 +454,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
         return result
 
 
-def run_cocktail_flow(
+async def run_cocktail_flow(
     cabinet: list[str],
     mood: str,
     skill_level: SkillLevel | str = SkillLevel.INTERMEDIATE,
@@ -465,7 +465,8 @@ def run_cocktail_flow(
     """Convenience function to run the complete cocktail recommendation flow.
 
     This function creates a CocktailFlow, initializes it with the provided
-    inputs, and runs all steps to completion.
+    inputs, and runs all steps to completion. Uses async kickoff to work
+    properly with FastAPI's event loop.
 
     Args:
         cabinet: List of ingredient IDs available in the user's cabinet.
@@ -479,7 +480,7 @@ def run_cocktail_flow(
         The final CocktailFlowState with recipe and recommendations.
 
     Example:
-        >>> state = run_cocktail_flow(
+        >>> state = await run_cocktail_flow(
         ...     cabinet=["bourbon", "lemons", "honey", "angostura-bitters"],
         ...     mood="unwinding after a long week",
         ...     skill_level=SkillLevel.INTERMEDIATE,
@@ -496,10 +497,10 @@ def run_cocktail_flow(
     )
     drink_str = drink_type.value if isinstance(drink_type, DrinkType) else drink_type
 
-    # Create the flow and run with inputs
+    # Create the flow and run with inputs using async kickoff
     # CrewAI Flow populates state from inputs dict
     flow = CocktailFlow()
-    flow.kickoff(
+    await flow.kickoff_async(
         inputs={
             "cabinet": cabinet,
             "mood": mood,
@@ -513,12 +514,13 @@ def run_cocktail_flow(
     return flow.state
 
 
-def request_another(flow_state: CocktailFlowState) -> CocktailFlowState:
+async def request_another(flow_state: CocktailFlowState) -> CocktailFlowState:
     """Request another recommendation, excluding the previously selected drink.
 
     This function implements the "show me something else" workflow. It takes
     an existing flow state, adds the currently selected drink to the rejected
     list, and re-runs the analysis and recipe generation to find a new drink.
+    Uses async kickoff to work properly with FastAPI's event loop.
 
     Args:
         flow_state: The current flow state with a selected drink.
@@ -527,9 +529,9 @@ def request_another(flow_state: CocktailFlowState) -> CocktailFlowState:
         Updated flow state with a new recommendation.
 
     Example:
-        >>> state = run_cocktail_flow(cabinet=["gin", "vermouth"], mood="fancy")
+        >>> state = await run_cocktail_flow(cabinet=["gin", "vermouth"], mood="fancy")
         >>> if state.selected == "martini" and user_says_another:
-        ...     state = request_another(state)
+        ...     state = await request_another(state)
         ...     print(f"New recommendation: {state.selected}")
     """
     if not flow_state.selected:
@@ -542,10 +544,10 @@ def request_another(flow_state: CocktailFlowState) -> CocktailFlowState:
         f"Rejecting '{flow_state.selected}', total rejected: {len(updated_rejected)}"
     )
 
-    # Create a new flow and run with updated inputs
+    # Create a new flow and run with updated inputs using async kickoff
     # This preserves the original inputs but adds the rejected drink
     flow = CocktailFlow()
-    flow.kickoff(
+    await flow.kickoff_async(
         inputs={
             "session_id": flow_state.session_id,
             "cabinet": flow_state.cabinet,
