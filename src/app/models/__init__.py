@@ -2,6 +2,16 @@
 
 from src.app.models.cabinet import Cabinet
 from src.app.models.cocktail import CocktailMatch
+from src.app.models.crew_io import (
+    AnalysisInput,
+    AnalysisOutput,
+    BottleAdvisorOutput,
+    BottleRecommendation,
+    DrinkCandidate,
+    RecipeCrewOutput,
+    RecipeInput,
+    RecipeOutput,
+)
 from src.app.models.drinks import (
     Drink,
     FlavorProfile,
@@ -25,6 +35,15 @@ __all__ = [
     "Cabinet",
     # Cocktail Matching
     "CocktailMatch",
+    # Crew I/O Models
+    "AnalysisInput",
+    "AnalysisOutput",
+    "BottleAdvisorOutput",
+    "BottleRecommendation",
+    "DrinkCandidate",
+    "RecipeCrewOutput",
+    "RecipeInput",
+    "RecipeOutput",
     # Drinks (existing)
     "Drink",
     "FlavorProfile",

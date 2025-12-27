@@ -17,8 +17,38 @@ os.environ.setdefault("ANTHROPIC_API_KEY", "test-key-not-used-for-actual-calls")
 
 from src.app.flows.cocktail_flow import CocktailFlowState
 from src.app.main import app
-from src.app.models import DrinkType, SkillLevel
+from src.app.models import (
+    DrinkType,
+    FlavorProfile,
+    RecipeOutput,
+    SkillLevel,
+)
+from src.app.models.recipe import RecipeIngredient, RecipeStep
 from src.app.routers.api import _sessions
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
+
+def create_simple_recipe(
+    recipe_id: str, name: str, tagline: str = "A classic cocktail"
+) -> RecipeOutput:
+    """Create a simple RecipeOutput for testing purposes."""
+    return RecipeOutput(
+        id=recipe_id,
+        name=name,
+        tagline=tagline,
+        why="Perfect for testing",
+        flavor_profile=FlavorProfile(sweet=30, sour=20, bitter=20, spirit=70),
+        ingredients=[RecipeIngredient(amount="2", unit="oz", item="Spirit")],
+        method=[RecipeStep(action="Mix", detail="and serve")],
+        glassware="Rocks glass",
+        garnish="None",
+        timing="2 minutes",
+        difficulty="easy",
+    )
+
 
 # =============================================================================
 # Test Fixtures
@@ -48,9 +78,30 @@ def mock_flow_state() -> CocktailFlowState:
     - Cabinet with common ingredients
     - Two candidate drinks with mood scores
     - A selected drink (whiskey-sour)
-    - A complete recipe
+    - A complete recipe using proper Pydantic model
     - A bottle recommendation
     """
+    recipe = RecipeOutput(
+        id="whiskey-sour",
+        name="Whiskey Sour",
+        tagline="A classic citrus cocktail with perfect balance",
+        why="The bright citrus perfectly matches your relaxing mood",
+        flavor_profile=FlavorProfile(sweet=40, sour=50, bitter=10, spirit=60),
+        ingredients=[
+            RecipeIngredient(amount="2", unit="oz", item="Bourbon"),
+            RecipeIngredient(amount="0.75", unit="oz", item="Fresh lemon juice"),
+            RecipeIngredient(amount="0.5", unit="oz", item="Simple syrup"),
+        ],
+        method=[
+            RecipeStep(action="Combine", detail="all ingredients in a shaker"),
+            RecipeStep(action="Shake", detail="with ice vigorously"),
+            RecipeStep(action="Strain", detail="into a rocks glass over ice"),
+        ],
+        glassware="Rocks glass",
+        garnish="Lemon wheel and cherry",
+        timing="3 minutes",
+        difficulty="easy",
+    )
     return CocktailFlowState(
         session_id="test-session-123",
         cabinet=["bourbon", "lemons", "honey", "simple-syrup"],
@@ -64,26 +115,7 @@ def mock_flow_state() -> CocktailFlowState:
             {"id": "old-fashioned", "name": "Old Fashioned", "mood_score": 85},
         ],
         selected="whiskey-sour",
-        recipe={
-            "id": "whiskey-sour",
-            "name": "Whiskey Sour",
-            "tagline": "A classic citrus cocktail with perfect balance",
-            "why": "The bright citrus perfectly matches your relaxing mood",
-            "ingredients": [
-                {"name": "Bourbon", "amount": "2 oz"},
-                {"name": "Fresh lemon juice", "amount": "0.75 oz"},
-                {"name": "Simple syrup", "amount": "0.5 oz"},
-            ],
-            "method": [
-                {"step": 1, "instruction": "Combine all ingredients in a shaker"},
-                {"step": 2, "instruction": "Add ice and shake vigorously"},
-                {"step": 3, "instruction": "Strain into a rocks glass over ice"},
-            ],
-            "glassware": "Rocks glass",
-            "garnish": "Lemon wheel and cherry",
-            "timing": "3 minutes",
-            "difficulty": "Easy",
-        },
+        recipe=recipe,
         next_bottle={
             "ingredient": "sweet-vermouth",
             "unlocks": 4,
@@ -96,6 +128,29 @@ def mock_flow_state() -> CocktailFlowState:
 @pytest.fixture
 def mock_another_state() -> CocktailFlowState:
     """Provide a mock state for the ANOTHER action response."""
+    recipe = RecipeOutput(
+        id="old-fashioned",
+        name="Old Fashioned",
+        tagline="The classic that started it all",
+        why="A timeless choice for relaxation",
+        flavor_profile=FlavorProfile(sweet=30, sour=10, bitter=30, spirit=80),
+        ingredients=[
+            RecipeIngredient(amount="2", unit="oz", item="Bourbon"),
+            RecipeIngredient(amount="0.25", unit="oz", item="Simple syrup"),
+            RecipeIngredient(amount="2", unit="dashes", item="Angostura bitters"),
+        ],
+        method=[
+            RecipeStep(action="Add", detail="all ingredients to a mixing glass"),
+            RecipeStep(action="Stir", detail="with ice for 30 seconds"),
+            RecipeStep(
+                action="Strain", detail="into a rocks glass over a large ice cube"
+            ),
+        ],
+        glassware="Rocks glass",
+        garnish="Orange peel",
+        timing="3 minutes",
+        difficulty="easy",
+    )
     return CocktailFlowState(
         session_id="test-session-123",
         cabinet=["bourbon", "lemons", "honey", "simple-syrup"],
@@ -110,11 +165,7 @@ def mock_another_state() -> CocktailFlowState:
             {"id": "gold-rush", "name": "Gold Rush", "mood_score": 80},
         ],
         selected="old-fashioned",
-        recipe={
-            "id": "old-fashioned",
-            "name": "Old Fashioned",
-            "tagline": "The classic that started it all",
-        },
+        recipe=recipe,
         next_bottle={
             "ingredient": "angostura-bitters",
             "unlocks": 6,
@@ -778,14 +829,14 @@ class TestCompleteFlowIntegration:
             session_id="test-session-123",
             cabinet=["bourbon", "lemons"],
             selected="old-fashioned",
-            recipe={"id": "old-fashioned", "name": "Old Fashioned"},
+            recipe=create_simple_recipe("old-fashioned", "Old Fashioned"),
             rejected=["whiskey-sour"],
         )
         third_recommendation = CocktailFlowState(
             session_id="test-session-123",
             cabinet=["bourbon", "lemons"],
             selected="gold-rush",
-            recipe={"id": "gold-rush", "name": "Gold Rush"},
+            recipe=create_simple_recipe("gold-rush", "Gold Rush"),
             rejected=["whiskey-sour", "old-fashioned"],
         )
 
@@ -905,18 +956,18 @@ class TestFlowEdgeCases:
         mock_run_flow.assert_called_once()
 
     @patch("src.app.routers.api.run_cocktail_flow")
-    def test_recipe_with_raw_content_fallback(
+    def test_recipe_structured_output(
         self, mock_run_flow: MagicMock, api_client: TestClient
     ):
-        """Recipe with raw_content instead of structured data is handled."""
+        """Recipe with structured RecipeOutput is properly converted."""
+        recipe = create_simple_recipe(
+            "custom-drink", "Custom Drink", "A simple test drink"
+        )
         raw_state = CocktailFlowState(
-            session_id="test-raw-recipe",
+            session_id="test-structured-recipe",
             cabinet=["bourbon"],
             selected="custom-drink",
-            recipe={
-                "id": "custom-drink",
-                "raw_content": "Mix bourbon with ice. Stir. Enjoy.",
-            },
+            recipe=recipe,
         )
         mock_run_flow.return_value = raw_state
 
@@ -930,7 +981,9 @@ class TestFlowEdgeCases:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["recipe"]["raw_content"] == "Mix bourbon with ice. Stir. Enjoy."
+        assert data["recipe"]["id"] == "custom-drink"
+        assert data["recipe"]["name"] == "Custom Drink"
+        assert data["recipe"]["tagline"] == "A simple test drink"
 
     @patch("src.app.routers.api.run_cocktail_flow")
     def test_response_without_next_bottle(
@@ -941,7 +994,7 @@ class TestFlowEdgeCases:
             session_id="test-no-bottle",
             cabinet=["bourbon", "vermouth", "bitters", "sugar"],
             selected="manhattan",
-            recipe={"id": "manhattan", "name": "Manhattan"},
+            recipe=create_simple_recipe("manhattan", "Manhattan"),
             next_bottle=None,  # No recommendation needed
         )
         mock_run_flow.return_value = state_no_bottle
@@ -967,7 +1020,7 @@ class TestFlowEdgeCases:
             session_id="test-single",
             cabinet=["bourbon"],
             selected="bourbon-neat",
-            recipe={"id": "bourbon-neat", "name": "Bourbon Neat"},
+            recipe=create_simple_recipe("bourbon-neat", "Bourbon Neat"),
             candidates=[{"id": "bourbon-neat", "name": "Bourbon Neat"}],
         )
         mock_run_flow.return_value = state_single

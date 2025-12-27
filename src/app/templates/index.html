@@ -248,6 +248,32 @@ const ingredients = {
     ]
 };
 
+// Fun mixology facts to display during loading
+const mixologyFacts = [
+    "🍸 The word 'cocktail' first appeared in print in 1806",
+    "🧊 Ice wasn't commonly used in drinks until the 1830s",
+    "🍋 Citrus was originally added to prevent scurvy on ships",
+    "🥃 The Old Fashioned is considered the original cocktail",
+    "🍹 Tiki drinks were invented in 1930s Hollywood",
+    "🫒 The Martini may have originated during the Gold Rush",
+    "🥂 Champagne bubbles were once considered a flaw",
+    "🌿 Mint juleps date back to the 1700s",
+    "🍊 Orange bitters were more popular than Angostura in the 1800s",
+    "🥃 Bourbon must be aged in new charred oak barrels",
+    "🍸 James Bond's 'shaken not stirred' actually bruises the gin",
+    "🧪 The Margarita is the most ordered cocktail in the US",
+    "🍹 Blue Curaçao gets its color from food dye, not the fruit",
+    "🥃 A 'neat' pour means no ice, no water, just spirit",
+    "🍋 The Daiquiri was named after a Cuban mining town",
+    "🌴 The Piña Colada is Puerto Rico's national drink",
+    "🥃 Whiskey and whisky are both correct spellings",
+    "🍸 The Gibson is just a Martini with an onion",
+    "🧊 Shaking a cocktail adds more dilution than stirring",
+    "🍊 The Negroni was invented by an Italian count in 1919"
+];
+
+let factInterval = null;
+
 // Initialize chat
 function init() {
     resetBtn.addEventListener('click', resetChat);
@@ -642,11 +668,37 @@ function onSkillDone() {
 }
 
 function showLoadingInput() {
+    // Pick a random starting fact
+    let factIndex = Math.floor(Math.random() * mixologyFacts.length);
+
     inputArea.innerHTML = `
-        <div class="text-center text-stone-500 py-2 text-sm">
-            <span class="inline-block animate-pulse">Finding your drink...</span>
+        <div class="text-center py-3 space-y-2">
+            <div class="text-stone-400 text-xs uppercase tracking-wider animate-pulse">Crafting your recommendation</div>
+            <div id="mixology-fact" class="text-amber-300/80 text-sm px-4 transition-opacity duration-300">
+                ${mixologyFacts[factIndex]}
+            </div>
         </div>
     `;
+
+    // Rotate facts every 3 seconds
+    factInterval = setInterval(() => {
+        factIndex = (factIndex + 1) % mixologyFacts.length;
+        const factEl = document.getElementById('mixology-fact');
+        if (factEl) {
+            factEl.style.opacity = '0';
+            setTimeout(() => {
+                factEl.textContent = mixologyFacts[factIndex];
+                factEl.style.opacity = '1';
+            }, 300);
+        }
+    }, 3000);
+}
+
+function stopFactRotation() {
+    if (factInterval) {
+        clearInterval(factInterval);
+        factInterval = null;
+    }
 }
 
 async function startFlow() {
@@ -664,6 +716,7 @@ async function startFlow() {
         });
 
         const data = await response.json();
+        stopFactRotation();
         removeTypingIndicator();
 
         if (data.success && data.recipe) {
@@ -674,6 +727,7 @@ async function startFlow() {
             showRetryInput();
         }
     } catch (error) {
+        stopFactRotation();
         removeTypingIndicator();
         addBotMessage("Something went wrong. Let's try again!");
         showRetryInput();
@@ -810,6 +864,7 @@ async function onAnother() {
         });
 
         const data = await response.json();
+        stopFactRotation();
         removeTypingIndicator();
 
         if (data.success && data.recipe) {
@@ -820,6 +875,7 @@ async function onAnother() {
             showEndInput();
         }
     } catch (error) {
+        stopFactRotation();
         removeTypingIndicator();
         addBotMessage("Couldn't fetch another. Try refreshing!");
         showRetryInput();

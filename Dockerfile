@@ -6,11 +6,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 WORKDIR /app
 
-# Copy dependency files first for layer caching
+# Copy all project files needed for dependency resolution
 COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
 
-# Install production dependencies only
-RUN uv sync --frozen --no-dev
+# Install production dependencies only (creates .venv)
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Stage 2: Runtime
 FROM python:3.12-slim AS runtime

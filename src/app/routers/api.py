@@ -17,7 +17,7 @@ from src.app.flows.cocktail_flow import (
     request_another,
     run_cocktail_flow,
 )
-from src.app.models import DrinkType, SkillLevel
+from src.app.models import DrinkType, RecipeOutput, SkillLevel
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +73,10 @@ class FlowRequest(BaseModel):
         default=None,
         description="Optional constraints like 'not too sweet'",
     )
+    include_bottle_advice: bool = Field(
+        default=True,
+        description="Whether to include bottle purchase recommendations (set to False to skip and save processing time)",
+    )
 
     # Required for ANOTHER and MADE actions
     session_id: str | None = Field(
@@ -97,6 +101,17 @@ class FlowRequest(BaseModel):
                         "mood": "unwinding after a long week",
                         "skill_level": "intermediate",
                         "drink_type": "cocktail",
+                    },
+                },
+                {
+                    "summary": "Start flow without bottle recommendations",
+                    "value": {
+                        "action": "START",
+                        "cabinet": ["gin", "tonic-water", "lime"],
+                        "mood": "quick refreshment",
+                        "skill_level": "beginner",
+                        "drink_type": "cocktail",
+                        "include_bottle_advice": False,
                     },
                 },
                 {
@@ -238,7 +253,66 @@ def _state_to_response(
     # Extract recipe data
     recipe_data: RecipeData | None = None
     if state.recipe:
-        if isinstance(state.recipe, dict):
+        if isinstance(state.recipe, RecipeOutput):
+            # Handle structured RecipeOutput Pydantic model
+            # Convert ingredients to frontend-compatible format
+            ingredients = (
+                [
+                    {
+                        "amount": f"{ing.amount} {ing.unit}".strip(),
+                        "name": ing.item,
+                    }
+                    for ing in state.recipe.ingredients
+                ]
+                if state.recipe.ingredients
+                else None
+            )
+
+            # Convert method to frontend-compatible format
+            method = (
+                [
+                    {
+                        "step": i + 1,
+                        "instruction": f"{step.action}: {step.detail}"
+                        if step.action
+                        else step.detail,
+                    }
+                    for i, step in enumerate(state.recipe.method)
+                ]
+                if state.recipe.method
+                else None
+            )
+
+            # Convert technique_tips to list of dicts
+            technique_tips = (
+                [tip.model_dump() for tip in state.recipe.technique_tips]
+                if state.recipe.technique_tips
+                else None
+            )
+
+            # Convert flavor_profile to dict
+            flavor_profile = (
+                state.recipe.flavor_profile.model_dump()
+                if state.recipe.flavor_profile
+                else None
+            )
+
+            recipe_data = RecipeData(
+                id=state.recipe.id,
+                name=state.recipe.name,
+                tagline=state.recipe.tagline,
+                why=state.recipe.why,
+                ingredients=ingredients,
+                method=method,
+                glassware=state.recipe.glassware,
+                garnish=state.recipe.garnish,
+                timing=state.recipe.timing,
+                difficulty=state.recipe.difficulty,
+                technique_tips=technique_tips,
+                is_mocktail=state.recipe.is_mocktail,
+                flavor_profile=flavor_profile,
+            )
+        elif isinstance(state.recipe, dict):
             recipe_data = RecipeData(
                 id=state.recipe.get("id") or state.selected,
                 name=state.recipe.get("name"),
@@ -256,7 +330,7 @@ def _state_to_response(
                 flavor_profile=state.recipe.get("flavor_profile"),
             )
         else:
-            # Handle case where recipe is not a dict
+            # Handle case where recipe is not a dict or RecipeOutput
             recipe_data = RecipeData(
                 id=state.selected,
                 raw_content=str(state.recipe),
@@ -349,7 +423,8 @@ async def _handle_start(request: FlowRequest) -> FlowResponse:
 
     logger.info(
         f"Starting new flow with {len(request.cabinet)} ingredients, "
-        f"mood='{request.mood or 'not specified'}'"
+        f"mood='{request.mood or 'not specified'}', "
+        f"include_bottle_advice={request.include_bottle_advice}"
     )
 
     # Run the cocktail flow (async to work with FastAPI's event loop)
@@ -360,6 +435,7 @@ async def _handle_start(request: FlowRequest) -> FlowResponse:
         drink_type=request.drink_type or DrinkType.COCKTAIL,
         recent_history=request.recent_history or [],
         constraints=request.constraints or [],
+        include_bottle_advice=request.include_bottle_advice,
     )
 
     # Store session state
