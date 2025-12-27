@@ -19,21 +19,24 @@
 
 ## Implementation Status
 
-> **Current Phase**: Week 3 Complete → Week 4 API & Integration (Next)
+> **Current Phase**: Week 4 API & UI Complete
 
 ### Completed Components
 
 | Component | Status | Details |
 |-----------|--------|---------|
 | Data Layer | ✅ Complete | 50 cocktails, 24 mocktails, 134 ingredients |
-| Pydantic Models | ✅ Complete | Phase 1 + Phase 2 models (Cabinet, Recipe, UserPrefs, History) |
-| Project Structure | ✅ Complete | FastAPI skeleton, tests, scripts configured |
+| Pydantic Models | ✅ Complete | Structured crew I/O (AnalysisOutput, RecipeOutput, BottleAdvisorOutput) |
+| Project Structure | ✅ Complete | FastAPI with routers, templates, static assets |
 | Validation Scripts | ✅ Complete | `validate_data.py`, `compute_unlock_scores.py` |
 | Pre-commit Hooks | ✅ Complete | ruff, mypy, trailing whitespace checks |
-| CrewAI Agents | ✅ Complete | 4 agents with Claude Haiku (Anthropic) |
+| CrewAI Agents | ✅ Complete | 5 agents including unified Drink Recommender (fast mode) |
 | CrewAI Tools | ✅ Complete | 4 deterministic tools for data operations |
-| CrewAI Crews | ✅ Complete | Analysis Crew + Recipe Crew with task dependencies |
+| CrewAI Crews | ✅ Complete | Analysis Crew (fast/full modes) + Recipe Crew (optional bottle advice) |
 | CrewAI Flow | ✅ Complete | CocktailFlow with state management and rejection workflow |
+| API Routes | ✅ Complete | FastAPI endpoints for recommendations |
+| Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
+| Deployment | ✅ Complete | Render.com with GitHub Actions CI/CD |
 | Unit Tests | ✅ Complete | 339 tests passing with 87% coverage |
 
 ### Data Files Summary
@@ -185,6 +188,9 @@ This insight drives the entire architecture.
 
 ### Crew Structure
 
+The system supports two modes for the Analysis Crew:
+
+**Fast Mode (Default)** - Single LLM call, ~50% faster:
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        COCKTAIL FLOW                                    │
@@ -195,44 +201,83 @@ This insight drives the entire architecture.
                     │                               │
                     ▼                               ▼
 ┌───────────────────────────────┐   ┌───────────────────────────────────┐
-│       CREW 1: ANALYSIS        │   │        CREW 2: RECIPE             │
-│   "What CAN and SHOULD        │   │   "How to make it, what          │
-│    they make?"                │   │    to buy next"                   │
+│   CREW 1: ANALYSIS (FAST)     │   │        CREW 2: RECIPE             │
+│   "Find and rank drinks"      │   │   "How to make it, what          │
+│                               │   │    to buy next"                   │
 ├───────────────────────────────┤   ├───────────────────────────────────┤
 │                               │   │                                   │
 │  ┌─────────────────────────┐  │   │  ┌─────────────────────────────┐  │
-│  │    CABINET ANALYST      │  │   │  │      RECIPE WRITER          │  │
-│  │                         │  │   │  │                             │  │
-│  │  Input: Raw ingredients │  │   │  │  Input: Selected cocktail   │  │
-│  │  Tool: RecipeDB         │  │   │  │  Tool: RecipeDB             │  │
-│  │  Output: Candidates     │  │   │  │  Output: Full recipe +      │  │
-│  │          with scores    │  │   │  │          technique tips     │  │
-│  └───────────┬─────────────┘  │   │  └───────────┬─────────────────┘  │
-│              │                │   │              │                    │
-│              ▼                │   │              ▼                    │
-│  ┌─────────────────────────┐  │   │  ┌─────────────────────────────┐  │
-│  │     MOOD MATCHER        │  │   │  │     BOTTLE ADVISOR          │  │
-│  │                         │  │   │  │                             │  │
-│  │  Input: Mood + canddts  │  │   │  │  Input: Cabinet             │  │
-│  │  Tool: FlavorProfiler   │  │   │  │  Tool: UnlockCalculator     │  │
-│  │  Output: Ranked list    │  │   │  │  Output: Next bottle +      │  │
-│  │          with "why"     │  │   │  │          ROI justification  │  │
-│  └─────────────────────────┘  │   │  └─────────────────────────────┘  │
-│                               │   │                                   │
+│  │   DRINK RECOMMENDER     │  │   │  │      RECIPE WRITER          │  │
+│  │   (Unified Agent)       │  │   │  │                             │  │
+│  │                         │  │   │  │  Input: Selected cocktail   │  │
+│  │  Input: Cabinet + Mood  │  │   │  │  Tools: RecipeDB,           │  │
+│  │  Tools: RecipeDB,       │  │   │  │         SubstitutionFinder  │  │
+│  │         FlavorProfiler  │  │   │  │  Output: RecipeOutput       │  │
+│  │  Output: AnalysisOutput │  │   │  └───────────┬─────────────────┘  │
+│  │  (1 LLM call)           │  │   │              │ (optional)         │
+│  └─────────────────────────┘  │   │              ▼                    │
+│                               │   │  ┌─────────────────────────────┐  │
+│                               │   │  │     BOTTLE ADVISOR          │  │
+│                               │   │  │                             │  │
+│                               │   │  │  Input: Cabinet             │  │
+│                               │   │  │  Tool: UnlockCalculator     │  │
+│                               │   │  │  Output: BottleAdvisorOutput│  │
+│                               │   │  └─────────────────────────────┘  │
 └───────────────────────────────┘   └───────────────────────────────────┘
-                    │                               │
-                    └───────────────┬───────────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   FINAL RESPONSE    │
-                         └─────────────────────┘
+```
+
+**Full Mode** - Two LLM calls, more detailed analysis:
+```
+┌───────────────────────────────┐
+│   CREW 1: ANALYSIS (FULL)     │
+├───────────────────────────────┤
+│  ┌─────────────────────────┐  │
+│  │    CABINET ANALYST      │  │
+│  │  Tool: RecipeDB         │  │
+│  │  Output: Candidates     │  │
+│  └───────────┬─────────────┘  │
+│              ▼                │
+│  ┌─────────────────────────┐  │
+│  │     MOOD MATCHER        │  │
+│  │  Tool: FlavorProfiler   │  │
+│  │  Output: AnalysisOutput │  │
+│  └─────────────────────────┘  │
+└───────────────────────────────┘
 ```
 
 ### Agent Specifications
 
 > **LLM Configuration**: All agents use Claude Haiku (`anthropic/claude-3-5-haiku-20241022`) by default.
 > Custom LLM configurations can be passed to each factory function.
+
+#### Agent 0: Drink Recommender (Fast Mode)
+
+```python
+# src/app/agents/drink_recommender.py
+from crewai import LLM, Agent
+from src.app.agents.llm_config import get_default_llm
+
+def create_drink_recommender(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
+    return Agent(
+        role="Drink Recommender",
+        goal="Find and rank the best drinks based on available ingredients and mood",
+        backstory="""You are Raja, an expert AI mixologist who combines deep
+        knowledge of cocktail recipes with an intuitive understanding of mood
+        and occasion. You analyze bar cabinets instantly, identify all makeable
+        drinks, and rank them by how well they match the user's current mood.
+        You always respect drink type preferences and skill level constraints.""",
+        tools=tools or [],
+        llm=llm or get_default_llm(),
+        verbose=False,
+        allow_delegation=False,
+    )
+```
+
+**Recommended Tools**: `RecipeDBTool`, `FlavorProfilerTool`
+**Used In**: Fast mode Analysis Crew (single-agent, single LLM call)
 
 #### Agent 1: Cabinet Analyst
 
@@ -437,18 +482,18 @@ ANTHROPIC_API_KEY=sk-ant-...
                                  │
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│ 3. ANALYSIS CREW (2 LLM calls)                                       │
-│    • Cabinet Analyst: Scores candidates by match quality             │
-│    • Mood Matcher: Ranks by mood fit, applies constraints            │
-│    • Output: Top 3 candidates with reasoning                         │
+│ 3. ANALYSIS CREW                                                     │
+│    • Fast mode (default): 1 LLM call via Drink Recommender           │
+│    • Full mode: 2 LLM calls (Cabinet Analyst → Mood Matcher)         │
+│    • Output: AnalysisOutput with ranked candidates                   │
 └──────────────────────────────────────────────────────────────────────┘
                                  │
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│ 4. RECIPE CREW (2 LLM calls)                                         │
-│    • Recipe Writer: Full recipe with tips for #1 candidate           │
-│    • Bottle Advisor: Next bottle recommendation                      │
-│    • Output: Complete response payload                               │
+│ 4. RECIPE CREW                                                       │
+│    • Recipe Writer: Full recipe with tips (RecipeOutput)             │
+│    • Bottle Advisor (optional): Next bottle (BottleAdvisorOutput)    │
+│    • Output: RecipeCrewOutput (combined structured output)           │
 └──────────────────────────────────────────────────────────────────────┘
                                  │
                                  ▼
@@ -460,8 +505,11 @@ ANTHROPIC_API_KEY=sk-ant-...
 └──────────────────────────────────────────────────────────────────────┘
 
 
-TOTAL LLM CALLS: 4
-TARGET LATENCY: <8 seconds
+TOTAL LLM CALLS: 2-4 (depending on mode)
+  - Fast mode + no bottle advice: 2 calls
+  - Fast mode + bottle advice: 3 calls
+  - Full mode + bottle advice: 4 calls
+TARGET LATENCY: <8 seconds (fast mode: <5 seconds)
 ```
 
 ### State Management
@@ -936,6 +984,7 @@ cocktail-cache/
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 1.1*
 *Last Updated: 2025-12-27*
 *Principles: KISS + YAGNI*
+*Changes: Added fast mode, Drink Recommender agent, structured Pydantic outputs*

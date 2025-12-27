@@ -2,35 +2,36 @@
 
 **Your cabinet. Your mood. Your perfect drink.**
 
-An AI-powered home bar advisor that helps you craft great cocktails with whatever bottles you have. Enter your cabinet contents and mood, get personalized drink recommendations, technique guidance, and smart suggestions for your next bottle purchase.
+An AI-powered home bar advisor that helps you craft great cocktails with whatever bottles you have. Chat with Raja, your AI mixologist, to get personalized drink recommendations, technique guidance, and smart suggestions for your next bottle purchase.
 
 ---
 
 ## Development Status
 
-> **Current Phase**: Week 3 Complete → Week 4 API & Integration (Next)
+> **Current Phase**: Week 4 API & UI Complete
 
 | Component | Status | Details |
 |-----------|--------|---------|
 | Data Layer | ✅ Complete | 50 cocktails, 24 mocktails, 134 ingredients |
-| Pydantic Models | ✅ Complete | Cabinet, Recipe, UserPrefs, History + Phase 1 models |
-| Project Structure | ✅ Complete | FastAPI skeleton, tests, scripts |
-| CrewAI Agents | ✅ Complete | 4 agents with Claude Haiku (Anthropic) |
+| Pydantic Models | ✅ Complete | Structured crew I/O with RecipeOutput, AnalysisOutput, BottleAdvisorOutput |
+| CrewAI Agents | ✅ Complete | 5 agents including unified Drink Recommender for fast mode |
 | CrewAI Tools | ✅ Complete | 4 deterministic tools for data operations |
-| Crews & Flow | ✅ Complete | Analysis Crew, Recipe Crew, CocktailFlow |
-| API Routes | 🔲 Pending | Week 4 |
-| UI/HTMX | 🔲 Pending | Week 5 |
+| Crews & Flow | ✅ Complete | Analysis Crew (fast mode), Recipe Crew, CocktailFlow |
+| API Routes | ✅ Complete | FastAPI endpoints with session management |
+| Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
+| Deployment | ✅ Complete | Render.com with GitHub Actions CI/CD |
 
 ---
 
 ## Features
 
-- **AI-powered cocktail recommendations** - Get drinks matched to your available ingredients
-- **Mood-based drink matching** - Unwinding, celebrating, or hosting? We've got you covered
+- **Chat with Raja** - Conversational AI mixologist that guides you to your perfect drink
+- **AI-powered recommendations** - Get drinks matched to your available ingredients and mood
+- **Fast mode analysis** - Single-agent mode for ~50% faster recommendations
 - **Skill level adaptation** - Beginner-friendly recipes to adventurous techniques
 - **Mocktail support** - Spirit-free options for non-alcoholic preferences
 - **"Next bottle" recommendations** - Maximize your drink potential with smart ROI suggestions
-- **Recipe history tracking** - Remember what you made and avoid recent repeats
+- **Mixology facts loading screen** - Learn cocktail history while waiting
 - **Mobile-first design** - Optimized for use in the kitchen
 
 ---
@@ -157,19 +158,28 @@ print(f"Selected: {result.selected}")
 print(f"Recipe: {result.recipe}")
 print(f"Next bottle: {result.next_bottle}")
 
-# Option 2: Use individual crews for more control
-from src.app.crews import create_analysis_crew, create_recipe_crew
+# Option 2: Use individual crews with fast mode (default)
+from src.app.crews import run_analysis_crew, run_recipe_crew
 
-# Run analysis crew
-analysis_crew = create_analysis_crew()
-analysis_result = analysis_crew.kickoff(inputs={
-    "cabinet": "bourbon, lemons, honey, simple-syrup",
-    "mood": "unwinding after a long week",
-    "drink_type": "cocktail",
-    "skill_level": "intermediate",
-    "exclude": "",
-})
-print(analysis_result)
+# Run analysis crew in fast mode (~50% faster)
+analysis_result = run_analysis_crew(
+    cabinet=["bourbon", "lemons", "honey", "simple-syrup"],
+    mood="unwinding after a long week",
+    skill_level="intermediate",
+    drink_type="cocktail",
+    fast_mode=True,  # Default: uses unified Drink Recommender agent
+)
+for candidate in analysis_result.candidates:
+    print(f"{candidate.name}: {candidate.mood_score}% match")
+
+# Run recipe crew (optionally skip bottle advice for faster response)
+recipe_result = run_recipe_crew(
+    cocktail_id="gold-rush",
+    skill_level="beginner",
+    cabinet=["bourbon", "lemons", "honey"],
+    include_bottle_advice=False,  # Skip bottle recommendations
+)
+print(f"Recipe: {recipe_result.recipe.name}")
 ```
 
 ### Available Components
@@ -180,18 +190,29 @@ print(analysis_result)
 | CocktailFlow | Full recommendation pipeline | Analysis → Recipe |
 
 #### Crews
-| Crew | Agents | Purpose |
-|------|--------|---------|
-| Analysis Crew | Cabinet Analyst → Mood Matcher | Find and rank makeable drinks |
-| Recipe Crew | Recipe Writer → Bottle Advisor | Generate recipes and purchase advice |
+| Crew | Mode | Purpose |
+|------|------|---------|
+| Analysis Crew | Fast (default) | Single Drink Recommender agent (~50% faster) |
+| Analysis Crew | Full | Cabinet Analyst → Mood Matcher (detailed analysis) |
+| Recipe Crew | Standard | Recipe Writer → Bottle Advisor |
+| Recipe Crew | Recipe Only | Recipe Writer (skip bottle advice) |
 
 #### Agents
 | Agent | Purpose | Primary Tool |
 |-------|---------|--------------|
+| Drink Recommender | Find and rank drinks in one call (fast mode) | RecipeDBTool, FlavorProfilerTool |
 | Cabinet Analyst | Find makeable drinks from cabinet | RecipeDBTool |
 | Mood Matcher | Rank drinks by mood fit | FlavorProfilerTool |
 | Recipe Writer | Generate skill-appropriate recipes | RecipeDBTool, SubstitutionFinderTool |
 | Bottle Advisor | Recommend next bottle purchase | UnlockCalculatorTool |
+
+#### Structured Output Models
+| Model | Purpose |
+|-------|---------|
+| AnalysisOutput | Crew output with ranked drink candidates |
+| RecipeOutput | Complete recipe with technique tips |
+| BottleAdvisorOutput | Bottle recommendations with ROI data |
+| RecipeCrewOutput | Combined recipe + bottle advice |
 
 ### Environment Variables
 

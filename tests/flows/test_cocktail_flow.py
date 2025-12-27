@@ -8,6 +8,8 @@ import os
 import uuid
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 # Set mock API keys before importing CrewAI to bypass validation
 # These keys are never used for actual API calls in tests
 os.environ.setdefault("OPENAI_API_KEY", "test-key-not-used-for-actual-calls")
@@ -331,9 +333,10 @@ class TestRunCocktailFlowFunction:
         for drink in valid_drinks:
             assert isinstance(drink, str)
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_run_cocktail_flow_returns_state(
+    async def test_run_cocktail_flow_returns_state(
         self, mock_recipe_crew, mock_analysis_crew
     ):
         """Function should return a CocktailFlowState."""
@@ -346,7 +349,7 @@ class TestRunCocktailFlowFunction:
         mock_recipe.kickoff.return_value = "{}"
         mock_recipe_crew.return_value = mock_recipe
 
-        result = run_cocktail_flow(
+        result = await run_cocktail_flow(
             cabinet=["bourbon", "simple-syrup"],
             mood="relaxing evening",
             skill_level="beginner",
@@ -355,9 +358,12 @@ class TestRunCocktailFlowFunction:
 
         assert isinstance(result, CocktailFlowState)
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_run_cocktail_flow_sets_cabinet(self, mock_recipe_crew, mock_analysis_crew):
+    async def test_run_cocktail_flow_sets_cabinet(
+        self, mock_recipe_crew, mock_analysis_crew
+    ):
         """Function should set cabinet in the returned state."""
         mock_analysis = MagicMock()
         mock_analysis.kickoff.return_value = "[]"
@@ -365,7 +371,7 @@ class TestRunCocktailFlowFunction:
 
         cabinet = ["gin", "vermouth", "campari"]
 
-        result = run_cocktail_flow(
+        result = await run_cocktail_flow(
             cabinet=cabinet,
             mood="aperitivo hour",
         )
@@ -373,9 +379,12 @@ class TestRunCocktailFlowFunction:
         # Inputs are passed via kickoff and populate state
         assert result.cabinet == [i.lower() for i in cabinet]
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_run_cocktail_flow_sets_mood(self, mock_recipe_crew, mock_analysis_crew):
+    async def test_run_cocktail_flow_sets_mood(
+        self, mock_recipe_crew, mock_analysis_crew
+    ):
         """Function should set mood in the returned state."""
         mock_analysis = MagicMock()
         mock_analysis.kickoff.return_value = "[]"
@@ -383,16 +392,17 @@ class TestRunCocktailFlowFunction:
 
         mood = "celebrating a promotion"
 
-        result = run_cocktail_flow(
+        result = await run_cocktail_flow(
             cabinet=["champagne"],
             mood=mood,
         )
 
         assert result.mood == mood
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_run_cocktail_flow_handles_enum_skill_level(
+    async def test_run_cocktail_flow_handles_enum_skill_level(
         self, mock_recipe_crew, mock_analysis_crew
     ):
         """Function should handle SkillLevel enum correctly."""
@@ -400,7 +410,7 @@ class TestRunCocktailFlowFunction:
         mock_analysis.kickoff.return_value = "[]"
         mock_analysis_crew.return_value = mock_analysis
 
-        result = run_cocktail_flow(
+        result = await run_cocktail_flow(
             cabinet=["bourbon"],
             mood="test",
             skill_level=SkillLevel.ADVENTUROUS,
@@ -408,9 +418,10 @@ class TestRunCocktailFlowFunction:
 
         assert result.skill_level == "adventurous"
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_run_cocktail_flow_handles_enum_drink_type(
+    async def test_run_cocktail_flow_handles_enum_drink_type(
         self, mock_recipe_crew, mock_analysis_crew
     ):
         """Function should handle DrinkType enum correctly."""
@@ -418,7 +429,7 @@ class TestRunCocktailFlowFunction:
         mock_analysis.kickoff.return_value = "[]"
         mock_analysis_crew.return_value = mock_analysis
 
-        result = run_cocktail_flow(
+        result = await run_cocktail_flow(
             cabinet=["bourbon"],
             mood="test",
             drink_type=DrinkType.MOCKTAIL,
@@ -426,9 +437,10 @@ class TestRunCocktailFlowFunction:
 
         assert result.drink_type == "mocktail"
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_run_cocktail_flow_sets_recent_history(
+    async def test_run_cocktail_flow_sets_recent_history(
         self, mock_recipe_crew, mock_analysis_crew
     ):
         """Function should set recent_history in the state."""
@@ -438,7 +450,7 @@ class TestRunCocktailFlowFunction:
 
         history = ["old-fashioned", "manhattan"]
 
-        result = run_cocktail_flow(
+        result = await run_cocktail_flow(
             cabinet=["bourbon"],
             mood="test",
             recent_history=history,
@@ -446,9 +458,10 @@ class TestRunCocktailFlowFunction:
 
         assert result.recent_history == history
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_run_cocktail_flow_sets_constraints(
+    async def test_run_cocktail_flow_sets_constraints(
         self, mock_recipe_crew, mock_analysis_crew
     ):
         """Function should set constraints in the state."""
@@ -458,7 +471,7 @@ class TestRunCocktailFlowFunction:
 
         constraints = ["not too sweet", "low alcohol"]
 
-        result = run_cocktail_flow(
+        result = await run_cocktail_flow(
             cabinet=["bourbon"],
             mood="test",
             constraints=constraints,
@@ -473,15 +486,17 @@ class TestRunCocktailFlowFunction:
 class TestCocktailFlowRejection:
     """Tests for the 'show me something else' rejection workflow."""
 
-    def test_request_another_returns_state_for_no_selection(self):
+    @pytest.mark.asyncio
+    async def test_request_another_returns_state_for_no_selection(self):
         """request_another should return unchanged state if no selection."""
         state = CocktailFlowState()
-        result = request_another(state)
+        result = await request_another(state)
         assert isinstance(result, CocktailFlowState)
 
+    @pytest.mark.asyncio
     @patch("src.app.flows.cocktail_flow.create_analysis_crew")
     @patch("src.app.flows.cocktail_flow.create_recipe_crew")
-    def test_request_another_adds_to_rejected(
+    async def test_request_another_adds_to_rejected(
         self, mock_recipe_crew, mock_analysis_crew
     ):
         """Requesting another should add current selection to rejected."""
@@ -496,7 +511,7 @@ class TestCocktailFlowRejection:
             rejected=["manhattan"],
         )
 
-        new_state = request_another(state)
+        new_state = await request_another(state)
 
         assert "old-fashioned" in new_state.rejected
 
@@ -507,26 +522,27 @@ class TestCocktailFlowRejection:
 class TestCocktailFlowMethods:
     """Tests for CocktailFlow helper methods."""
 
-    def test_parse_analysis_result_with_empty_string(self):
+    def test_parse_analysis_output_with_empty_string(self):
         """Parse method should handle empty string."""
         flow = CocktailFlow()
 
-        result = flow._parse_analysis_result("")
+        result = flow._parse_analysis_output("")
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        assert result is not None
+        assert hasattr(result, "candidates")
+        assert len(result.candidates) == 0
 
-    def test_parse_recipe_result_with_empty_string(self):
+    def test_parse_recipe_output_with_empty_string(self):
         """Parse method should handle empty string."""
         flow = CocktailFlow()
         # Set a selected drink in the state (for the parse method to use)
         flow.state.selected = "test-drink"
 
-        result = flow._parse_recipe_result("")
+        result = flow._parse_recipe_output("", "test-drink")
 
-        assert isinstance(result, dict)
-        assert "recipe" in result
-        assert "next_bottle" in result
+        assert result is not None
+        assert hasattr(result, "id")
+        assert result.id == "test-drink"
 
 
 class TestCocktailFlowEdgeCases:
