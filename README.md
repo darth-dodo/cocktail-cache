@@ -8,14 +8,16 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
 
 ## Development Status
 
-> **Current Phase**: Week 1 Complete → Week 2 CrewAI Core (Next)
+> **Current Phase**: Week 2 Complete → Week 3 Crews & Flow (Next)
 
 | Component | Status | Details |
 |-----------|--------|---------|
 | Data Layer | ✅ Complete | 50 cocktails, 24 mocktails, 134 ingredients |
-| Pydantic Models | ✅ Complete | Drink, Ingredient, UnlockScores models |
+| Pydantic Models | ✅ Complete | Cabinet, Recipe, UserPrefs, History + Phase 1 models |
 | Project Structure | ✅ Complete | FastAPI skeleton, tests, scripts |
-| CrewAI Agents | 🔲 Pending | Week 2 |
+| CrewAI Agents | ✅ Complete | 4 agents with Claude Haiku (Anthropic) |
+| CrewAI Tools | ✅ Complete | 4 deterministic tools for data operations |
+| Crews & Flow | 🔲 Pending | Week 3 |
 | API Routes | 🔲 Pending | Week 4 |
 | UI/HTMX | 🔲 Pending | Week 5 |
 
@@ -134,8 +136,76 @@ This project is configured for deployment on Render using the included `render.y
 
 ---
 
+## Using the Agents
+
+The CrewAI agents can be used directly for testing and development:
+
+```python
+import os
+os.environ["ANTHROPIC_API_KEY"] = "your-api-key"
+
+from crewai import Crew, Task
+from src.app.agents import create_cabinet_analyst, create_mood_matcher
+from src.app.tools import RecipeDBTool, FlavorProfilerTool
+
+# Create tools
+recipe_db = RecipeDBTool()
+flavor_profiler = FlavorProfilerTool()
+
+# Create agents with tools
+cabinet_analyst = create_cabinet_analyst(tools=[recipe_db])
+mood_matcher = create_mood_matcher(tools=[flavor_profiler])
+
+# Define tasks
+analyze_task = Task(
+    description="""Analyze cabinet contents: bourbon, lemons, honey, simple-syrup.
+    Find all cocktails and mocktails that can be made with these ingredients.
+    The user prefers cocktails and has intermediate skill level.""",
+    expected_output="List of makeable drinks with match scores",
+    agent=cabinet_analyst,
+)
+
+rank_task = Task(
+    description="""The user's mood is 'unwinding after a long week'.
+    Rank the candidate drinks by how well they fit this mood.
+    Consider flavor profiles and complexity.""",
+    expected_output="Ranked list of drinks with explanations",
+    agent=mood_matcher,
+    context=[analyze_task],  # Uses output from analyze_task
+)
+
+# Create crew and run
+crew = Crew(
+    agents=[cabinet_analyst, mood_matcher],
+    tasks=[analyze_task, rank_task],
+    verbose=True,
+)
+result = crew.kickoff()
+print(result)
+```
+
+### Available Agents
+
+| Agent | Purpose | Primary Tool |
+|-------|---------|--------------|
+| Cabinet Analyst | Find makeable drinks from cabinet | RecipeDBTool |
+| Mood Matcher | Rank drinks by mood fit | FlavorProfilerTool |
+| Recipe Writer | Generate skill-appropriate recipes | RecipeDBTool, SubstitutionFinderTool |
+| Bottle Advisor | Recommend next bottle purchase | UnlockCalculatorTool |
+
+### Environment Variables
+
+```bash
+# Required for running agents
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+---
+
 ## Documentation
 
+- [Architecture](docs/architecture.md) - System design and agent specifications
+- [Implementation Guide](docs/implementation-guide.md) - Build order and weekly milestones
 - [Tasks](tasks.md) - Development task tracker with phase status
 
 ---
