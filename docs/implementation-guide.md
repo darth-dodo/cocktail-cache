@@ -600,15 +600,18 @@ Tool Tests (30%)   - Deterministic tool tests
 
 ## Checklist
 
-### Week 1
-- [ ] Project structure (`src/` layout)
-- [ ] `pyproject.toml` configured
-- [ ] `uv sync` installs all dependencies
-- [ ] 50 cocktails in DB
-- [ ] 20+ mocktails in DB
-- [ ] Difficulty tags on all recipes
-- [ ] Ingredients categorized
-- [ ] Unlock scores computed (cocktails + mocktails)
+### Week 1 ✅ COMPLETE
+- [x] Project structure (`src/` layout)
+- [x] `pyproject.toml` configured
+- [x] `uv sync` installs all dependencies
+- [x] 50 cocktails in DB
+- [x] 24 mocktails in DB (exceeded target of 20+)
+- [x] Difficulty tags on all recipes (easy/medium/hard/advanced)
+- [x] 134 ingredients categorized (6 categories)
+- [x] Unlock scores computed (110 entries covering cocktails + mocktails)
+- [x] Pydantic models for all data types
+- [x] Data validation script (`scripts/validate_data.py`)
+- [x] Pre-commit hooks configured (ruff, mypy)
 
 ### Week 2
 - [ ] Pydantic models (including UserPrefs, HistoryEntry)
@@ -648,6 +651,7 @@ Tool Tests (30%)   - Deterministic tool tests
 
 ---
 
-*Implementation Guide v1.1*
+*Implementation Guide v1.2*
 *Applies BLUEPRINT.md patterns to Cocktail Cache*
-*Updated: uv for package management, Render for deployment*
+*Updated: Week 1 complete, uv for package management, Render for deployment*
+*Last Updated: 2025-12-27*

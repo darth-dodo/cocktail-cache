@@ -6,6 +6,21 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
 
 ---
 
+## Development Status
+
+> **Current Phase**: Week 1 Complete → Week 2 CrewAI Core (Next)
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| Data Layer | ✅ Complete | 50 cocktails, 24 mocktails, 134 ingredients |
+| Pydantic Models | ✅ Complete | Drink, Ingredient, UnlockScores models |
+| Project Structure | ✅ Complete | FastAPI skeleton, tests, scripts |
+| CrewAI Agents | 🔲 Pending | Week 2 |
+| API Routes | 🔲 Pending | Week 4 |
+| UI/HTMX | 🔲 Pending | Week 5 |
+
+---
+
 ## Features
 
 - **AI-powered cocktail recommendations** - Get drinks matched to your available ingredients
@@ -77,24 +92,38 @@ cocktail-cache/
 │       ├── crews/               # Crew compositions
 │       ├── tools/               # CrewAI tools (RecipeDB, etc.)
 │       ├── flows/               # Flow orchestration
-│       ├── models/              # Pydantic models
+│       ├── models/              # Pydantic models (Drink, Ingredient, etc.)
+│       ├── services/            # Data loading and business logic
 │       ├── routers/             # API routes
 │       ├── templates/           # Jinja2 templates
 │       └── static/              # CSS and JS assets
 ├── data/
-│   ├── cocktails.json           # Cocktail recipe database
-│   ├── mocktails.json           # Non-alcoholic recipes
-│   ├── ingredients.json         # Categorized ingredients
-│   ├── substitutions.json       # Ingredient swap mappings
-│   └── unlock_scores.json       # Pre-computed bottle ROI
+│   ├── cocktails.json           # 50 cocktail recipes
+│   ├── mocktails.json           # 24 non-alcoholic recipes
+│   ├── ingredients.json         # 134 categorized ingredients
+│   ├── substitutions.json       # 118 ingredient swap rules
+│   └── unlock_scores.json       # Pre-computed bottle ROI (293 mappings)
+├── scripts/
+│   ├── compute_unlock_scores.py # Generate bottle recommendations
+│   └── validate_data.py         # Pydantic data validation
 ├── tests/                       # Test suite
-├── scripts/                     # Build utilities
-└── docs/
-    ├── product.md               # Product requirements
-    ├── architecture.md          # System architecture
-    ├── implementation-guide.md  # Implementation details
-    ├── BLUEPRINT.md             # Multi-agent AI service patterns
-    └── tasks.md                 # Development task tracker
+└── tasks.md                     # Development task tracker
+```
+
+---
+
+## Data Validation
+
+Run the validation script to verify all data files:
+
+```bash
+uv run python scripts/validate_data.py
+```
+
+To recompute unlock scores after modifying recipes:
+
+```bash
+uv run python scripts/compute_unlock_scores.py
 ```
 
 ---
@@ -103,16 +132,11 @@ cocktail-cache/
 
 This project is configured for deployment on Render using the included `render.yaml` configuration.
 
-See the [implementation guide](docs/implementation-guide.md) for detailed deployment instructions.
-
 ---
 
 ## Documentation
 
-- [Product Requirements](docs/product.md) - Features, user stories, and success metrics
-- [Architecture](docs/architecture.md) - System design, agents, and data flow
-- [Implementation Guide](docs/implementation-guide.md) - Setup and development details
-- [Tasks](docs/tasks.md) - Development task tracker
+- [Tasks](tasks.md) - Development task tracker with phase status
 
 ---
 

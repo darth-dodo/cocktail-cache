@@ -1,0 +1,1445 @@
+[
+  {
+    "id": "virgin-mojito",
+    "name": "Virgin Mojito",
+    "tagline": "Classic Cuban refreshment without the rum",
+    "ingredients": [
+      {
+        "amount": "6",
+        "unit": "leaves",
+        "item": "fresh-mint"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "club-soda"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Gently press mint leaves with lime juice and simple syrup"
+      },
+      {
+        "action": "Add ice",
+        "detail": "Fill glass with crushed ice"
+      },
+      {
+        "action": "Top",
+        "detail": "Add club soda and stir gently"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "mint sprig and lime wheel",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 45,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "citrus",
+      "refreshing",
+      "herbal",
+      "classic"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "shirley-temple",
+    "name": "Shirley Temple",
+    "tagline": "The original mocktail, sweet and bubbly",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "ginger-ale"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "lemon-lime-soda"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grenadine"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "Add grenadine to glass"
+      },
+      {
+        "action": "Add ice",
+        "detail": "Fill with ice cubes"
+      },
+      {
+        "action": "Top",
+        "detail": "Add ginger ale and lemon-lime soda, stir gently"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "maraschino cherry and orange slice",
+    "flavor_profile": {
+      "sweet": 75,
+      "sour": 10,
+      "bitter": 0,
+      "spirit": 0
+    },
+    "tags": [
+      "sweet",
+      "classic",
+      "kid-friendly",
+      "bubbly"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "arnold-palmer",
+    "name": "Arnold Palmer",
+    "tagline": "The legendary half-and-half refresher",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "iced-tea"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "lemonade"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "Fill glass with ice"
+      },
+      {
+        "action": "Pour",
+        "detail": "Add iced tea and lemonade"
+      },
+      {
+        "action": "Stir",
+        "detail": "Mix gently to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lemon wedge",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 35,
+      "bitter": 15,
+      "spirit": 0
+    },
+    "tags": [
+      "citrus",
+      "tea",
+      "refreshing",
+      "classic"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "citrus-sunrise-fizz",
+    "name": "Citrus Sunrise Fizz",
+    "tagline": "A vibrant morning pick-me-up with layered citrus",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grenadine"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "club-soda"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Combine citrus juices with ice, shake 10 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add club soda"
+      },
+      {
+        "action": "Float",
+        "detail": "Slowly pour grenadine down the side"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "orange wheel and cherry",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "citrus",
+      "refreshing",
+      "colorful",
+      "brunch"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "lemon-ginger-spritz",
+    "name": "Lemon Ginger Spritz",
+    "tagline": "Zesty citrus meets warming ginger spice",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "ginger-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "honey-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "sparkling-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Combine lemon juice, ginger syrup, and honey with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add sparkling water and stir gently"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "lemon twist and candied ginger",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 45,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "citrus",
+      "ginger",
+      "spicy",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "ruby-citrus-cooler",
+    "name": "Ruby Citrus Cooler",
+    "tagline": "Blood orange and pomegranate create a stunning ruby hue",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "blood-orange-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "pomegranate-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "sparkling-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Combine juices and syrup with ice, shake well"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add sparkling water"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "blood orange wheel",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "citrus",
+      "fruity",
+      "elegant",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "virgin-pina-colada",
+    "name": "Virgin Pina Colada",
+    "tagline": "Tropical paradise in a glass",
+    "ingredients": [
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "pineapple-juice"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "coconut-cream"
+      },
+      {
+        "amount": "1",
+        "unit": "cup",
+        "item": "ice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Blend",
+        "detail": "Combine all ingredients in blender until smooth"
+      },
+      {
+        "action": "Pour",
+        "detail": "Transfer to chilled glass"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "pineapple wedge and maraschino cherry",
+    "flavor_profile": {
+      "sweet": 70,
+      "sour": 15,
+      "bitter": 0,
+      "spirit": 0
+    },
+    "tags": [
+      "tropical",
+      "sweet",
+      "creamy",
+      "frozen"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "strawberry-smash",
+    "name": "Strawberry Smash",
+    "tagline": "Fresh muddled berries with a hint of basil",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "whole",
+        "item": "fresh-strawberries"
+      },
+      {
+        "amount": "4",
+        "unit": "leaves",
+        "item": "fresh-basil"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "club-soda"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Smash strawberries and basil in shaker"
+      },
+      {
+        "action": "Shake",
+        "detail": "Add lemon juice, syrup, and ice; shake vigorously"
+      },
+      {
+        "action": "Double strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add club soda"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "strawberry half and basil leaf",
+    "flavor_profile": {
+      "sweet": 55,
+      "sour": 30,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "fruity",
+      "herbal",
+      "refreshing",
+      "summery"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "mango-lassi",
+    "name": "Mango Lassi",
+    "tagline": "Creamy Indian-inspired mango yogurt drink",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "cup",
+        "item": "mango-pulp"
+      },
+      {
+        "amount": "0.5",
+        "unit": "cup",
+        "item": "yogurt"
+      },
+      {
+        "amount": "0.25",
+        "unit": "cup",
+        "item": "milk"
+      },
+      {
+        "amount": "1",
+        "unit": "tbsp",
+        "item": "honey"
+      },
+      {
+        "amount": "0.25",
+        "unit": "tsp",
+        "item": "cardamom"
+      }
+    ],
+    "method": [
+      {
+        "action": "Blend",
+        "detail": "Combine all ingredients until smooth and creamy"
+      },
+      {
+        "action": "Chill",
+        "detail": "Serve immediately or refrigerate briefly"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "mango slice and pinch of cardamom",
+    "flavor_profile": {
+      "sweet": 65,
+      "sour": 15,
+      "bitter": 0,
+      "spirit": 0
+    },
+    "tags": [
+      "tropical",
+      "creamy",
+      "indian",
+      "sweet"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "berry-cooler",
+    "name": "Berry Cooler",
+    "tagline": "Mixed berry bliss with a splash of citrus",
+    "ingredients": [
+      {
+        "amount": "0.25",
+        "unit": "cup",
+        "item": "mixed-berries"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "sparkling-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Gently crush berries in shaker"
+      },
+      {
+        "action": "Shake",
+        "detail": "Add lemon juice, syrup, and ice; shake well"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add sparkling water"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "skewered berries",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "fruity",
+      "refreshing",
+      "colorful",
+      "summery"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "passion-fruit-punch",
+    "name": "Passion Fruit Punch",
+    "tagline": "Exotic tropical flavors with vibrant passion fruit",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "passion-fruit-puree"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "sparkling-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Combine puree, juices, and syrup with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add sparkling water and stir gently"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "passion fruit half",
+    "flavor_profile": {
+      "sweet": 55,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "tropical",
+      "fruity",
+      "exotic",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "watermelon-agua-fresca",
+    "name": "Watermelon Agua Fresca",
+    "tagline": "Light and hydrating Mexican-inspired refresher",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "cups",
+        "item": "fresh-watermelon"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "cup",
+        "item": "cold-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Blend",
+        "detail": "Puree watermelon until smooth"
+      },
+      {
+        "action": "Strain",
+        "detail": "Remove pulp through fine mesh"
+      },
+      {
+        "action": "Mix",
+        "detail": "Combine with lime juice, syrup, and water"
+      },
+      {
+        "action": "Serve",
+        "detail": "Pour over ice"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "watermelon cube and mint sprig",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 20,
+      "bitter": 0,
+      "spirit": 0
+    },
+    "tags": [
+      "fruity",
+      "refreshing",
+      "hydrating",
+      "summery"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 5,
+    "is_mocktail": true
+  },
+  {
+    "id": "cucumber-mint-cooler",
+    "name": "Cucumber Mint Cooler",
+    "tagline": "Spa-like refreshment with cool cucumber and mint",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "slices",
+        "item": "fresh-cucumber"
+      },
+      {
+        "amount": "6",
+        "unit": "leaves",
+        "item": "fresh-mint"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "sparkling-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Gently press cucumber and mint"
+      },
+      {
+        "action": "Add",
+        "detail": "Pour in lime juice and syrup"
+      },
+      {
+        "action": "Shake",
+        "detail": "Shake with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "Double strain into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add sparkling water"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "cucumber ribbon and mint sprig",
+    "flavor_profile": {
+      "sweet": 25,
+      "sour": 30,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "herbal",
+      "refreshing",
+      "spa",
+      "light"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "lavender-lemonade",
+    "name": "Lavender Lemonade",
+    "tagline": "Floral elegance meets classic lemonade",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lavender-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "cold-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Stir",
+        "detail": "Combine lemon juice and lavender syrup"
+      },
+      {
+        "action": "Add",
+        "detail": "Pour in cold water and stir"
+      },
+      {
+        "action": "Serve",
+        "detail": "Pour over ice"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "dried lavender sprig and lemon wheel",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "floral",
+      "herbal",
+      "elegant",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "rosemary-grapefruit-fizz",
+    "name": "Rosemary Grapefruit Fizz",
+    "tagline": "Piney rosemary complements bright grapefruit",
+    "ingredients": [
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "rosemary-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "club-soda"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Combine grapefruit juice, rosemary syrup, and lemon juice with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add club soda"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "fresh rosemary sprig and grapefruit wedge",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 40,
+      "bitter": 25,
+      "spirit": 0
+    },
+    "tags": [
+      "herbal",
+      "citrus",
+      "botanical",
+      "sophisticated"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "basil-smash-mocktail",
+    "name": "Basil Smash Mocktail",
+    "tagline": "Herbaceous Italian-inspired refresher",
+    "ingredients": [
+      {
+        "amount": "8",
+        "unit": "leaves",
+        "item": "fresh-basil"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "sparkling-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Press basil leaves with lemon juice"
+      },
+      {
+        "action": "Shake",
+        "detail": "Add syrup and ice, shake vigorously"
+      },
+      {
+        "action": "Double strain",
+        "detail": "Pour into ice-filled rocks glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add sparkling water"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "basil leaf bouquet",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "herbal",
+      "refreshing",
+      "italian",
+      "summery"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "garden-tonic",
+    "name": "Garden Tonic",
+    "tagline": "A complex botanical blend like a walk through an herb garden",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "slices",
+        "item": "fresh-cucumber"
+      },
+      {
+        "amount": "3",
+        "unit": "leaves",
+        "item": "fresh-mint"
+      },
+      {
+        "amount": "2",
+        "unit": "leaves",
+        "item": "fresh-basil"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "elderflower-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "tonic-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Gently press cucumber and herbs"
+      },
+      {
+        "action": "Add",
+        "detail": "Pour in lime juice and elderflower syrup"
+      },
+      {
+        "action": "Stir",
+        "detail": "Mix well with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "Add tonic water"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "cucumber wheel, mint, and basil",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 25,
+      "bitter": 20,
+      "spirit": 0
+    },
+    "tags": [
+      "herbal",
+      "botanical",
+      "complex",
+      "elegant"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "thyme-honey-spritz",
+    "name": "Thyme Honey Spritz",
+    "tagline": "Earthy thyme meets golden honey sweetness",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "sprigs",
+        "item": "fresh-thyme"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "honey-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "sparkling-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Gently press thyme sprigs"
+      },
+      {
+        "action": "Shake",
+        "detail": "Add lemon juice, honey syrup, and ice; shake well"
+      },
+      {
+        "action": "Double strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add sparkling water"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "fresh thyme sprig",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 35,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "herbal",
+      "botanical",
+      "elegant",
+      "aromatic"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "virgin-moscow-mule",
+    "name": "Virgin Moscow Mule",
+    "tagline": "All the ginger kick without the vodka",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "ginger-beer"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "simple-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "Add lime juice and syrup to copper mug"
+      },
+      {
+        "action": "Add ice",
+        "detail": "Fill with ice cubes"
+      },
+      {
+        "action": "Top",
+        "detail": "Pour ginger beer and stir briefly"
+      }
+    ],
+    "glassware": "copper-mug",
+    "garnish": "lime wheel and candied ginger",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 35,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "ginger",
+      "spicy",
+      "refreshing",
+      "classic"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "ginger-lime-fizz",
+    "name": "Ginger Lime Fizz",
+    "tagline": "Bright citrus with a fiery ginger punch",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "inch",
+        "item": "fresh-ginger"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "club-soda"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Crush fresh ginger to release juices"
+      },
+      {
+        "action": "Shake",
+        "detail": "Add lime juice, syrup, and ice; shake hard"
+      },
+      {
+        "action": "Double strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add club soda"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wheel and ginger slice",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 45,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "ginger",
+      "citrus",
+      "spicy",
+      "refreshing"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "spicy-paloma-mocktail",
+    "name": "Spicy Paloma Mocktail",
+    "tagline": "Mexican-inspired grapefruit refresher with a jalape\u00f1o kick",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "slices",
+        "item": "fresh-jalapeno"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "agave-syrup"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "club-soda"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "Press jalape\u00f1o slices to release heat"
+      },
+      {
+        "action": "Shake",
+        "detail": "Add juices, agave, and ice; shake well"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into salt-rimmed glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "Add club soda"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "grapefruit wedge and jalape\u00f1o slice",
+    "flavor_profile": {
+      "sweet": 25,
+      "sour": 40,
+      "bitter": 20,
+      "spirit": 0
+    },
+    "tags": [
+      "spicy",
+      "citrus",
+      "mexican",
+      "bold"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "thai-iced-tea-mocktail",
+    "name": "Thai Iced Tea Mocktail",
+    "tagline": "Creamy, sweet, and aromatic Thai classic",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "thai-tea"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "sweetened-condensed-milk"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "evaporated-milk"
+      }
+    ],
+    "method": [
+      {
+        "action": "Brew",
+        "detail": "Prepare Thai tea and chill completely"
+      },
+      {
+        "action": "Build",
+        "detail": "Fill glass with ice, add chilled tea"
+      },
+      {
+        "action": "Float",
+        "detail": "Pour milks over the back of a spoon to create layers"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "star anise",
+    "flavor_profile": {
+      "sweet": 70,
+      "sour": 0,
+      "bitter": 15,
+      "spirit": 0
+    },
+    "tags": [
+      "creamy",
+      "sweet",
+      "thai",
+      "spiced"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 10,
+    "is_mocktail": true
+  },
+  {
+    "id": "chai-spice-cooler",
+    "name": "Chai Spice Cooler",
+    "tagline": "Warming chai spices transformed into a refreshing iced drink",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "chilled-chai-tea"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "vanilla-syrup"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "milk"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "ginger-beer"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Combine chai, vanilla syrup, and milk with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add ginger beer for fizz"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "cinnamon stick",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 5,
+      "bitter": 15,
+      "spirit": 0
+    },
+    "tags": [
+      "spiced",
+      "creamy",
+      "indian",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "golden-turmeric-tonic",
+    "name": "Golden Turmeric Tonic",
+    "tagline": "Anti-inflammatory golden milk meets refreshing tonic",
+    "ingredients": [
+      {
+        "amount": "0.5",
+        "unit": "tsp",
+        "item": "ground-turmeric"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "ginger-syrup"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "coconut-milk"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "tonic-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Combine turmeric, ginger syrup, lemon juice, and coconut milk with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "Pour into ice-filled glass"
+      },
+      {
+        "action": "Top",
+        "detail": "Add tonic water and stir gently"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lemon wheel and turmeric dust",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 30,
+      "bitter": 20,
+      "spirit": 0
+    },
+    "tags": [
+      "spiced",
+      "healthy",
+      "golden",
+      "unique"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  }
+]
