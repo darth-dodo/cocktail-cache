@@ -1,0 +1,3524 @@
+{
+  "angostura-bitters": [
+    {
+      "id": "champagne-cocktail",
+      "name": "Champagne Cocktail",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "champagne",
+        "cognac",
+        "sugar"
+      ]
+    },
+    {
+      "id": "manhattan",
+      "name": "Manhattan",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "rye-whiskey",
+        "sweet-vermouth"
+      ]
+    },
+    {
+      "id": "oaxaca-old-fashioned",
+      "name": "Oaxaca Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "agave-syrup",
+        "mezcal",
+        "reposado-tequila"
+      ]
+    },
+    {
+      "id": "old-fashioned",
+      "name": "Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "orange-bitters",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "pisco-sour",
+      "name": "Pisco Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "egg-white",
+        "fresh-lime-juice",
+        "pisco",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "benedictine",
+        "cherry-heering",
+        "cointreau",
+        "fresh-lime-juice",
+        "grenadine",
+        "london-dry-gin",
+        "pineapple-juice"
+      ]
+    },
+    {
+      "id": "vieux-carre",
+      "name": "Vieux Carre",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "benedictine",
+        "cognac",
+        "peychauds-bitters",
+        "rye-whiskey",
+        "sweet-vermouth"
+      ]
+    }
+  ],
+  "orange-bitters": [
+    {
+      "id": "old-fashioned",
+      "name": "Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "bourbon",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "bourbon": [
+    {
+      "id": "amaretto-sour",
+      "name": "Amaretto Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "amaretto",
+        "egg-white",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "boulevardier",
+      "name": "Boulevardier",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "campari",
+        "sweet-vermouth"
+      ]
+    },
+    {
+      "id": "hot-toddy",
+      "name": "Hot Toddy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cinnamon",
+        "fresh-lemon-juice",
+        "honey-syrup",
+        "hot-water"
+      ]
+    },
+    {
+      "id": "mint-julep",
+      "name": "Mint Julep",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-mint",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "new-york-sour",
+      "name": "New York Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "fresh-lemon-juice",
+        "red-wine",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "old-fashioned",
+      "name": "Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "orange-bitters",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "paper-plane",
+      "name": "Paper Plane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "amaro-nonino",
+        "aperol",
+        "fresh-lemon-juice"
+      ]
+    },
+    {
+      "id": "whiskey-sour",
+      "name": "Whiskey Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "egg-white",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "simple-syrup": [
+    {
+      "id": "amaretto-sour",
+      "name": "Amaretto Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "amaretto",
+        "bourbon",
+        "egg-white",
+        "fresh-lemon-juice"
+      ]
+    },
+    {
+      "id": "basil-smash-mocktail",
+      "name": "Basil Smash Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-basil",
+        "lemon-juice",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "berry-cooler",
+      "name": "Berry Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lemon-juice",
+        "mixed-berries",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-mure",
+        "fresh-lemon-juice",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "cucumber-mint-cooler",
+      "name": "Cucumber Mint Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "fresh-cucumber",
+        "fresh-mint",
+        "lime-juice",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "daiquiri",
+      "name": "Daiquiri",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "espresso-martini",
+      "name": "Espresso Martini",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "coffee-liqueur",
+        "fresh-espresso",
+        "vodka"
+      ]
+    },
+    {
+      "id": "french-75",
+      "name": "French 75",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "champagne",
+        "fresh-lemon-juice",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "ginger-lime-fizz",
+      "name": "Ginger Lime Fizz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-ginger",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "lemon-drop",
+      "name": "Lemon Drop",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cointreau",
+        "fresh-lemon-juice",
+        "vodka"
+      ]
+    },
+    {
+      "id": "mai-tai",
+      "name": "Mai Tai",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "aged-rum",
+        "fresh-lime-juice",
+        "orange-curacao",
+        "orgeat",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "mint-julep",
+      "name": "Mint Julep",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "fresh-mint"
+      ]
+    },
+    {
+      "id": "mojito",
+      "name": "Mojito",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-lime-juice",
+        "fresh-mint",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "new-york-sour",
+      "name": "New York Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "bourbon",
+        "fresh-lemon-juice",
+        "red-wine"
+      ]
+    },
+    {
+      "id": "old-fashioned",
+      "name": "Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "bourbon",
+        "orange-bitters"
+      ]
+    },
+    {
+      "id": "passion-fruit-punch",
+      "name": "Passion Fruit Punch",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lime-juice",
+        "orange-juice",
+        "passion-fruit-puree",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "pisco-sour",
+      "name": "Pisco Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "angostura-bitters",
+        "egg-white",
+        "fresh-lime-juice",
+        "pisco"
+      ]
+    },
+    {
+      "id": "ruby-citrus-cooler",
+      "name": "Ruby Citrus Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "blood-orange-juice",
+        "lime-juice",
+        "pomegranate-juice",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "sazerac",
+      "name": "Sazerac",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "absinthe",
+        "peychauds-bitters",
+        "rye-whiskey"
+      ]
+    },
+    {
+      "id": "strawberry-smash",
+      "name": "Strawberry Smash",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-basil",
+        "fresh-strawberries",
+        "lemon-juice"
+      ]
+    },
+    {
+      "id": "tom-collins",
+      "name": "Tom Collins",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "fresh-lemon-juice",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "virgin-mojito",
+      "name": "Virgin Mojito",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "fresh-mint",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "virgin-moscow-mule",
+      "name": "Virgin Moscow Mule",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-beer",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "watermelon-agua-fresca",
+      "name": "Watermelon Agua Fresca",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cold-water",
+        "fresh-watermelon",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "whiskey-sour",
+      "name": "Whiskey Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "bourbon",
+        "egg-white",
+        "fresh-lemon-juice"
+      ]
+    }
+  ],
+  "sweet-vermouth": [
+    {
+      "id": "boulevardier",
+      "name": "Boulevardier",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "campari"
+      ]
+    },
+    {
+      "id": "manhattan",
+      "name": "Manhattan",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "rye-whiskey"
+      ]
+    },
+    {
+      "id": "negroni",
+      "name": "Negroni",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "campari",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "vieux-carre",
+      "name": "Vieux Carre",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cognac",
+        "peychauds-bitters",
+        "rye-whiskey"
+      ]
+    }
+  ],
+  "rye-whiskey": [
+    {
+      "id": "manhattan",
+      "name": "Manhattan",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "sweet-vermouth"
+      ]
+    },
+    {
+      "id": "sazerac",
+      "name": "Sazerac",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "absinthe",
+        "peychauds-bitters",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "vieux-carre",
+      "name": "Vieux Carre",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cognac",
+        "peychauds-bitters",
+        "sweet-vermouth"
+      ]
+    }
+  ],
+  "fresh-lemon-juice": [
+    {
+      "id": "amaretto-sour",
+      "name": "Amaretto Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "amaretto",
+        "bourbon",
+        "egg-white",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "aviation",
+      "name": "Aviation",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-violette",
+        "london-dry-gin",
+        "maraschino-liqueur"
+      ]
+    },
+    {
+      "id": "bloody-mary",
+      "name": "Bloody Mary",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "black-pepper",
+        "celery-salt",
+        "hot-sauce",
+        "tomato-juice",
+        "vodka",
+        "worcestershire-sauce"
+      ]
+    },
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-mure",
+        "london-dry-gin",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "clover-club",
+      "name": "Clover Club",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "egg-white",
+        "london-dry-gin",
+        "raspberry-syrup"
+      ]
+    },
+    {
+      "id": "corpse-reviver-2",
+      "name": "Corpse Reviver #2",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "absinthe",
+        "cointreau",
+        "lillet-blanc",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "french-75",
+      "name": "French 75",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "champagne",
+        "london-dry-gin",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "hot-toddy",
+      "name": "Hot Toddy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "cinnamon",
+        "honey-syrup",
+        "hot-water"
+      ]
+    },
+    {
+      "id": "lemon-drop",
+      "name": "Lemon Drop",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cointreau",
+        "simple-syrup",
+        "vodka"
+      ]
+    },
+    {
+      "id": "new-york-sour",
+      "name": "New York Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "bourbon",
+        "red-wine",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "paper-plane",
+      "name": "Paper Plane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "amaro-nonino",
+        "aperol",
+        "bourbon"
+      ]
+    },
+    {
+      "id": "penicillin",
+      "name": "Penicillin",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "blended-scotch",
+        "honey-ginger-syrup",
+        "islay-scotch"
+      ]
+    },
+    {
+      "id": "sidecar",
+      "name": "Sidecar",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cognac",
+        "cointreau"
+      ]
+    },
+    {
+      "id": "tom-collins",
+      "name": "Tom Collins",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "london-dry-gin",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "whiskey-sour",
+      "name": "Whiskey Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "bourbon",
+        "egg-white",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "egg-white": [
+    {
+      "id": "amaretto-sour",
+      "name": "Amaretto Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "amaretto",
+        "bourbon",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "clover-club",
+      "name": "Clover Club",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "fresh-lemon-juice",
+        "london-dry-gin",
+        "raspberry-syrup"
+      ]
+    },
+    {
+      "id": "pisco-sour",
+      "name": "Pisco Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "angostura-bitters",
+        "fresh-lime-juice",
+        "pisco",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "whiskey-sour",
+      "name": "Whiskey Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "bourbon",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "campari": [
+    {
+      "id": "boulevardier",
+      "name": "Boulevardier",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "sweet-vermouth"
+      ]
+    },
+    {
+      "id": "negroni",
+      "name": "Negroni",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "london-dry-gin",
+        "sweet-vermouth"
+      ]
+    }
+  ],
+  "peychauds-bitters": [
+    {
+      "id": "sazerac",
+      "name": "Sazerac",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "absinthe",
+        "rye-whiskey",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "vieux-carre",
+      "name": "Vieux Carre",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cognac",
+        "rye-whiskey",
+        "sweet-vermouth"
+      ]
+    }
+  ],
+  "absinthe": [
+    {
+      "id": "corpse-reviver-2",
+      "name": "Corpse Reviver #2",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "cointreau",
+        "fresh-lemon-juice",
+        "lillet-blanc",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "sazerac",
+      "name": "Sazerac",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "peychauds-bitters",
+        "rye-whiskey",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "fresh-mint": [
+    {
+      "id": "cucumber-mint-cooler",
+      "name": "Cucumber Mint Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "fresh-cucumber",
+        "lime-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "garden-tonic",
+      "name": "Garden Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "elderflower-syrup",
+        "fresh-basil",
+        "fresh-cucumber",
+        "lime-juice",
+        "tonic-water"
+      ]
+    },
+    {
+      "id": "mint-julep",
+      "name": "Mint Julep",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "mojito",
+      "name": "Mojito",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-lime-juice",
+        "simple-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "virgin-mojito",
+      "name": "Virgin Mojito",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "lime-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "aperol": [
+    {
+      "id": "aperol-spritz",
+      "name": "Aperol Spritz",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "prosecco"
+      ]
+    },
+    {
+      "id": "naked-and-famous",
+      "name": "Naked and Famous",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "mezcal",
+        "yellow-chartreuse"
+      ]
+    },
+    {
+      "id": "paper-plane",
+      "name": "Paper Plane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "amaro-nonino",
+        "bourbon",
+        "fresh-lemon-juice"
+      ]
+    }
+  ],
+  "amaro-nonino": [
+    {
+      "id": "paper-plane",
+      "name": "Paper Plane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aperol",
+        "bourbon",
+        "fresh-lemon-juice"
+      ]
+    }
+  ],
+  "blended-scotch": [
+    {
+      "id": "penicillin",
+      "name": "Penicillin",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "fresh-lemon-juice",
+        "honey-ginger-syrup",
+        "islay-scotch"
+      ]
+    }
+  ],
+  "islay-scotch": [
+    {
+      "id": "penicillin",
+      "name": "Penicillin",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "blended-scotch",
+        "fresh-lemon-juice",
+        "honey-ginger-syrup"
+      ]
+    }
+  ],
+  "honey-ginger-syrup": [
+    {
+      "id": "penicillin",
+      "name": "Penicillin",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "blended-scotch",
+        "fresh-lemon-juice",
+        "islay-scotch"
+      ]
+    }
+  ],
+  "red-wine": [
+    {
+      "id": "new-york-sour",
+      "name": "New York Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "bourbon",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "honey-syrup": [
+    {
+      "id": "hot-toddy",
+      "name": "Hot Toddy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "cinnamon",
+        "fresh-lemon-juice",
+        "hot-water"
+      ]
+    },
+    {
+      "id": "lemon-ginger-spritz",
+      "name": "Lemon Ginger Spritz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-syrup",
+        "lemon-juice",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "thyme-honey-spritz",
+      "name": "Thyme Honey Spritz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-thyme",
+        "lemon-juice",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "cinnamon": [
+    {
+      "id": "hot-toddy",
+      "name": "Hot Toddy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "fresh-lemon-juice",
+        "honey-syrup",
+        "hot-water"
+      ]
+    }
+  ],
+  "hot-water": [
+    {
+      "id": "hot-toddy",
+      "name": "Hot Toddy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "bourbon",
+        "cinnamon",
+        "fresh-lemon-juice",
+        "honey-syrup"
+      ]
+    }
+  ],
+  "dry-vermouth": [
+    {
+      "id": "martini",
+      "name": "Martini",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "vodka-martini",
+      "name": "Vodka Martini",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "vodka"
+      ]
+    }
+  ],
+  "london-dry-gin": [
+    {
+      "id": "aviation",
+      "name": "Aviation",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-violette",
+        "fresh-lemon-juice",
+        "maraschino-liqueur"
+      ]
+    },
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-mure",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "clover-club",
+      "name": "Clover Club",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "egg-white",
+        "fresh-lemon-juice",
+        "raspberry-syrup"
+      ]
+    },
+    {
+      "id": "corpse-reviver-2",
+      "name": "Corpse Reviver #2",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "absinthe",
+        "cointreau",
+        "fresh-lemon-juice",
+        "lillet-blanc"
+      ]
+    },
+    {
+      "id": "french-75",
+      "name": "French 75",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "champagne",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "gin-and-tonic",
+      "name": "Gin & Tonic",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "tonic-water"
+      ]
+    },
+    {
+      "id": "last-word",
+      "name": "Last Word",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "green-chartreuse",
+        "maraschino-liqueur"
+      ]
+    },
+    {
+      "id": "martini",
+      "name": "Martini",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dry-vermouth"
+      ]
+    },
+    {
+      "id": "negroni",
+      "name": "Negroni",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "campari",
+        "sweet-vermouth"
+      ]
+    },
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cherry-heering",
+        "cointreau",
+        "fresh-lime-juice",
+        "grenadine",
+        "pineapple-juice"
+      ]
+    },
+    {
+      "id": "tom-collins",
+      "name": "Tom Collins",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "tonic-water": [
+    {
+      "id": "garden-tonic",
+      "name": "Garden Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "elderflower-syrup",
+        "fresh-basil",
+        "fresh-cucumber",
+        "fresh-mint",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "gin-and-tonic",
+      "name": "Gin & Tonic",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "golden-turmeric-tonic",
+      "name": "Golden Turmeric Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "coconut-milk",
+        "ginger-syrup",
+        "ground-turmeric",
+        "lemon-juice"
+      ]
+    }
+  ],
+  "club-soda": [
+    {
+      "id": "aperol-spritz",
+      "name": "Aperol Spritz",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aperol",
+        "prosecco"
+      ]
+    },
+    {
+      "id": "citrus-sunrise-fizz",
+      "name": "Citrus Sunrise Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "grapefruit-juice",
+        "grenadine",
+        "lime-juice",
+        "orange-juice"
+      ]
+    },
+    {
+      "id": "ginger-lime-fizz",
+      "name": "Ginger Lime Fizz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-ginger",
+        "lime-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "mojito",
+      "name": "Mojito",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "fresh-lime-juice",
+        "fresh-mint",
+        "simple-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "rosemary-grapefruit-fizz",
+      "name": "Rosemary Grapefruit Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "grapefruit-juice",
+        "lemon-juice",
+        "rosemary-syrup"
+      ]
+    },
+    {
+      "id": "spicy-paloma-mocktail",
+      "name": "Spicy Paloma Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "agave-syrup",
+        "fresh-jalapeno",
+        "grapefruit-juice",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "strawberry-smash",
+      "name": "Strawberry Smash",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-basil",
+        "fresh-strawberries",
+        "lemon-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "tom-collins",
+      "name": "Tom Collins",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lemon-juice",
+        "london-dry-gin",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "virgin-mojito",
+      "name": "Virgin Mojito",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "fresh-mint",
+        "lime-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "champagne": [
+    {
+      "id": "champagne-cocktail",
+      "name": "Champagne Cocktail",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "cognac",
+        "sugar"
+      ]
+    },
+    {
+      "id": "french-75",
+      "name": "French 75",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lemon-juice",
+        "london-dry-gin",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "fresh-lime-juice": [
+    {
+      "id": "cosmopolitan",
+      "name": "Cosmopolitan",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "citrus-vodka",
+        "cointreau",
+        "cranberry-juice"
+      ]
+    },
+    {
+      "id": "cuba-libre",
+      "name": "Cuba Libre",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cola",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "daiquiri",
+      "name": "Daiquiri",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "simple-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "dark-n-stormy",
+      "name": "Dark 'n' Stormy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dark-rum",
+        "ginger-beer"
+      ]
+    },
+    {
+      "id": "el-diablo",
+      "name": "El Diablo",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-cassis",
+        "ginger-beer",
+        "reposado-tequila"
+      ]
+    },
+    {
+      "id": "hurricane",
+      "name": "Hurricane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dark-rum",
+        "fresh-orange-juice",
+        "passion-fruit-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "last-word",
+      "name": "Last Word",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "green-chartreuse",
+        "london-dry-gin",
+        "maraschino-liqueur"
+      ]
+    },
+    {
+      "id": "mai-tai",
+      "name": "Mai Tai",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "aged-rum",
+        "orange-curacao",
+        "orgeat",
+        "simple-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "margarita",
+      "name": "Margarita",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "cointreau"
+      ]
+    },
+    {
+      "id": "mojito",
+      "name": "Mojito",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-mint",
+        "simple-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "moscow-mule",
+      "name": "Moscow Mule",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "ginger-beer",
+        "vodka"
+      ]
+    },
+    {
+      "id": "naked-and-famous",
+      "name": "Naked and Famous",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aperol",
+        "mezcal",
+        "yellow-chartreuse"
+      ]
+    },
+    {
+      "id": "paloma",
+      "name": "Paloma",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "grapefruit-soda",
+        "salt"
+      ]
+    },
+    {
+      "id": "pisco-sour",
+      "name": "Pisco Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "angostura-bitters",
+        "egg-white",
+        "pisco",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cherry-heering",
+        "cointreau",
+        "grenadine",
+        "london-dry-gin",
+        "pineapple-juice"
+      ]
+    },
+    {
+      "id": "tommys-margarita",
+      "name": "Tommy's Margarita",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "agave-syrup",
+        "blanco-tequila"
+      ]
+    }
+  ],
+  "maraschino-liqueur": [
+    {
+      "id": "aviation",
+      "name": "Aviation",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-violette",
+        "fresh-lemon-juice",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "last-word",
+      "name": "Last Word",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "green-chartreuse",
+        "london-dry-gin"
+      ]
+    }
+  ],
+  "green-chartreuse": [
+    {
+      "id": "last-word",
+      "name": "Last Word",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "london-dry-gin",
+        "maraschino-liqueur"
+      ]
+    }
+  ],
+  "creme-de-violette": [
+    {
+      "id": "aviation",
+      "name": "Aviation",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lemon-juice",
+        "london-dry-gin",
+        "maraschino-liqueur"
+      ]
+    }
+  ],
+  "creme-de-mure": [
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lemon-juice",
+        "london-dry-gin",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "cointreau": [
+    {
+      "id": "corpse-reviver-2",
+      "name": "Corpse Reviver #2",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "absinthe",
+        "fresh-lemon-juice",
+        "lillet-blanc",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "cosmopolitan",
+      "name": "Cosmopolitan",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "citrus-vodka",
+        "cranberry-juice",
+        "fresh-lime-juice"
+      ]
+    },
+    {
+      "id": "lemon-drop",
+      "name": "Lemon Drop",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lemon-juice",
+        "simple-syrup",
+        "vodka"
+      ]
+    },
+    {
+      "id": "margarita",
+      "name": "Margarita",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "fresh-lime-juice"
+      ]
+    },
+    {
+      "id": "sidecar",
+      "name": "Sidecar",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cognac",
+        "fresh-lemon-juice"
+      ]
+    },
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cherry-heering",
+        "fresh-lime-juice",
+        "grenadine",
+        "london-dry-gin",
+        "pineapple-juice"
+      ]
+    }
+  ],
+  "lillet-blanc": [
+    {
+      "id": "corpse-reviver-2",
+      "name": "Corpse Reviver #2",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "absinthe",
+        "cointreau",
+        "fresh-lemon-juice",
+        "london-dry-gin"
+      ]
+    }
+  ],
+  "raspberry-syrup": [
+    {
+      "id": "clover-club",
+      "name": "Clover Club",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "egg-white",
+        "fresh-lemon-juice",
+        "london-dry-gin"
+      ]
+    }
+  ],
+  "ginger-beer": [
+    {
+      "id": "chai-spice-cooler",
+      "name": "Chai Spice Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "chilled-chai-tea",
+        "milk",
+        "vanilla-syrup"
+      ]
+    },
+    {
+      "id": "dark-n-stormy",
+      "name": "Dark 'n' Stormy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dark-rum",
+        "fresh-lime-juice"
+      ]
+    },
+    {
+      "id": "el-diablo",
+      "name": "El Diablo",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-cassis",
+        "fresh-lime-juice",
+        "reposado-tequila"
+      ]
+    },
+    {
+      "id": "moscow-mule",
+      "name": "Moscow Mule",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "vodka"
+      ]
+    },
+    {
+      "id": "virgin-moscow-mule",
+      "name": "Virgin Moscow Mule",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lime-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "vodka": [
+    {
+      "id": "black-russian",
+      "name": "Black Russian",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "coffee-liqueur"
+      ]
+    },
+    {
+      "id": "bloody-mary",
+      "name": "Bloody Mary",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "black-pepper",
+        "celery-salt",
+        "fresh-lemon-juice",
+        "hot-sauce",
+        "tomato-juice",
+        "worcestershire-sauce"
+      ]
+    },
+    {
+      "id": "espresso-martini",
+      "name": "Espresso Martini",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "coffee-liqueur",
+        "fresh-espresso",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "lemon-drop",
+      "name": "Lemon Drop",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cointreau",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "moscow-mule",
+      "name": "Moscow Mule",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "ginger-beer"
+      ]
+    },
+    {
+      "id": "vodka-martini",
+      "name": "Vodka Martini",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dry-vermouth"
+      ]
+    },
+    {
+      "id": "white-russian",
+      "name": "White Russian",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "coffee-liqueur",
+        "heavy-cream"
+      ]
+    }
+  ],
+  "cranberry-juice": [
+    {
+      "id": "cosmopolitan",
+      "name": "Cosmopolitan",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "citrus-vodka",
+        "cointreau",
+        "fresh-lime-juice"
+      ]
+    }
+  ],
+  "citrus-vodka": [
+    {
+      "id": "cosmopolitan",
+      "name": "Cosmopolitan",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cointreau",
+        "cranberry-juice",
+        "fresh-lime-juice"
+      ]
+    }
+  ],
+  "fresh-espresso": [
+    {
+      "id": "espresso-martini",
+      "name": "Espresso Martini",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "coffee-liqueur",
+        "simple-syrup",
+        "vodka"
+      ]
+    }
+  ],
+  "coffee-liqueur": [
+    {
+      "id": "black-russian",
+      "name": "Black Russian",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "vodka"
+      ]
+    },
+    {
+      "id": "espresso-martini",
+      "name": "Espresso Martini",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "fresh-espresso",
+        "simple-syrup",
+        "vodka"
+      ]
+    },
+    {
+      "id": "white-russian",
+      "name": "White Russian",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "heavy-cream",
+        "vodka"
+      ]
+    }
+  ],
+  "heavy-cream": [
+    {
+      "id": "white-russian",
+      "name": "White Russian",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "coffee-liqueur",
+        "vodka"
+      ]
+    }
+  ],
+  "celery-salt": [
+    {
+      "id": "bloody-mary",
+      "name": "Bloody Mary",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "black-pepper",
+        "fresh-lemon-juice",
+        "hot-sauce",
+        "tomato-juice",
+        "vodka",
+        "worcestershire-sauce"
+      ]
+    }
+  ],
+  "black-pepper": [
+    {
+      "id": "bloody-mary",
+      "name": "Bloody Mary",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "celery-salt",
+        "fresh-lemon-juice",
+        "hot-sauce",
+        "tomato-juice",
+        "vodka",
+        "worcestershire-sauce"
+      ]
+    }
+  ],
+  "tomato-juice": [
+    {
+      "id": "bloody-mary",
+      "name": "Bloody Mary",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "black-pepper",
+        "celery-salt",
+        "fresh-lemon-juice",
+        "hot-sauce",
+        "vodka",
+        "worcestershire-sauce"
+      ]
+    }
+  ],
+  "worcestershire-sauce": [
+    {
+      "id": "bloody-mary",
+      "name": "Bloody Mary",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "black-pepper",
+        "celery-salt",
+        "fresh-lemon-juice",
+        "hot-sauce",
+        "tomato-juice",
+        "vodka"
+      ]
+    }
+  ],
+  "hot-sauce": [
+    {
+      "id": "bloody-mary",
+      "name": "Bloody Mary",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "black-pepper",
+        "celery-salt",
+        "fresh-lemon-juice",
+        "tomato-juice",
+        "vodka",
+        "worcestershire-sauce"
+      ]
+    }
+  ],
+  "white-rum": [
+    {
+      "id": "cuba-libre",
+      "name": "Cuba Libre",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cola",
+        "fresh-lime-juice"
+      ]
+    },
+    {
+      "id": "daiquiri",
+      "name": "Daiquiri",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "hurricane",
+      "name": "Hurricane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dark-rum",
+        "fresh-lime-juice",
+        "fresh-orange-juice",
+        "passion-fruit-syrup"
+      ]
+    },
+    {
+      "id": "mai-tai",
+      "name": "Mai Tai",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "aged-rum",
+        "fresh-lime-juice",
+        "orange-curacao",
+        "orgeat",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "mojito",
+      "name": "Mojito",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-lime-juice",
+        "fresh-mint",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "pina-colada",
+      "name": "Pina Colada",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "coconut-cream",
+        "pineapple-juice"
+      ]
+    }
+  ],
+  "dark-rum": [
+    {
+      "id": "dark-n-stormy",
+      "name": "Dark 'n' Stormy",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "ginger-beer"
+      ]
+    },
+    {
+      "id": "hurricane",
+      "name": "Hurricane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "fresh-orange-juice",
+        "passion-fruit-syrup",
+        "white-rum"
+      ]
+    }
+  ],
+  "orange-curacao": [
+    {
+      "id": "mai-tai",
+      "name": "Mai Tai",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "aged-rum",
+        "fresh-lime-juice",
+        "orgeat",
+        "simple-syrup",
+        "white-rum"
+      ]
+    }
+  ],
+  "orgeat": [
+    {
+      "id": "mai-tai",
+      "name": "Mai Tai",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "aged-rum",
+        "fresh-lime-juice",
+        "orange-curacao",
+        "simple-syrup",
+        "white-rum"
+      ]
+    }
+  ],
+  "aged-rum": [
+    {
+      "id": "mai-tai",
+      "name": "Mai Tai",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "fresh-lime-juice",
+        "orange-curacao",
+        "orgeat",
+        "simple-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "painkiller",
+      "name": "Painkiller",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "coconut-cream",
+        "fresh-orange-juice",
+        "pineapple-juice"
+      ]
+    }
+  ],
+  "coconut-cream": [
+    {
+      "id": "painkiller",
+      "name": "Painkiller",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aged-rum",
+        "fresh-orange-juice",
+        "pineapple-juice"
+      ]
+    },
+    {
+      "id": "pina-colada",
+      "name": "Pina Colada",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "pineapple-juice",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "virgin-pina-colada",
+      "name": "Virgin Pina Colada",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ice",
+        "pineapple-juice"
+      ]
+    }
+  ],
+  "pineapple-juice": [
+    {
+      "id": "painkiller",
+      "name": "Painkiller",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aged-rum",
+        "coconut-cream",
+        "fresh-orange-juice"
+      ]
+    },
+    {
+      "id": "pina-colada",
+      "name": "Pina Colada",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "coconut-cream",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cherry-heering",
+        "cointreau",
+        "fresh-lime-juice",
+        "grenadine",
+        "london-dry-gin"
+      ]
+    },
+    {
+      "id": "virgin-pina-colada",
+      "name": "Virgin Pina Colada",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "coconut-cream",
+        "ice"
+      ]
+    }
+  ],
+  "passion-fruit-syrup": [
+    {
+      "id": "hurricane",
+      "name": "Hurricane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dark-rum",
+        "fresh-lime-juice",
+        "fresh-orange-juice",
+        "white-rum"
+      ]
+    }
+  ],
+  "fresh-orange-juice": [
+    {
+      "id": "hurricane",
+      "name": "Hurricane",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "dark-rum",
+        "fresh-lime-juice",
+        "passion-fruit-syrup",
+        "white-rum"
+      ]
+    },
+    {
+      "id": "painkiller",
+      "name": "Painkiller",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aged-rum",
+        "coconut-cream",
+        "pineapple-juice"
+      ]
+    },
+    {
+      "id": "tequila-sunrise",
+      "name": "Tequila Sunrise",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "grenadine"
+      ]
+    }
+  ],
+  "cola": [
+    {
+      "id": "cuba-libre",
+      "name": "Cuba Libre",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "white-rum"
+      ]
+    }
+  ],
+  "blanco-tequila": [
+    {
+      "id": "margarita",
+      "name": "Margarita",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cointreau",
+        "fresh-lime-juice"
+      ]
+    },
+    {
+      "id": "paloma",
+      "name": "Paloma",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "grapefruit-soda",
+        "salt"
+      ]
+    },
+    {
+      "id": "tequila-sunrise",
+      "name": "Tequila Sunrise",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-orange-juice",
+        "grenadine"
+      ]
+    },
+    {
+      "id": "tommys-margarita",
+      "name": "Tommy's Margarita",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "agave-syrup",
+        "fresh-lime-juice"
+      ]
+    }
+  ],
+  "grapefruit-soda": [
+    {
+      "id": "paloma",
+      "name": "Paloma",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "fresh-lime-juice",
+        "salt"
+      ]
+    }
+  ],
+  "salt": [
+    {
+      "id": "paloma",
+      "name": "Paloma",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "fresh-lime-juice",
+        "grapefruit-soda"
+      ]
+    }
+  ],
+  "grenadine": [
+    {
+      "id": "citrus-sunrise-fizz",
+      "name": "Citrus Sunrise Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "grapefruit-juice",
+        "lime-juice",
+        "orange-juice"
+      ]
+    },
+    {
+      "id": "shirley-temple",
+      "name": "Shirley Temple",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-ale",
+        "lemon-lime-soda"
+      ]
+    },
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cherry-heering",
+        "cointreau",
+        "fresh-lime-juice",
+        "london-dry-gin",
+        "pineapple-juice"
+      ]
+    },
+    {
+      "id": "tequila-sunrise",
+      "name": "Tequila Sunrise",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "fresh-orange-juice"
+      ]
+    }
+  ],
+  "agave-syrup": [
+    {
+      "id": "oaxaca-old-fashioned",
+      "name": "Oaxaca Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "angostura-bitters",
+        "mezcal",
+        "reposado-tequila"
+      ]
+    },
+    {
+      "id": "spicy-paloma-mocktail",
+      "name": "Spicy Paloma Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-jalapeno",
+        "grapefruit-juice",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "tommys-margarita",
+      "name": "Tommy's Margarita",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "blanco-tequila",
+        "fresh-lime-juice"
+      ]
+    }
+  ],
+  "yellow-chartreuse": [
+    {
+      "id": "naked-and-famous",
+      "name": "Naked and Famous",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aperol",
+        "fresh-lime-juice",
+        "mezcal"
+      ]
+    }
+  ],
+  "mezcal": [
+    {
+      "id": "naked-and-famous",
+      "name": "Naked and Famous",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aperol",
+        "fresh-lime-juice",
+        "yellow-chartreuse"
+      ]
+    },
+    {
+      "id": "oaxaca-old-fashioned",
+      "name": "Oaxaca Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "agave-syrup",
+        "angostura-bitters",
+        "reposado-tequila"
+      ]
+    }
+  ],
+  "reposado-tequila": [
+    {
+      "id": "el-diablo",
+      "name": "El Diablo",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "creme-de-cassis",
+        "fresh-lime-juice",
+        "ginger-beer"
+      ]
+    },
+    {
+      "id": "oaxaca-old-fashioned",
+      "name": "Oaxaca Old Fashioned",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "agave-syrup",
+        "angostura-bitters",
+        "mezcal"
+      ]
+    }
+  ],
+  "creme-de-cassis": [
+    {
+      "id": "el-diablo",
+      "name": "El Diablo",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "fresh-lime-juice",
+        "ginger-beer",
+        "reposado-tequila"
+      ]
+    }
+  ],
+  "cognac": [
+    {
+      "id": "champagne-cocktail",
+      "name": "Champagne Cocktail",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "champagne",
+        "sugar"
+      ]
+    },
+    {
+      "id": "sidecar",
+      "name": "Sidecar",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "cointreau",
+        "fresh-lemon-juice"
+      ]
+    },
+    {
+      "id": "vieux-carre",
+      "name": "Vieux Carre",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "peychauds-bitters",
+        "rye-whiskey",
+        "sweet-vermouth"
+      ]
+    }
+  ],
+  "pisco": [
+    {
+      "id": "pisco-sour",
+      "name": "Pisco Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "angostura-bitters",
+        "egg-white",
+        "fresh-lime-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "amaretto": [
+    {
+      "id": "amaretto-sour",
+      "name": "Amaretto Sour",
+      "is_mocktail": false,
+      "difficulty": "medium",
+      "other": [
+        "bourbon",
+        "egg-white",
+        "fresh-lemon-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "prosecco": [
+    {
+      "id": "aperol-spritz",
+      "name": "Aperol Spritz",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "aperol",
+        "club-soda"
+      ]
+    }
+  ],
+  "sugar": [
+    {
+      "id": "champagne-cocktail",
+      "name": "Champagne Cocktail",
+      "is_mocktail": false,
+      "difficulty": "easy",
+      "other": [
+        "angostura-bitters",
+        "champagne",
+        "cognac"
+      ]
+    }
+  ],
+  "cherry-heering": [
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "benedictine",
+        "cointreau",
+        "fresh-lime-juice",
+        "grenadine",
+        "london-dry-gin",
+        "pineapple-juice"
+      ]
+    }
+  ],
+  "benedictine": [
+    {
+      "id": "singapore-sling",
+      "name": "Singapore Sling",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "cherry-heering",
+        "cointreau",
+        "fresh-lime-juice",
+        "grenadine",
+        "london-dry-gin",
+        "pineapple-juice"
+      ]
+    },
+    {
+      "id": "vieux-carre",
+      "name": "Vieux Carre",
+      "is_mocktail": false,
+      "difficulty": "advanced",
+      "other": [
+        "angostura-bitters",
+        "cognac",
+        "peychauds-bitters",
+        "rye-whiskey",
+        "sweet-vermouth"
+      ]
+    }
+  ],
+  "lime-juice": [
+    {
+      "id": "citrus-sunrise-fizz",
+      "name": "Citrus Sunrise Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "grapefruit-juice",
+        "grenadine",
+        "orange-juice"
+      ]
+    },
+    {
+      "id": "cucumber-mint-cooler",
+      "name": "Cucumber Mint Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "fresh-cucumber",
+        "fresh-mint",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "garden-tonic",
+      "name": "Garden Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "elderflower-syrup",
+        "fresh-basil",
+        "fresh-cucumber",
+        "fresh-mint",
+        "tonic-water"
+      ]
+    },
+    {
+      "id": "ginger-lime-fizz",
+      "name": "Ginger Lime Fizz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-ginger",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "passion-fruit-punch",
+      "name": "Passion Fruit Punch",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "orange-juice",
+        "passion-fruit-puree",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "ruby-citrus-cooler",
+      "name": "Ruby Citrus Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "blood-orange-juice",
+        "pomegranate-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "spicy-paloma-mocktail",
+      "name": "Spicy Paloma Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "agave-syrup",
+        "club-soda",
+        "fresh-jalapeno",
+        "grapefruit-juice"
+      ]
+    },
+    {
+      "id": "virgin-mojito",
+      "name": "Virgin Mojito",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "fresh-mint",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "virgin-moscow-mule",
+      "name": "Virgin Moscow Mule",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-beer",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "watermelon-agua-fresca",
+      "name": "Watermelon Agua Fresca",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cold-water",
+        "fresh-watermelon",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "lemon-lime-soda": [
+    {
+      "id": "shirley-temple",
+      "name": "Shirley Temple",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-ale",
+        "grenadine"
+      ]
+    }
+  ],
+  "ginger-ale": [
+    {
+      "id": "shirley-temple",
+      "name": "Shirley Temple",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "grenadine",
+        "lemon-lime-soda"
+      ]
+    }
+  ],
+  "iced-tea": [
+    {
+      "id": "arnold-palmer",
+      "name": "Arnold Palmer",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lemonade"
+      ]
+    }
+  ],
+  "lemonade": [
+    {
+      "id": "arnold-palmer",
+      "name": "Arnold Palmer",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "iced-tea"
+      ]
+    }
+  ],
+  "grapefruit-juice": [
+    {
+      "id": "citrus-sunrise-fizz",
+      "name": "Citrus Sunrise Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "grenadine",
+        "lime-juice",
+        "orange-juice"
+      ]
+    },
+    {
+      "id": "rosemary-grapefruit-fizz",
+      "name": "Rosemary Grapefruit Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "lemon-juice",
+        "rosemary-syrup"
+      ]
+    },
+    {
+      "id": "spicy-paloma-mocktail",
+      "name": "Spicy Paloma Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "agave-syrup",
+        "club-soda",
+        "fresh-jalapeno",
+        "lime-juice"
+      ]
+    }
+  ],
+  "orange-juice": [
+    {
+      "id": "citrus-sunrise-fizz",
+      "name": "Citrus Sunrise Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "grapefruit-juice",
+        "grenadine",
+        "lime-juice"
+      ]
+    },
+    {
+      "id": "passion-fruit-punch",
+      "name": "Passion Fruit Punch",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lime-juice",
+        "passion-fruit-puree",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "ginger-syrup": [
+    {
+      "id": "golden-turmeric-tonic",
+      "name": "Golden Turmeric Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "coconut-milk",
+        "ground-turmeric",
+        "lemon-juice",
+        "tonic-water"
+      ]
+    },
+    {
+      "id": "lemon-ginger-spritz",
+      "name": "Lemon Ginger Spritz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "honey-syrup",
+        "lemon-juice",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "lemon-juice": [
+    {
+      "id": "basil-smash-mocktail",
+      "name": "Basil Smash Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-basil",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "berry-cooler",
+      "name": "Berry Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "mixed-berries",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "golden-turmeric-tonic",
+      "name": "Golden Turmeric Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "coconut-milk",
+        "ginger-syrup",
+        "ground-turmeric",
+        "tonic-water"
+      ]
+    },
+    {
+      "id": "lavender-lemonade",
+      "name": "Lavender Lemonade",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cold-water",
+        "lavender-syrup"
+      ]
+    },
+    {
+      "id": "lemon-ginger-spritz",
+      "name": "Lemon Ginger Spritz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-syrup",
+        "honey-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "rosemary-grapefruit-fizz",
+      "name": "Rosemary Grapefruit Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "grapefruit-juice",
+        "rosemary-syrup"
+      ]
+    },
+    {
+      "id": "strawberry-smash",
+      "name": "Strawberry Smash",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-basil",
+        "fresh-strawberries",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "thyme-honey-spritz",
+      "name": "Thyme Honey Spritz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-thyme",
+        "honey-syrup",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "sparkling-water": [
+    {
+      "id": "basil-smash-mocktail",
+      "name": "Basil Smash Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-basil",
+        "lemon-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "berry-cooler",
+      "name": "Berry Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lemon-juice",
+        "mixed-berries",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "cucumber-mint-cooler",
+      "name": "Cucumber Mint Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "fresh-cucumber",
+        "fresh-mint",
+        "lime-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "lemon-ginger-spritz",
+      "name": "Lemon Ginger Spritz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-syrup",
+        "honey-syrup",
+        "lemon-juice"
+      ]
+    },
+    {
+      "id": "passion-fruit-punch",
+      "name": "Passion Fruit Punch",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lime-juice",
+        "orange-juice",
+        "passion-fruit-puree",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "ruby-citrus-cooler",
+      "name": "Ruby Citrus Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "blood-orange-juice",
+        "lime-juice",
+        "pomegranate-juice",
+        "simple-syrup"
+      ]
+    },
+    {
+      "id": "thyme-honey-spritz",
+      "name": "Thyme Honey Spritz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-thyme",
+        "honey-syrup",
+        "lemon-juice"
+      ]
+    }
+  ],
+  "pomegranate-juice": [
+    {
+      "id": "ruby-citrus-cooler",
+      "name": "Ruby Citrus Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "blood-orange-juice",
+        "lime-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "blood-orange-juice": [
+    {
+      "id": "ruby-citrus-cooler",
+      "name": "Ruby Citrus Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lime-juice",
+        "pomegranate-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "ice": [
+    {
+      "id": "virgin-pina-colada",
+      "name": "Virgin Pina Colada",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "coconut-cream",
+        "pineapple-juice"
+      ]
+    }
+  ],
+  "fresh-strawberries": [
+    {
+      "id": "strawberry-smash",
+      "name": "Strawberry Smash",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-basil",
+        "lemon-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "fresh-basil": [
+    {
+      "id": "basil-smash-mocktail",
+      "name": "Basil Smash Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "lemon-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "garden-tonic",
+      "name": "Garden Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "elderflower-syrup",
+        "fresh-cucumber",
+        "fresh-mint",
+        "lime-juice",
+        "tonic-water"
+      ]
+    },
+    {
+      "id": "strawberry-smash",
+      "name": "Strawberry Smash",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "fresh-strawberries",
+        "lemon-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "mango-pulp": [
+    {
+      "id": "mango-lassi",
+      "name": "Mango Lassi",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cardamom",
+        "honey",
+        "milk",
+        "yogurt"
+      ]
+    }
+  ],
+  "milk": [
+    {
+      "id": "chai-spice-cooler",
+      "name": "Chai Spice Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "chilled-chai-tea",
+        "ginger-beer",
+        "vanilla-syrup"
+      ]
+    },
+    {
+      "id": "mango-lassi",
+      "name": "Mango Lassi",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cardamom",
+        "honey",
+        "mango-pulp",
+        "yogurt"
+      ]
+    }
+  ],
+  "yogurt": [
+    {
+      "id": "mango-lassi",
+      "name": "Mango Lassi",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cardamom",
+        "honey",
+        "mango-pulp",
+        "milk"
+      ]
+    }
+  ],
+  "honey": [
+    {
+      "id": "mango-lassi",
+      "name": "Mango Lassi",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cardamom",
+        "mango-pulp",
+        "milk",
+        "yogurt"
+      ]
+    }
+  ],
+  "cardamom": [
+    {
+      "id": "mango-lassi",
+      "name": "Mango Lassi",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "honey",
+        "mango-pulp",
+        "milk",
+        "yogurt"
+      ]
+    }
+  ],
+  "mixed-berries": [
+    {
+      "id": "berry-cooler",
+      "name": "Berry Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lemon-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "passion-fruit-puree": [
+    {
+      "id": "passion-fruit-punch",
+      "name": "Passion Fruit Punch",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lime-juice",
+        "orange-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "cold-water": [
+    {
+      "id": "lavender-lemonade",
+      "name": "Lavender Lemonade",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "lavender-syrup",
+        "lemon-juice"
+      ]
+    },
+    {
+      "id": "watermelon-agua-fresca",
+      "name": "Watermelon Agua Fresca",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "fresh-watermelon",
+        "lime-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "fresh-watermelon": [
+    {
+      "id": "watermelon-agua-fresca",
+      "name": "Watermelon Agua Fresca",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cold-water",
+        "lime-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "fresh-cucumber": [
+    {
+      "id": "cucumber-mint-cooler",
+      "name": "Cucumber Mint Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "fresh-mint",
+        "lime-juice",
+        "simple-syrup",
+        "sparkling-water"
+      ]
+    },
+    {
+      "id": "garden-tonic",
+      "name": "Garden Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "elderflower-syrup",
+        "fresh-basil",
+        "fresh-mint",
+        "lime-juice",
+        "tonic-water"
+      ]
+    }
+  ],
+  "lavender-syrup": [
+    {
+      "id": "lavender-lemonade",
+      "name": "Lavender Lemonade",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "cold-water",
+        "lemon-juice"
+      ]
+    }
+  ],
+  "rosemary-syrup": [
+    {
+      "id": "rosemary-grapefruit-fizz",
+      "name": "Rosemary Grapefruit Fizz",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "club-soda",
+        "grapefruit-juice",
+        "lemon-juice"
+      ]
+    }
+  ],
+  "elderflower-syrup": [
+    {
+      "id": "garden-tonic",
+      "name": "Garden Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "fresh-basil",
+        "fresh-cucumber",
+        "fresh-mint",
+        "lime-juice",
+        "tonic-water"
+      ]
+    }
+  ],
+  "fresh-thyme": [
+    {
+      "id": "thyme-honey-spritz",
+      "name": "Thyme Honey Spritz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "honey-syrup",
+        "lemon-juice",
+        "sparkling-water"
+      ]
+    }
+  ],
+  "fresh-ginger": [
+    {
+      "id": "ginger-lime-fizz",
+      "name": "Ginger Lime Fizz",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "club-soda",
+        "lime-juice",
+        "simple-syrup"
+      ]
+    }
+  ],
+  "fresh-jalapeno": [
+    {
+      "id": "spicy-paloma-mocktail",
+      "name": "Spicy Paloma Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "agave-syrup",
+        "club-soda",
+        "grapefruit-juice",
+        "lime-juice"
+      ]
+    }
+  ],
+  "evaporated-milk": [
+    {
+      "id": "thai-iced-tea-mocktail",
+      "name": "Thai Iced Tea Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "sweetened-condensed-milk",
+        "thai-tea"
+      ]
+    }
+  ],
+  "sweetened-condensed-milk": [
+    {
+      "id": "thai-iced-tea-mocktail",
+      "name": "Thai Iced Tea Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "evaporated-milk",
+        "thai-tea"
+      ]
+    }
+  ],
+  "thai-tea": [
+    {
+      "id": "thai-iced-tea-mocktail",
+      "name": "Thai Iced Tea Mocktail",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "evaporated-milk",
+        "sweetened-condensed-milk"
+      ]
+    }
+  ],
+  "vanilla-syrup": [
+    {
+      "id": "chai-spice-cooler",
+      "name": "Chai Spice Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "chilled-chai-tea",
+        "ginger-beer",
+        "milk"
+      ]
+    }
+  ],
+  "chilled-chai-tea": [
+    {
+      "id": "chai-spice-cooler",
+      "name": "Chai Spice Cooler",
+      "is_mocktail": true,
+      "difficulty": "easy",
+      "other": [
+        "ginger-beer",
+        "milk",
+        "vanilla-syrup"
+      ]
+    }
+  ],
+  "coconut-milk": [
+    {
+      "id": "golden-turmeric-tonic",
+      "name": "Golden Turmeric Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "ginger-syrup",
+        "ground-turmeric",
+        "lemon-juice",
+        "tonic-water"
+      ]
+    }
+  ],
+  "ground-turmeric": [
+    {
+      "id": "golden-turmeric-tonic",
+      "name": "Golden Turmeric Tonic",
+      "is_mocktail": true,
+      "difficulty": "medium",
+      "other": [
+        "coconut-milk",
+        "ginger-syrup",
+        "lemon-juice",
+        "tonic-water"
+      ]
+    }
+  ]
+}
