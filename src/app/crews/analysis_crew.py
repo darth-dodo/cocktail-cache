@@ -287,7 +287,11 @@ def run_analysis_crew(
     )
 
     # Return the structured pydantic output if available
-    if result.pydantic and isinstance(result.pydantic, AnalysisOutput):
+    if (
+        hasattr(result, "pydantic")
+        and result.pydantic
+        and isinstance(result.pydantic, AnalysisOutput)
+    ):
         return result.pydantic
 
     # Fallback: parse from raw output if pydantic output unavailable

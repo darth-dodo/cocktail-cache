@@ -238,7 +238,7 @@ def run_recipe_crew(
                 bottle_output = _parse_bottle_output(str(task_1))
 
     # Fallback: try to get from final result pydantic
-    if recipe_output is None and result.pydantic:
+    if recipe_output is None and hasattr(result, "pydantic") and result.pydantic:
         if isinstance(result.pydantic, RecipeOutput):
             recipe_output = result.pydantic
         elif isinstance(result.pydantic, BottleAdvisorOutput):

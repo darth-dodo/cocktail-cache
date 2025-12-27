@@ -274,7 +274,11 @@ class CocktailFlow(Flow[CocktailFlowState]):
             self.state.analysis_raw = str(result)
 
             # Get structured output from crew result
-            if result.pydantic and isinstance(result.pydantic, AnalysisOutput):
+            if (
+                hasattr(result, "pydantic")
+                and result.pydantic
+                and isinstance(result.pydantic, AnalysisOutput)
+            ):
                 self.state.analysis = result.pydantic
             else:
                 # Fallback: try to parse from raw output
