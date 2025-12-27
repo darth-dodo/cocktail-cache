@@ -1,0 +1,247 @@
+# Agentic Framework - Project Configuration
+# Copy this file to .agentic/config.yml and customize for your project
+
+# ============================================================================
+# Project Information
+# ============================================================================
+project:
+  name: 'Your Project Name'
+  description: 'Brief project description'
+  type: 'web-app|api|library|cli|static-site|mobile'
+
+# ============================================================================
+# Technology Stack
+# ============================================================================
+stack:
+  languages:
+    primary: 'typescript' # Primary language
+    secondary: [] # Additional languages: ["python", "go"]
+
+  frameworks:
+    frontend: '' # react, vue, angular, astro, svelte, none
+    backend: '' # express, fastapi, django, gin, none
+    testing: '' # vitest, jest, pytest, go-test
+
+  build_tools:
+    package_manager: 'npm' # npm, yarn, pnpm, pip, go
+    bundler: '' # vite, webpack, esbuild, none
+    task_runner: '' # make, npm-scripts, just, none
+
+# ============================================================================
+# Quality Gate Thresholds
+# ============================================================================
+quality_gates:
+  # Gate 1-3: Code Quality
+  syntax:
+    enabled: true
+    commands:
+      - 'npm run build --dry-run' # Adapt to your stack
+
+  types:
+    enabled: true
+    strict_mode: true
+    commands:
+      - 'npm run type-check' # TypeScript
+      # - "mypy ."                 # Python
+      # - "go vet ./..."           # Go
+
+  lint:
+    enabled: true
+    zero_warnings: true
+    commands:
+      - 'npm run lint'
+      # - "ruff check ."           # Python
+      # - "golangci-lint run"      # Go
+
+  # Gate 4: Security
+  security:
+    enabled: true
+    audit_level: 'moderate' # low, moderate, high, critical
+    commands:
+      - 'npm audit'
+      # - "pip-audit"              # Python
+      # - "govulncheck ./..."      # Go
+
+  # Gate 5: Tests
+  tests:
+    enabled: true
+    coverage_threshold: 70 # Percentage
+    commands:
+      - 'npm run test:ci'
+      # - "pytest --cov"           # Python
+      # - "go test -cover ./..."   # Go
+
+  # Gate 6: Performance
+  performance:
+    enabled: true
+    lighthouse_score: 90 # For web projects
+    load_time_3g: '3s' # Max load time on 3G
+    bundle_size: '500KB' # Max bundle size (gzipped)
+
+  # Gate 7: Accessibility
+  accessibility:
+    enabled: true
+    wcag_level: 'AA' # A, AA, AAA
+    lighthouse_score: 95
+
+  # Gate 8: Integration
+  integration:
+    enabled: true
+    commands:
+      - 'npm run build'
+      - 'npm run preview' # Or equivalent
+
+# ============================================================================
+# Persona Configuration
+# ============================================================================
+personas:
+  architect:
+    enabled: true
+    mcp_primary: 'sequential'
+    mcp_secondary: 'context7'
+    focus: ['architecture', 'design', 'scalability', 'patterns']
+
+  developer:
+    enabled: true
+    mcp_primary: 'context7'
+    mcp_secondary: 'sequential'
+    focus: ['implementation', 'coding', 'debugging', 'optimization']
+
+  writer:
+    enabled: true
+    mcp_primary: 'context7'
+    mcp_secondary: 'sequential'
+    focus: ['documentation', 'content', 'guides', 'README']
+
+  qa:
+    enabled: true
+    mcp_primary: 'playwright'
+    mcp_secondary: 'sequential'
+    focus: ['testing', 'validation', 'quality', 'deployment']
+
+  # Add custom personas as needed
+  # security:
+  #   enabled: true
+  #   mcp_primary: "sequential"
+  #   focus: ["security", "vulnerabilities", "compliance"]
+
+# ============================================================================
+# Workflow Configuration
+# ============================================================================
+workflows:
+  feature_development:
+    phases:
+      - name: 'Design'
+        persona: 'architect'
+        duration: '30-60min'
+      - name: 'Implementation'
+        persona: 'developer'
+        duration: '1-3hr'
+      - name: 'Validation'
+        persona: 'qa'
+        duration: '30-60min'
+
+  content_creation:
+    phases:
+      - name: 'Outline'
+        persona: 'writer'
+        duration: '15-30min'
+      - name: 'Write'
+        persona: 'writer'
+        duration: '1-2hr'
+      - name: 'Review'
+        persona: 'qa'
+        duration: '15-30min'
+
+  bug_fix:
+    phases:
+      - name: 'Investigate'
+        persona: 'developer'
+        duration: '15-30min'
+      - name: 'Fix'
+        persona: 'developer'
+        duration: '30-60min'
+      - name: 'Verify'
+        persona: 'qa'
+        duration: '15min'
+
+# ============================================================================
+# Multi-Agent Configuration
+# ============================================================================
+multi_agent:
+  enabled: true
+  max_parallel_agents: 5
+
+  patterns:
+    parallel:
+      description: 'Independent tasks with same persona'
+      use_when: "Tasks don't depend on each other"
+      example: '5 Writer agents documenting different endpoints'
+
+    sequential:
+      description: 'Tasks with dependencies'
+      use_when: 'Output of one feeds into another'
+      example: 'Architect → Developer → QA'
+
+    hierarchical:
+      description: 'Lead + worker agents'
+      use_when: 'Complex features needing coordination'
+      example: 'Architect leads 3 Developer agents'
+
+# ============================================================================
+# Session Management
+# ============================================================================
+session:
+  checkpoint_interval: '30min'
+  auto_save: true
+
+  context_retention:
+    target: 90 # Percentage
+    compress_at: 75 # Trigger compression at 75%
+
+  handoff:
+    required_fields:
+      - 'current_task'
+      - 'next_action'
+      - 'blockers'
+      - 'quality_status'
+
+# ============================================================================
+# MCP Server Preferences
+# ============================================================================
+mcp_servers:
+  context7:
+    description: 'Library documentation and patterns'
+    use_for: ['documentation', 'framework patterns', 'best practices']
+    auto_activate: ['import statements', 'framework questions']
+
+  sequential:
+    description: 'Multi-step reasoning and analysis'
+    use_for: ['debugging', 'architecture', 'complex problems']
+    auto_activate: ['--think flags', 'system design']
+
+  playwright:
+    description: 'Browser automation and E2E testing'
+    use_for: ['testing', 'visual validation', 'accessibility']
+    auto_activate: ['test workflows', 'E2E scenarios']
+
+  serena:
+    description: 'Semantic code understanding'
+    use_for: ['refactoring', 'symbol operations', 'large codebases']
+    auto_activate: ['rename operations', 'project memory']
+
+  magic:
+    description: 'UI component generation'
+    use_for: ['frontend components', 'design systems']
+    auto_activate: ['UI requests', 'component creation']
+
+# ============================================================================
+# Project-Specific Extensions
+# ============================================================================
+extensions:
+  # Add project-specific configuration here
+  # Example:
+  # deployment:
+  #   platform: "netlify"
+  #   build_command: "npm run build"
+  #   publish_dir: "dist"

@@ -1,0 +1,21 @@
+# Render Blueprint for Cocktail Cache FastAPI Application
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: cocktail-cache-api
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: true
+    buildCommand: pip install uv && uv sync
+    startCommand: uv run uvicorn src.app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.12"
