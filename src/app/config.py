@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""
 
     # Application Settings
-    APP_ENV: Literal["development", "staging", "production"] = "development"
+    APP_ENV: Literal["development", "staging", "production", "test"] = "development"
     DEBUG: bool = True
 
     # Server Settings
@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         """Check if running in production mode."""
         return self.APP_ENV == "production"
+
+    @property
+    def is_test(self) -> bool:
+        """Check if running in test mode."""
+        return self.APP_ENV == "test"
 
 
 @lru_cache
