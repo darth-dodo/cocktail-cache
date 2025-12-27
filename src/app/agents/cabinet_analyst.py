@@ -4,10 +4,15 @@ This agent analyzes a user's bar cabinet contents and determines
 which cocktails and mocktails can be made with available ingredients.
 """
 
-from crewai import Agent
+from crewai import LLM, Agent
+
+from src.app.agents.llm_config import get_default_llm
 
 
-def create_cabinet_analyst(tools: list | None = None) -> Agent:
+def create_cabinet_analyst(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
     """Create the Cabinet Analyst agent.
 
     The Cabinet Analyst is an expert mixologist who knows every classic
@@ -17,6 +22,7 @@ def create_cabinet_analyst(tools: list | None = None) -> Agent:
     Args:
         tools: List of tools the agent can use. Typically includes
             RecipeDBTool for querying the recipe database.
+        llm: Optional LLM configuration. Defaults to Claude Haiku.
 
     Returns:
         A configured CrewAI Agent instance.
@@ -32,6 +38,7 @@ def create_cabinet_analyst(tools: list | None = None) -> Agent:
             "or both). You never suggest drinks that require unavailable ingredients."
         ),
         tools=tools or [],
+        llm=llm or get_default_llm(),
         verbose=False,
         allow_delegation=False,
     )

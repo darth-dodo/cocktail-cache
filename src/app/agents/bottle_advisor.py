@@ -4,10 +4,15 @@ This agent analyzes bar inventories and recommends which bottles
 to buy next for maximum drink-unlocking value.
 """
 
-from crewai import Agent
+from crewai import LLM, Agent
+
+from src.app.agents.llm_config import get_default_llm
 
 
-def create_bottle_advisor(tools: list | None = None) -> Agent:
+def create_bottle_advisor(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
     """Create the Bottle Advisor agent.
 
     The Bottle Advisor analyzes bar inventories and recommends strategic
@@ -18,6 +23,7 @@ def create_bottle_advisor(tools: list | None = None) -> Agent:
         tools: List of tools the agent can use. Typically includes
             UnlockCalculatorTool for computing which bottles unlock
             the most new drinks.
+        llm: Optional LLM configuration. Defaults to Claude Haiku.
 
     Returns:
         A configured CrewAI Agent instance.
@@ -33,6 +39,7 @@ def create_bottle_advisor(tools: list | None = None) -> Agent:
             "the user's drink type preference."
         ),
         tools=tools or [],
+        llm=llm or get_default_llm(),
         verbose=False,
         allow_delegation=False,
     )

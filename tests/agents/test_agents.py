@@ -9,8 +9,10 @@ import os
 
 import pytest
 
-# Set a mock API key before importing CrewAI to bypass validation
+# Set mock API keys before importing CrewAI to bypass validation
+# These keys are never used for actual API calls in tests
 os.environ.setdefault("OPENAI_API_KEY", "test-key-not-used-for-actual-calls")
+os.environ.setdefault("ANTHROPIC_API_KEY", "test-key-not-used-for-actual-calls")
 
 from crewai import Agent
 from crewai.tools import BaseTool

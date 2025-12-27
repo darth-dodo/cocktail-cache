@@ -4,10 +4,15 @@ This agent understands the emotional connection between drinks and moods,
 ranking available cocktails based on the user's current mood and context.
 """
 
-from crewai import Agent
+from crewai import LLM, Agent
+
+from src.app.agents.llm_config import get_default_llm
 
 
-def create_mood_matcher(tools: list | None = None) -> Agent:
+def create_mood_matcher(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
     """Create the Mood Matcher agent.
 
     The Mood Matcher understands the emotional resonance of drinks.
@@ -17,6 +22,7 @@ def create_mood_matcher(tools: list | None = None) -> Agent:
     Args:
         tools: List of tools the agent can use. Typically includes
             FlavorProfilerTool for analyzing flavor characteristics.
+        llm: Optional LLM configuration. Defaults to Claude Haiku.
 
     Returns:
         A configured CrewAI Agent instance.
@@ -32,6 +38,7 @@ def create_mood_matcher(tools: list | None = None) -> Agent:
             "prioritize drinks the user hasn't made recently."
         ),
         tools=tools or [],
+        llm=llm or get_default_llm(),
         verbose=False,
         allow_delegation=False,
     )

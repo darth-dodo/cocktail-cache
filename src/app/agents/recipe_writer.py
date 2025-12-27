@@ -4,10 +4,15 @@ This agent creates clear, detailed recipes with technique tips
 tailored to the user's skill level.
 """
 
-from crewai import Agent
+from crewai import LLM, Agent
+
+from src.app.agents.llm_config import get_default_llm
 
 
-def create_recipe_writer(tools: list | None = None) -> Agent:
+def create_recipe_writer(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
     """Create the Recipe Writer agent.
 
     The Recipe Writer has taught thousands of home bartenders at every
@@ -18,6 +23,7 @@ def create_recipe_writer(tools: list | None = None) -> Agent:
         tools: List of tools the agent can use. Typically includes
             RecipeDBTool for retrieving recipes and SubstitutionFinderTool
             for suggesting ingredient alternatives.
+        llm: Optional LLM configuration. Defaults to Claude Haiku.
 
     Returns:
         A configured CrewAI Agent instance.
@@ -33,6 +39,7 @@ def create_recipe_writer(tools: list | None = None) -> Agent:
             "concise and suggest creative variations or experiments."
         ),
         tools=tools or [],
+        llm=llm or get_default_llm(),
         verbose=False,
         allow_delegation=False,
     )
