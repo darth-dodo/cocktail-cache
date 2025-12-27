@@ -15,13 +15,15 @@ uv sync
 cp .env.example .env
 # Add your ANTHROPIC_API_KEY to .env
 
-# Run Tests (212 tests, 90% coverage)
+# Run Tests (339 tests, 87% coverage)
 uv run pytest
 
 # Run specific test suites
 uv run pytest tests/tools/
 uv run pytest tests/agents/
 uv run pytest tests/models/
+uv run pytest tests/crews/
+uv run pytest tests/flows/
 
 # Development Server
 uv run uvicorn src.app.main:app --reload
@@ -338,39 +340,53 @@ uv run pytest --cov=src/app      # With coverage
 
 ---
 
-## Week 3: Crews & Flow
+## Week 3: Crews & Flow ✅ COMPLETE
 
 ### Crews
 
 ```
 src/app/crews/
-├── __init__.py
-├── analysis_crew.py   # Cabinet Analyst → Mood Matcher
-└── recipe_crew.py     # Recipe Writer → Bottle Advisor
+├── __init__.py          # Exports: create_analysis_crew, create_recipe_crew, run_*
+├── analysis_crew.py     # Cabinet Analyst → Mood Matcher
+└── recipe_crew.py       # Recipe Writer → Bottle Advisor
 ```
 
-**Crew Pattern:**
+**Crew Implementation (Actual):**
 
 ```python
-from crewai import Crew, Task
+# src/app/crews/analysis_crew.py
+from crewai import Crew, Process, Task
+from src.app.agents import create_cabinet_analyst, create_mood_matcher
+from src.app.tools import FlavorProfilerTool, RecipeDBTool
 
-def create_analysis_crew():
-    analyst = create_cabinet_analyst()
-    matcher = create_mood_matcher()
+def create_analysis_crew() -> Crew:
+    """Create the Analysis Crew for cabinet analysis and mood matching."""
+    recipe_db = RecipeDBTool()
+    flavor_profiler = FlavorProfilerTool()
 
-    task1 = Task(
-        description="Analyze cabinet: {cabinet}",
-        agent=analyst
+    cabinet_analyst = create_cabinet_analyst(tools=[recipe_db])
+    mood_matcher = create_mood_matcher(tools=[flavor_profiler])
+
+    analyze_task = Task(
+        description="""Analyze cabinet: {cabinet}. Drink type: {drink_type}.
+        Find all makeable drinks, excluding: {exclude}.""",
+        expected_output="JSON list of makeable drinks with match scores",
+        agent=cabinet_analyst,
     )
-    task2 = Task(
-        description="Rank for mood: {mood}",
-        agent=matcher,
-        context=[task1]
+
+    match_task = Task(
+        description="""Rank candidates for mood: {mood}.
+        Skill level: {skill_level}. Exclude: {exclude}.""",
+        expected_output="Ranked list ordered by mood fit",
+        agent=mood_matcher,
+        context=[analyze_task],  # Dependency on analyze_task
     )
 
     return Crew(
-        agents=[analyst, matcher],
-        tasks=[task1, task2]
+        agents=[cabinet_analyst, mood_matcher],
+        tasks=[analyze_task, match_task],
+        process=Process.sequential,
+        verbose=False,
     )
 ```
 
@@ -378,54 +394,70 @@ def create_analysis_crew():
 
 ```python
 # src/app/flows/cocktail_flow.py
+from crewai.flow.flow import Flow, listen, start
+from pydantic import BaseModel, Field
 
 class CocktailFlowState(BaseModel):
-    session_id: str
-    cabinet: list[str]
-    mood: str
-    constraints: list[str] = []
-
-    # New: User preferences
-    drink_type: str = "cocktail"  # "cocktail" | "mocktail" | "both"
-    skill_level: str = "intermediate"  # "beginner" | "intermediate" | "adventurous"
-
-    # New: History (recipe IDs to exclude)
-    recent_history: list[str] = []
-
-    candidates: list[dict] = []
+    """State container for the cocktail recommendation flow."""
+    session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    cabinet: list[str] = Field(default_factory=list)
+    mood: str = ""
+    constraints: list[str] = Field(default_factory=list)
+    drink_type: str = "cocktail"
+    skill_level: str = "intermediate"
+    recent_history: list[str] = Field(default_factory=list)
+    candidates: list[dict] = Field(default_factory=list)
     selected: str | None = None
     recipe: dict | None = None
     next_bottle: dict | None = None
-    rejected: list[str] = []
+    rejected: list[str] = Field(default_factory=list)
+    error: str | None = None
 
 class CocktailFlow(Flow[CocktailFlowState]):
+    """Main flow orchestrating Analysis → Recipe crews."""
 
     @start()
-    def receive_input(self):
+    def receive_input(self) -> CocktailFlowState:
+        # Normalize inputs, validate cabinet
         return self.state
 
     @listen(receive_input)
-    def analyze(self):
+    def analyze(self) -> CocktailFlowState:
+        # Run Analysis Crew, parse results
         crew = create_analysis_crew()
-        result = crew.kickoff(inputs={
-            "cabinet": self.state.cabinet,
-            "mood": self.state.mood,
-            "drink_type": self.state.drink_type,
-            "skill_level": self.state.skill_level,
-            "exclude": self.state.recent_history + self.state.rejected
-        })
-        # Update state
+        result = crew.kickoff(inputs={...})
+        # Update state.candidates
         return self.state
 
     @listen(analyze)
-    def generate_recipe(self):
-        crew = create_recipe_crew()
-        result = crew.kickoff(inputs={
-            "cocktail_id": self.state.selected,
-            "skill_level": self.state.skill_level  # For tip adaptation
-        })
+    def select(self) -> CocktailFlowState:
+        # Select top candidate from ranked list
         return self.state
+
+    @listen(select)
+    def generate_recipe(self) -> CocktailFlowState:
+        # Run Recipe Crew, parse results
+        crew = create_recipe_crew()
+        result = crew.kickoff(inputs={...})
+        return self.state
+
+# Convenience functions
+def run_cocktail_flow(...) -> CocktailFlowState:
+    """Run the complete cocktail recommendation flow."""
+    flow = CocktailFlow()
+    return flow.kickoff(inputs={...})
+
+def request_another(state: CocktailFlowState) -> CocktailFlowState:
+    """Handle 'show me something else' by adding to rejected list."""
+    ...
 ```
+
+### Tests
+
+- **127 tests** for crews and flows
+- Tests verify crew configuration, tool assignments, task dependencies
+- Tests use mocking to avoid LLM calls
+- Run: `uv run pytest tests/crews/ tests/flows/ -v`
 
 ---
 
@@ -652,11 +684,14 @@ Tool Tests (30%)   - Deterministic tool tests
 - [x] Model tests passing (`uv run pytest tests/models/`)
 - [x] 212 tests total, 90% coverage
 
-### Week 3
-- [ ] Analysis Crew (with drink_type, skill_level, exclude)
-- [ ] Recipe Crew (with skill-adapted tips)
-- [ ] Flow orchestration
-- [ ] Crew tests passing (`uv run pytest tests/crews/`)
+### Week 3 ✅ COMPLETE
+- [x] Analysis Crew (Cabinet Analyst → Mood Matcher)
+- [x] Recipe Crew (Recipe Writer → Bottle Advisor)
+- [x] Flow orchestration (CocktailFlow with state management)
+- [x] "Show me something else" rejection workflow
+- [x] Crew tests passing (`uv run pytest tests/crews/`)
+- [x] Flow tests passing (`uv run pytest tests/flows/`)
+- [x] 127 new tests, 339 total tests, 87% coverage
 
 ### Week 4
 - [ ] API endpoints (including /made)
