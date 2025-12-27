@@ -15,6 +15,14 @@ uv sync
 cp .env.example .env
 # Add your ANTHROPIC_API_KEY to .env
 
+# Environment Variables
+# Required:
+#   ANTHROPIC_API_KEY=sk-ant-...
+#
+# Optional:
+#   APP_ENV=development      # Options: development, staging, production, test
+#   CREWAI_TRACING=false     # Enable flow tracing for debugging
+
 # Run Tests (339 tests, 87% coverage)
 uv run pytest
 
@@ -368,6 +376,13 @@ def create_analysis_crew(fast_mode: bool = True) -> Crew:
     Args:
         fast_mode: If True (default), uses a single unified agent for faster
             response (~50% faster). If False, uses two sequential agents.
+
+    Returns:
+        Configured Crew ready for execution.
+
+    Performance:
+        - Fast mode: 1 LLM call, ~2-3 seconds
+        - Full mode: 2 LLM calls, ~4-5 seconds
     """
     if fast_mode:
         # Single agent with both tools - 1 LLM call
@@ -386,6 +401,19 @@ def create_analysis_crew(fast_mode: bool = True) -> Crew:
         # Two agents - 2 LLM calls (more detailed)
         # Cabinet Analyst → Mood Matcher pipeline
         ...
+
+def run_analysis_crew(inputs: dict, fast_mode: bool = True) -> AnalysisOutput:
+    """Run the Analysis Crew with the given inputs.
+
+    Args:
+        inputs: Dict with cabinet, mood, constraints, etc.
+        fast_mode: If True (default), uses single-agent mode.
+
+    Returns:
+        AnalysisOutput with ranked drink candidates.
+    """
+    crew = create_analysis_crew(fast_mode=fast_mode)
+    return crew.kickoff(inputs=inputs)
 ```
 
 **Recipe Crew with Optional Bottle Advice:**
@@ -398,8 +426,28 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
     Args:
         include_bottle_advice: When False, skips the bottle advisor task
             to save processing time. Defaults to True.
+
+    Returns:
+        Configured Crew ready for execution.
+
+    Performance:
+        - With bottle advice: 2 LLM calls, ~3-4 seconds
+        - Without bottle advice: 1 LLM call, ~2 seconds
     """
     ...
+
+def run_recipe_crew(inputs: dict, include_bottle_advice: bool = True) -> RecipeCrewOutput:
+    """Run the Recipe Crew with the given inputs.
+
+    Args:
+        inputs: Dict with selected drink, cabinet, skill_level, etc.
+        include_bottle_advice: If True (default), includes bottle recommendations.
+
+    Returns:
+        RecipeCrewOutput with recipe and optional bottle advice.
+    """
+    crew = create_recipe_crew(include_bottle_advice=include_bottle_advice)
+    return crew.kickoff(inputs=inputs)
 ```
 
 ### Flow
@@ -428,6 +476,11 @@ class CocktailFlowState(BaseModel):
 class CocktailFlow(Flow[CocktailFlowState]):
     """Main flow orchestrating Analysis → Recipe crews."""
 
+    def __init__(self, fast_mode: bool = True, include_bottle_advice: bool = True):
+        super().__init__()
+        self.fast_mode = fast_mode
+        self.include_bottle_advice = include_bottle_advice
+
     @start()
     def receive_input(self) -> CocktailFlowState:
         # Normalize inputs, validate cabinet
@@ -436,7 +489,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
     @listen(receive_input)
     def analyze(self) -> CocktailFlowState:
         # Run Analysis Crew, parse results
-        crew = create_analysis_crew()
+        crew = create_analysis_crew(fast_mode=self.fast_mode)
         result = crew.kickoff(inputs={...})
         # Update state.candidates
         return self.state
@@ -449,15 +502,37 @@ class CocktailFlow(Flow[CocktailFlowState]):
     @listen(select)
     def generate_recipe(self) -> CocktailFlowState:
         # Run Recipe Crew, parse results
-        crew = create_recipe_crew()
+        crew = create_recipe_crew(include_bottle_advice=self.include_bottle_advice)
         result = crew.kickoff(inputs={...})
         return self.state
 
 # Convenience functions
-def run_cocktail_flow(...) -> CocktailFlowState:
-    """Run the complete cocktail recommendation flow."""
-    flow = CocktailFlow()
-    return flow.kickoff(inputs={...})
+def run_cocktail_flow(
+    cabinet: list[str],
+    mood: str,
+    fast_mode: bool = True,
+    include_bottle_advice: bool = True,
+    **kwargs
+) -> CocktailFlowState:
+    """Run the complete cocktail recommendation flow.
+
+    Args:
+        cabinet: List of available ingredients.
+        mood: User's mood or occasion description.
+        fast_mode: If True (default), uses single-agent analysis for faster response.
+        include_bottle_advice: If True (default), includes next bottle recommendations.
+        **kwargs: Additional parameters (constraints, skill_level, etc.)
+
+    Returns:
+        CocktailFlowState with complete recommendation.
+
+    Performance Modes:
+        - fast_mode=True, include_bottle_advice=False: ~3-4 seconds (2 LLM calls)
+        - fast_mode=True, include_bottle_advice=True: ~5 seconds (3 LLM calls)
+        - fast_mode=False, include_bottle_advice=True: ~8 seconds (4 LLM calls)
+    """
+    flow = CocktailFlow(fast_mode=fast_mode, include_bottle_advice=include_bottle_advice)
+    return flow.kickoff(inputs={"cabinet": cabinet, "mood": mood, **kwargs})
 
 def request_another(state: CocktailFlowState) -> CocktailFlowState:
     """Handle 'show me something else' by adding to rejected list."""
@@ -676,6 +751,21 @@ Tool Tests (30%)   - Deterministic tool tests
 | Cost per request | <$0.05 | Fast mode uses 2-3 LLM calls vs 4 |
 | Mobile Lighthouse | 90+ | Vanilla JS, minimal dependencies |
 
+### Configuration Options
+
+| Parameter | Default | Effect |
+|-----------|---------|--------|
+| `fast_mode` | `True` | Uses unified Drink Recommender (1 LLM call) vs Cabinet Analyst + Mood Matcher (2 LLM calls) |
+| `include_bottle_advice` | `True` | When False, skips bottle advisor step saving 1 LLM call |
+
+### Performance by Mode
+
+| Mode | LLM Calls | Latency | Best For |
+|------|-----------|---------|----------|
+| Fast + no bottle | 2 | ~3-4s | Quick recommendations |
+| Fast + bottle (default) | 3 | ~5s | Standard experience |
+| Full + bottle | 4 | ~8s | Detailed analysis |
+
 ---
 
 ## Checklist
@@ -740,7 +830,7 @@ Tool Tests (30%)   - Deterministic tool tests
 
 ---
 
-*Implementation Guide v1.3*
+*Implementation Guide v1.4*
 *Applies BLUEPRINT.md patterns to Cocktail Cache*
-*Updated: Week 4 complete, fast mode, chat UI with Raja*
+*Updated: Fast mode parameters, bottle advice toggle, environment configuration*
 *Last Updated: 2025-12-27*

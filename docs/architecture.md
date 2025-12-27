@@ -415,8 +415,22 @@ def get_llm(
 
 **Environment Requirements**:
 ```bash
+# Required
 ANTHROPIC_API_KEY=sk-ant-...
+
+# Optional
+APP_ENV=development        # Options: development, staging, production, test
+CREWAI_TRACING=false       # Enable flow tracing for debugging/observability
 ```
+
+**CrewAI Tracing**:
+
+When `CREWAI_TRACING=true`, the application enables flow tracing which sends execution traces to CrewAI's observability platform. This is useful for:
+- Debugging complex flow issues
+- Monitoring LLM call latency and token usage
+- Analyzing agent behavior in production
+
+Note: Tracing is disabled by default to avoid sending data to external services.
 
 ### Tool Specifications
 
@@ -459,6 +473,15 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ## Data Flow
 
+### Configuration Options
+
+The system supports several configuration parameters for performance tuning:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `fast_mode` | `True` | Uses unified Drink Recommender (1 LLM call) instead of Cabinet Analyst + Mood Matcher (2 calls) |
+| `include_bottle_advice` | `True` | When False, skips the bottle advisor step to save 1 LLM call |
+
 ### Request Lifecycle
 
 ```
@@ -484,7 +507,8 @@ ANTHROPIC_API_KEY=sk-ant-...
 ┌──────────────────────────────────────────────────────────────────────┐
 │ 3. ANALYSIS CREW                                                     │
 │    • Fast mode (default): 1 LLM call via Drink Recommender           │
-│    • Full mode: 2 LLM calls (Cabinet Analyst → Mood Matcher)         │
+│    • Full mode (fast_mode=False): 2 LLM calls (Cabinet Analyst →     │
+│      Mood Matcher)                                                   │
 │    • Output: AnalysisOutput with ranked candidates                   │
 └──────────────────────────────────────────────────────────────────────┘
                                  │
@@ -492,7 +516,8 @@ ANTHROPIC_API_KEY=sk-ant-...
 ┌──────────────────────────────────────────────────────────────────────┐
 │ 4. RECIPE CREW                                                       │
 │    • Recipe Writer: Full recipe with tips (RecipeOutput)             │
-│    • Bottle Advisor (optional): Next bottle (BottleAdvisorOutput)    │
+│    • Bottle Advisor (optional, include_bottle_advice=True):          │
+│      Next bottle recommendation (BottleAdvisorOutput)                │
 │    • Output: RecipeCrewOutput (combined structured output)           │
 └──────────────────────────────────────────────────────────────────────┘
                                  │
@@ -505,10 +530,10 @@ ANTHROPIC_API_KEY=sk-ant-...
 └──────────────────────────────────────────────────────────────────────┘
 
 
-TOTAL LLM CALLS: 2-4 (depending on mode)
-  - Fast mode + no bottle advice: 2 calls
-  - Fast mode + bottle advice: 3 calls
-  - Full mode + bottle advice: 4 calls
+TOTAL LLM CALLS: 2-4 (depending on configuration)
+  - Fast mode + no bottle advice: 2 calls (~3-4 seconds)
+  - Fast mode + bottle advice (default): 3 calls (~5 seconds)
+  - Full mode + bottle advice: 4 calls (~8 seconds)
 TARGET LATENCY: <8 seconds (fast mode: <5 seconds)
 ```
 
@@ -984,7 +1009,7 @@ cocktail-cache/
 
 ---
 
-*Document Version: 1.1*
+*Document Version: 1.2*
 *Last Updated: 2025-12-27*
 *Principles: KISS + YAGNI*
-*Changes: Added fast mode, Drink Recommender agent, structured Pydantic outputs*
+*Changes: Added fast_mode parameter, include_bottle_advice toggle, CREWAI_TRACING env var, APP_ENV test support*

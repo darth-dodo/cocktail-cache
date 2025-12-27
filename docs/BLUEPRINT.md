@@ -170,9 +170,12 @@ class Settings(BaseSettings):
     redis_session_ttl: int = 86400  # 24 hours
 
     # Server
-    environment: str = "development"
+    environment: str = "development"  # "development", "staging", "production", or "test"
     host: str = "0.0.0.0"
     port: int = 8000
+
+    # CrewAI Configuration
+    crewai_tracing: bool = False  # Enable flow tracing for debugging
 
     # LLM defaults
     default_model: str = "anthropic/claude-3-5-haiku-20241022"

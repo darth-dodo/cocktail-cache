@@ -290,7 +290,19 @@ The original spec proposed 3 crews with 7+ agents. This creates:
 - High cost ($0.20+ per request)
 - Complexity that obscures learning
 
-**Revised Architecture**: 2 crews, 4 agents, with pre-computed data optimization
+**Revised Architecture**: 2 crews, 5 agents, with pre-computed data optimization and configurable performance modes.
+
+#### Performance Modes
+
+| Mode | LLM Calls | Latency | Use Case |
+|------|-----------|---------|----------|
+| Fast mode + no bottle advice | 2 | ~3-4s | Quick recommendations |
+| Fast mode + bottle advice | 3 | ~5s | Standard experience |
+| Full mode + bottle advice | 4 | ~8s | Detailed analysis |
+
+**Configuration Options**:
+- `fast_mode` (default: True): Uses single unified Drink Recommender agent instead of two sequential agents
+- `include_bottle_advice` (default: True): When False, skips the bottle advisor for faster responses
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -311,6 +323,14 @@ The original spec proposed 3 crews with 7+ agents. This creates:
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                  CREW 1: ANALYSIS CREW                          │
+│                                                                 │
+│  Fast Mode (default):                                           │
+│  ┌──────────────────────────────────────────┐                  │
+│  │        Drink Recommender (unified)       │                  │
+│  │              (1 LLM call)                │                  │
+│  └──────────────────────────────────────────┘                  │
+│                                                                 │
+│  Full Mode (fast_mode=False):                                   │
 │  ┌──────────────────┐    ┌──────────────────┐                  │
 │  │  Cabinet Analyst │ →  │   Mood Matcher   │                  │
 │  │  (1 LLM call)    │    │   (1 LLM call)   │                  │
@@ -323,11 +343,11 @@ The original spec proposed 3 crews with 7+ agents. This creates:
 ┌─────────────────────────────────────────────────────────────────┐
 │                  CREW 2: RECIPE CREW                            │
 │  ┌──────────────────┐    ┌──────────────────┐                  │
-│  │  Recipe Writer   │ →  │  Bottle Advisor  │                  │
+│  │  Recipe Writer   │ →  │  Bottle Advisor  │ (optional)       │
 │  │  (1 LLM call)    │    │  (1 LLM call)    │                  │
 │  └──────────────────┘    └──────────────────┘                  │
 │                                                                 │
-│  Output: Full recipe + technique tips + next bottle             │
+│  Output: Full recipe + technique tips + next bottle (optional)  │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -337,7 +357,7 @@ The original spec proposed 3 crews with 7+ agents. This creates:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Key Optimization**: Heavy pre-computation reduces LLM calls from ~10 to ~4.
+**Key Optimization**: Heavy pre-computation reduces LLM calls from ~10 to 2-4 depending on mode.
 
 ### Data Layer
 
@@ -603,6 +623,8 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 1.1*
 *Created: 2025-12-27*
-*Status: Ready for Implementation*
+*Updated: 2025-12-27*
+*Status: In Production*
+*Changes: Added fast_mode and include_bottle_advice configuration options, updated architecture diagrams*
