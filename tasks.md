@@ -1,10 +1,10 @@
 # Cocktail Cache - Implementation Tasks
 
-> **Status**: Week 2 CrewAI Core (Complete) → Week 3 Crews & Flow (Next)
+> **Status**: Week 3 Crews & Flow (Complete) → Week 4 API & Integration (Next)
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI
 >
-> **Test Coverage**: 212 tests passing, 90% coverage
+> **Test Coverage**: 339 tests passing, 87% coverage
 
 ---
 
@@ -314,149 +314,85 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Week 3: Crews & Flow
+## Week 3: Crews & Flow ✅ COMPLETE
 
 ### Phase 3.1: Analysis Crew (Developer)
 
 **Duration**: 1-2 hours
-**Status**: PENDING
+**Status**: COMPLETE
 
 #### Tasks
 
-- [ ] Create `src/app/crews/__init__.py`
-- [ ] Create `src/app/crews/analysis_crew.py`:
-  ```python
-  def create_analysis_crew():
-      """Cabinet Analyst -> Mood Matcher crew."""
-      analyst = create_cabinet_analyst()
-      matcher = create_mood_matcher()
-
-      analyze_task = Task(
-          description="""Analyze cabinet: {cabinet}
-          Drink type: {drink_type}
-          Exclude recent: {exclude}""",
-          agent=analyst
-      )
-
-      match_task = Task(
-          description="""Rank candidates for mood: {mood}
-          Skill level: {skill_level}""",
-          agent=matcher,
-          context=[analyze_task]
-      )
-
-      return Crew(
-          agents=[analyst, matcher],
-          tasks=[analyze_task, match_task]
-      )
-  ```
-- [ ] Write crew tests in `tests/crews/test_analysis_crew.py`
+- [x] Create `src/app/crews/__init__.py`
+- [x] Create `src/app/crews/analysis_crew.py`:
+  - Cabinet Analyst → Mood Matcher pipeline
+  - Task context/dependency chaining
+  - Sequential process with verbose=False
+- [x] Write crew tests in `tests/crews/test_analysis_crew.py` (32 tests)
 
 #### Quality Gate: Analysis Crew Review
 
-- [ ] Crew composes correctly
-- [ ] Context flows between tasks
-- [ ] Handles drink_type, skill_level, exclude parameters
-- [ ] Tests pass with mocked agents
+- [x] Crew composes correctly
+- [x] Context flows between tasks
+- [x] Handles drink_type, skill_level, exclude parameters
+- [x] Tests pass with mocked agents
 
 ---
 
 ### Phase 3.2: Recipe Crew (Developer)
 
 **Duration**: 1-2 hours
-**Status**: PENDING
+**Status**: COMPLETE
 
 #### Tasks
 
-- [ ] Create `src/app/crews/recipe_crew.py`:
-  ```python
-  def create_recipe_crew():
-      """Recipe Writer -> Bottle Advisor crew."""
-      writer = create_recipe_writer()
-      advisor = create_bottle_advisor()
-
-      recipe_task = Task(
-          description="""Generate recipe for: {cocktail_id}
-          Skill level: {skill_level}""",
-          agent=writer
-      )
-
-      bottle_task = Task(
-          description="""Recommend next bottle based on:
-          Cabinet: {cabinet}
-          Drink type: {drink_type}""",
-          agent=advisor,
-          context=[recipe_task]
-      )
-
-      return Crew(
-          agents=[writer, advisor],
-          tasks=[recipe_task, bottle_task]
-      )
-  ```
-- [ ] Write crew tests in `tests/crews/test_recipe_crew.py`
+- [x] Create `src/app/crews/recipe_crew.py`:
+  - Recipe Writer → Bottle Advisor pipeline
+  - Task context/dependency chaining
+  - Sequential process with verbose=False
+- [x] Write crew tests in `tests/crews/test_recipe_crew.py` (43 tests)
 
 #### Quality Gate: Recipe Crew Review
 
-- [ ] Skill-adapted tips in recipe output
-- [ ] Bottle advisor considers current cabinet
-- [ ] Tests pass with mocked agents
+- [x] Skill-adapted tips in recipe output
+- [x] Bottle advisor considers current cabinet
+- [x] Tests pass with mocked agents
 
 ---
 
 ### Phase 3.3: Flow Orchestration (Developer)
 
 **Duration**: 2-3 hours
-**Status**: PENDING
+**Status**: COMPLETE
 
 #### Tasks
 
-- [ ] Create `src/app/flows/__init__.py`
-- [ ] Create `src/app/flows/cocktail_flow.py`:
-  ```python
-  class CocktailFlowState(BaseModel):
-      session_id: str
-      cabinet: list[str]
-      mood: str
-      constraints: list[str] = []
-      drink_type: str = "cocktail"
-      skill_level: str = "intermediate"
-      recent_history: list[str] = []
-      candidates: list[dict] = []
-      selected: str | None = None
-      recipe: dict | None = None
-      next_bottle: dict | None = None
-      rejected: list[str] = []
-
-  class CocktailFlow(Flow[CocktailFlowState]):
-
-      @start()
-      def receive_input(self):
-          return self.state
-
-      @listen(receive_input)
-      def analyze(self):
-          crew = create_analysis_crew()
-          result = crew.kickoff(inputs={...})
-          # Update state with candidates
-          return self.state
-
-      @listen(analyze)
-      def generate_recipe(self):
-          crew = create_recipe_crew()
-          result = crew.kickoff(inputs={...})
-          # Update state with recipe
-          return self.state
-  ```
-- [ ] Add "another" flow for rejecting and getting new recommendation
-- [ ] Write flow tests in `tests/flows/test_cocktail_flow.py`
+- [x] Create `src/app/flows/__init__.py`
+- [x] Create `src/app/flows/cocktail_flow.py`:
+  - CocktailFlowState with Pydantic v2 models
+  - Flow steps: receive_input → analyze → select → generate_recipe
+  - State normalization (lowercase cabinet, default values)
+  - Error handling for empty cabinet
+- [x] Add `request_another()` for rejection workflow
+- [x] Write flow tests in `tests/flows/test_cocktail_flow.py` (52 tests)
 
 #### Quality Gate: Flow Review
 
-- [ ] State transitions correctly
-- [ ] Crews invoked with proper inputs
-- [ ] Rejection/another flow works
-- [ ] Tests pass with mocked crews
+- [x] State transitions correctly
+- [x] Crews invoked with proper inputs
+- [x] Rejection/another flow works
+- [x] Tests pass with mocked crews
+
+---
+
+### Week 3 Quality Gate: PASSED ✅
+
+- [x] 127 new tests for crews and flows
+- [x] 339 total tests passing
+- [x] 87% code coverage
+- [x] Pre-commit hooks passing (ruff, mypy)
+- [x] All crews use sequential processing
+- [x] Flow state management with Pydantic v2
 
 ---
 
@@ -731,7 +667,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 |-------|------|----------|--------|
 | Week 1 | Data Complete | 50 cocktails, 24 mocktails, all JSON valid | ✅ PASSED |
 | Week 2 | Core Complete | Models, Tools, Agents tested (212 tests, 90% coverage) | ✅ PASSED |
-| Week 3 | Crews Complete | Flow orchestration working | 🔲 PENDING |
+| Week 3 | Crews Complete | Flow orchestration working (339 tests, 87% coverage) | ✅ PASSED |
 | Week 4 | API Complete | <8s latency, all endpoints tested | 🔲 PENDING |
 | Week 5 | UI Complete | Mobile responsive, deployed | 🔲 PENDING |
 | Week 6 | Ready | All polish complete, documentation done | 🔲 PENDING |
