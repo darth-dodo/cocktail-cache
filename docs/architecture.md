@@ -19,17 +19,20 @@
 
 ## Implementation Status
 
-> **Current Phase**: Week 1 Complete → Week 2 CrewAI Core (Next)
+> **Current Phase**: Week 2 Complete → Week 3 Crews & Flow (Next)
 
 ### Completed Components
 
 | Component | Status | Details |
 |-----------|--------|---------|
 | Data Layer | ✅ Complete | 50 cocktails, 24 mocktails, 134 ingredients |
-| Pydantic Models | ✅ Complete | `Drink`, `Ingredient`, `UnlockScores` validated |
+| Pydantic Models | ✅ Complete | Phase 1 + Phase 2 models (Cabinet, Recipe, UserPrefs, History) |
 | Project Structure | ✅ Complete | FastAPI skeleton, tests, scripts configured |
 | Validation Scripts | ✅ Complete | `validate_data.py`, `compute_unlock_scores.py` |
 | Pre-commit Hooks | ✅ Complete | ruff, mypy, trailing whitespace checks |
+| CrewAI Agents | ✅ Complete | 4 agents with Claude Haiku (Anthropic) |
+| CrewAI Tools | ✅ Complete | 4 deterministic tools for data operations |
+| Unit Tests | ✅ Complete | 212 tests passing with 90% coverage |
 
 ### Data Files Summary
 
@@ -41,7 +44,7 @@
 | `substitutions.json` | 118 rules | 7 substitution maps |
 | `unlock_scores.json` | 110 entries | Pre-computed ROI |
 
-### Actual Project Structure (Phase 1)
+### Actual Project Structure (Phase 2)
 
 ```
 cocktail-cache/
@@ -49,17 +52,34 @@ cocktail-cache/
 │   └── app/
 │       ├── main.py              # FastAPI entry point (skeleton)
 │       ├── config.py            # Environment configuration
-│       ├── models/              # ✅ Pydantic models
-│       │   ├── __init__.py
+│       ├── models/              # ✅ Complete (Phase 1 + 2)
+│       │   ├── __init__.py      # Exports all models
 │       │   ├── drinks.py        # Drink, IngredientAmount, FlavorProfile
 │       │   ├── ingredients.py   # Ingredient, IngredientsDatabase, SubstitutionsDatabase
-│       │   └── unlock_scores.py # UnlockedDrink, UnlockScores
+│       │   ├── unlock_scores.py # UnlockedDrink, UnlockScores
+│       │   ├── cabinet.py       # Cabinet model
+│       │   ├── cocktail.py      # CocktailMatch model
+│       │   ├── recipe.py        # Recipe, RecipeStep, TechniqueTip
+│       │   ├── recommendation.py # Recommendation, BottleRec
+│       │   ├── user_prefs.py    # SkillLevel, DrinkType, UserPreferences
+│       │   └── history.py       # HistoryEntry, RecipeHistory
 │       ├── services/            # ✅ Data loading
 │       │   ├── __init__.py
 │       │   └── data_loader.py   # Cached JSON loading with validation
-│       ├── agents/              # 🔲 Week 2
-│       ├── crews/               # 🔲 Week 2
-│       ├── tools/               # 🔲 Week 2
+│       ├── agents/              # ✅ Complete (Claude Haiku)
+│       │   ├── __init__.py      # Factory exports + LLM config
+│       │   ├── llm_config.py    # Centralized LLM configuration
+│       │   ├── cabinet_analyst.py
+│       │   ├── mood_matcher.py
+│       │   ├── recipe_writer.py
+│       │   └── bottle_advisor.py
+│       ├── tools/               # ✅ Complete
+│       │   ├── __init__.py      # Tool exports
+│       │   ├── recipe_db.py     # RecipeDBTool
+│       │   ├── flavor_profiler.py # FlavorProfilerTool
+│       │   ├── substitution_finder.py # SubstitutionFinderTool
+│       │   └── unlock_calculator.py # UnlockCalculatorTool
+│       ├── crews/               # 🔲 Week 3
 │       ├── flows/               # 🔲 Week 3
 │       ├── routers/             # 🔲 Week 4
 │       ├── templates/           # 🔲 Week 5
@@ -73,8 +93,10 @@ cocktail-cache/
 ├── scripts/                     # ✅ Complete
 │   ├── compute_unlock_scores.py # Generate bottle recommendations
 │   └── validate_data.py         # Pydantic data validation
-├── tests/                       # 🔲 Week 2+
-├── tasks.md                     # Development task tracker
+├── tests/                       # ✅ Complete (212 tests)
+│   ├── agents/test_agents.py    # Agent factory tests
+│   ├── models/                  # Model validation tests
+│   └── tools/test_tools.py      # Tool unit tests
 ├── pyproject.toml              # Project configuration
 ├── Makefile                    # Development commands
 └── render.yaml                 # Render deployment config
@@ -197,121 +219,146 @@ This insight drives the entire architecture.
 
 ### Agent Specifications
 
+> **LLM Configuration**: All agents use Claude Haiku (`anthropic/claude-3-5-haiku-20241022`) by default.
+> Custom LLM configurations can be passed to each factory function.
+
 #### Agent 1: Cabinet Analyst
 
-```yaml
-role: "Cabinet Analyst"
-goal: "Identify all drinks makeable with available ingredients"
-backstory: |
-  You're the inventory specialist. You know every classic cocktail's
-  and mocktail's ingredient list by heart. Your job is simple: look at
-  what they have, find what they can make. No creativity needed—just accuracy.
+```python
+# src/app/agents/cabinet_analyst.py
+from crewai import LLM, Agent
+from src.app.agents.llm_config import get_default_llm
 
-tools:
-  - RecipeDB.query_by_ingredients()
-
-input:
-  cabinet: list[str]      # ["bourbon", "lemons", "honey"]
-  drink_type: str         # "cocktail" | "mocktail" | "both"
-  skill_level: str        # "beginner" | "intermediate" | "adventurous"
-  exclude_recent: list[str]  # Recipe IDs to exclude (from history)
-
-output:
-  candidates:
-    - cocktail_id: str
-      name: str
-      match_score: float  # 1.0 = all ingredients, 0.8 = missing 1
-      missing: list[str]
-      substitutable: bool
-      difficulty: str     # "easy" | "medium" | "advanced"
-      is_mocktail: bool
+def create_cabinet_analyst(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
+    return Agent(
+        role="Cabinet Analyst",
+        goal="Identify all drinks makeable with available ingredients",
+        backstory="""You are an expert mixologist who has memorized every classic
+        cocktail and mocktail recipe. When shown a home bar cabinet, you instantly
+        recognize which drinks can be made. You consider close substitutions and
+        always respect the user's drink type preference (cocktail, mocktail, or both).
+        You never suggest drinks that require unavailable ingredients.""",
+        tools=tools or [],
+        llm=llm or get_default_llm(),
+        verbose=False,
+        allow_delegation=False,
+    )
 ```
+
+**Recommended Tools**: `RecipeDBTool`
 
 #### Agent 2: Mood Matcher
 
-```yaml
-role: "Mood Matcher"
-goal: "Rank drinks by how well they fit the user's mood, constraints, and skill level"
-backstory: |
-  You read between the lines. "Unwinding" means something different than
-  "celebrating." You understand that "not too sweet" is a hard constraint,
-  but "something impressive" is a soft preference. You also respect skill
-  levels—beginners get simpler recipes first. You explain WHY a drink
-  fits—that's what builds trust.
-
-tools:
-  - FlavorProfiler.get_profile()
-
-input:
-  mood: str
-  constraints: list[str]
-  candidates: list[CocktailMatch]
-  skill_level: str        # Factor into ranking
-
-output:
-  ranked:
-    - cocktail_id: str
-      rank: int
-      why: str  # "This delivers bourbon warmth without being heavy..."
-      flavor_profile: FlavorProfile
-      skill_appropriate: bool  # Matches user's comfort level
+```python
+# src/app/agents/mood_matcher.py
+def create_mood_matcher(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
+    return Agent(
+        role="Mood Matcher",
+        goal="Rank drinks by mood fit and occasion",
+        backstory="""You understand the deep emotional connection between drinks
+        and moods. A Manhattan suits quiet contemplation; a Margarita fits
+        celebration. You consider time of day, season, and the user's stated
+        mood when ranking candidates. You match drink complexity to skill level
+        and prioritize drinks the user hasn't made recently.""",
+        tools=tools or [],
+        llm=llm or get_default_llm(),
+        verbose=False,
+        allow_delegation=False,
+    )
 ```
+
+**Recommended Tools**: `FlavorProfilerTool`
 
 #### Agent 3: Recipe Writer
 
-```yaml
-role: "Recipe Writer"
-goal: "Generate clear, skill-appropriate recipes with technique tips"
-backstory: |
-  You've taught thousands of home bartenders at every skill level. You know
-  where beginners mess up: undershaking, using bottled citrus, not chilling
-  glasses. For adventurous users, you can explain egg white handling or
-  infusion techniques. Your recipes are scannable (bold actions, indented
-  details) and your tips match the user's comfort level. You never
-  condescend—you empower.
-
-tools:
-  - RecipeDB.get_recipe()
-  - SubstitutionFinder.find_subs()
-
-input:
-  cocktail_id: str
-  user_cabinet: list[str]
-  skill_level: str        # Adjusts tip detail and complexity
-
-output:
-  recipe: Recipe  # Full Pydantic model (see models/)
-  # Includes: skill_adapted_tips, mocktail_badge (if applicable)
+```python
+# src/app/agents/recipe_writer.py
+def create_recipe_writer(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
+    return Agent(
+        role="Recipe Writer",
+        goal="Generate clear, skill-appropriate recipes with technique tips",
+        backstory="""You have taught thousands of home bartenders at every skill
+        level. For beginners, you provide detailed technique explanations, safety
+        tips, and precise measurements. For intermediate users, you give standard
+        instructions with occasional tips. For adventurous bartenders, you're
+        concise and suggest creative variations or experiments.""",
+        tools=tools or [],
+        llm=llm or get_default_llm(),
+        verbose=False,
+        allow_delegation=False,
+    )
 ```
+
+**Recommended Tools**: `RecipeDBTool`, `SubstitutionFinderTool`
 
 #### Agent 4: Bottle Advisor
 
-```yaml
-role: "Bottle Advisor"
-goal: "Recommend the highest-ROI next bottle purchase"
-backstory: |
-  You think in terms of "unlock potential." One bottle that enables 4 new
-  cocktails beats three bottles that each enable one. You consider what
-  they already have, what they seem to like, and what lasts on the shelf.
-  You always explain your reasoning—it's not just a recommendation, it's
-  education.
+```python
+# src/app/agents/bottle_advisor.py
+def create_bottle_advisor(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
+    return Agent(
+        role="Bottle Advisor",
+        goal="Recommend the next bottle purchase for maximum value",
+        backstory="""You analyze bar inventories and recommend strategic purchases.
+        You know exactly which bottles unlock the most new drink possibilities.
+        You consider budget-friendly options and suggest bottles that unlock the
+        most NEW drinks the user cannot currently make. You always respect the
+        user's drink type preference.""",
+        tools=tools or [],
+        llm=llm or get_default_llm(),
+        verbose=False,
+        allow_delegation=False,
+    )
+```
 
-tools:
-  - UnlockCalculator.get_scores()
+**Recommended Tools**: `UnlockCalculatorTool`
 
-input:
-  cabinet: list[str]
-  preferred_profiles: list[str]  # inferred from mood/selection
+### LLM Configuration
 
-output:
-  recommendation:
-    bottle: str
-    price_range: str
-    why: str
-    unlocks: list[UnlockedCocktail]
-  runner_up:
-    bottle: str
-    why: str
+```python
+# src/app/agents/llm_config.py
+from crewai import LLM
+
+DEFAULT_MODEL = "anthropic/claude-3-5-haiku-20241022"
+DEFAULT_MAX_TOKENS = 4096
+DEFAULT_TEMPERATURE = 0.7
+
+def get_default_llm() -> LLM:
+    """Get the default LLM configuration (Claude Haiku)."""
+    return LLM(
+        model=DEFAULT_MODEL,
+        max_tokens=DEFAULT_MAX_TOKENS,
+        temperature=DEFAULT_TEMPERATURE,
+    )
+
+def get_llm(
+    model: str | None = None,
+    max_tokens: int | None = None,
+    temperature: float | None = None,
+) -> LLM:
+    """Get a customized LLM configuration."""
+    return LLM(
+        model=model or DEFAULT_MODEL,
+        max_tokens=max_tokens or DEFAULT_MAX_TOKENS,
+        temperature=temperature or DEFAULT_TEMPERATURE,
+    )
+```
+
+**Environment Requirements**:
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ### Tool Specifications

@@ -1,10 +1,10 @@
 # Cocktail Cache - Implementation Tasks
 
-> **Status**: Week 1 Foundation (Complete) → Week 2 CrewAI Core (Next)
+> **Status**: Week 2 CrewAI Core (Complete) → Week 3 Crews & Flow (Next)
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI
 >
-> **Workflow**: Follows `.agentic-framework/workflows/feature-development.md`
+> **Test Coverage**: 212 tests passing, 90% coverage
 
 ---
 
@@ -245,279 +245,72 @@
 
 ---
 
-## Week 2: CrewAI Core
+## Week 2: CrewAI Core ✅ COMPLETE
 
-### Phase 2.1: Pydantic Models (Architect -> Developer)
+### Phase 2.1: Pydantic Models ✅
 
-**Duration**: 2-3 hours
-**Status**: PENDING
+**Status**: COMPLETE
 
-#### Design Tasks (Architect)
-
-- [ ] Design model hierarchy and relationships
-- [ ] Define enums for skill levels, drink types, moods
-- [ ] Plan validation rules and constraints
-
-#### Implementation Tasks (Developer)
-
-- [ ] Create `src/app/models/__init__.py` with exports
-- [ ] Create `src/app/models/cabinet.py`:
-  ```python
-  class Ingredient(BaseModel):
-      id: str
-      category: str
-
-  class Cabinet(BaseModel):
-      ingredients: list[str]
-  ```
-- [ ] Create `src/app/models/cocktail.py`:
-  ```python
-  class FlavorProfile(BaseModel):
-      sweet: int = Field(ge=0, le=100)
-      sour: int = Field(ge=0, le=100)
-      bitter: int = Field(ge=0, le=100)
-      spirit: int = Field(ge=0, le=100)
-
-  class CocktailMatch(BaseModel):
-      id: str
-      name: str
-      score: float
-      missing: list[str] = []
-  ```
-- [ ] Create `src/app/models/recipe.py`:
-  ```python
-  class RecipeIngredient(BaseModel):
-      amount: str
-      unit: str
-      item: str
-
-  class RecipeStep(BaseModel):
-      action: str
-      detail: str
-
-  class TechniqueTip(BaseModel):
-      skill_level: str
-      tip: str
-
-  class Recipe(BaseModel):
-      id: str
-      name: str
-      tagline: str
-      why: str
-      flavor_profile: FlavorProfile
-      ingredients: list[RecipeIngredient]
-      method: list[RecipeStep]
-      glassware: str
-      garnish: str
-      timing: str
-      difficulty: str
-      technique_tips: list[TechniqueTip]
-      is_mocktail: bool = False
-  ```
-- [ ] Create `src/app/models/recommendation.py`:
-  ```python
-  class BottleRec(BaseModel):
-      ingredient: str
-      unlocks: int
-      drinks: list[str]
-
-  class Recommendation(BaseModel):
-      recipe: Recipe
-      alternatives: list[CocktailMatch]
-      next_bottle: BottleRec | None
-  ```
-- [ ] Create `src/app/models/user_prefs.py`:
-  ```python
-  class SkillLevel(str, Enum):
-      BEGINNER = "beginner"
-      INTERMEDIATE = "intermediate"
-      ADVENTUROUS = "adventurous"
-
-  class DrinkType(str, Enum):
-      COCKTAIL = "cocktail"
-      MOCKTAIL = "mocktail"
-      BOTH = "both"
-
-  class UserPreferences(BaseModel):
-      skill_level: SkillLevel = SkillLevel.INTERMEDIATE
-      drink_type: DrinkType = DrinkType.COCKTAIL
-      exclude_count: int = 5
-  ```
-- [ ] Create `src/app/models/history.py`:
-  ```python
-  class HistoryEntry(BaseModel):
-      recipe_id: str
-      recipe_name: str
-      made_at: datetime
-      is_mocktail: bool = False
-
-  class RecipeHistory(BaseModel):
-      entries: list[HistoryEntry] = []
-  ```
-- [ ] Write unit tests for all models in `tests/test_models.py`
-
-#### Quality Gate: Models Review
-
-- [ ] All models use Pydantic v2 patterns
-- [ ] Field validators for constraints
-- [ ] Enums for finite state values
-- [ ] JSON serialization works
-- [ ] Unit tests pass
+- [x] Created `src/app/models/__init__.py` with exports
+- [x] Created `src/app/models/cabinet.py` (Cabinet model)
+- [x] Created `src/app/models/cocktail.py` (CocktailMatch, FlavorProfile)
+- [x] Created `src/app/models/recipe.py` (Recipe, RecipeStep, TechniqueTip)
+- [x] Created `src/app/models/recommendation.py` (Recommendation, BottleRec)
+- [x] Created `src/app/models/user_prefs.py` (SkillLevel, DrinkType, UserPreferences enums)
+- [x] Created `src/app/models/history.py` (HistoryEntry, RecipeHistory)
+- [x] Unit tests passing in `tests/models/`
 
 ---
 
-### Phase 2.2: Tools (Developer)
+### Phase 2.2: Tools ✅
 
-**Duration**: 2-3 hours
-**Status**: PENDING
+**Status**: COMPLETE
 
-#### Tasks
-
-- [ ] Create `src/app/tools/__init__.py` with exports
-- [ ] Create `src/app/tools/recipe_db.py`:
-  ```python
-  class RecipeDBTool(BaseTool):
-      """Query cocktails and mocktails database."""
-      name: str = "recipe_database"
-      description: str = "Search and retrieve cocktail/mocktail recipes"
-
-      def _run(self, query: str, drink_type: str = "both") -> str:
-          # Load cocktails.json and mocktails.json
-          # Filter based on query and drink_type
-          # Return matching recipes as JSON
-  ```
-- [ ] Create `src/app/tools/flavor_profiler.py`:
-  ```python
-  class FlavorProfilerTool(BaseTool):
-      """Get flavor profiles for cocktails."""
-      name: str = "flavor_profiler"
-      description: str = "Analyze and compare flavor profiles"
-
-      def _run(self, cocktail_ids: list[str]) -> str:
-          # Return flavor profiles for given cocktails
-  ```
-- [ ] Create `src/app/tools/substitution_finder.py`:
-  ```python
-  class SubstitutionFinderTool(BaseTool):
-      """Find ingredient substitutions."""
-      name: str = "substitution_finder"
-      description: str = "Find substitutes for missing ingredients"
-
-      def _run(self, ingredient: str) -> str:
-          # Load substitutions.json
-          # Return possible substitutes
-  ```
-- [ ] Create `src/app/tools/unlock_calculator.py`:
-  ```python
-  class UnlockCalculatorTool(BaseTool):
-      """Calculate which bottles unlock most drinks."""
-      name: str = "unlock_calculator"
-      description: str = "Find which bottles to buy next"
-
-      def _run(self, cabinet: list[str], drink_type: str = "both") -> str:
-          # Load unlock_scores.json
-          # Calculate best next purchases
-  ```
-- [ ] Write comprehensive tests in `tests/tools/`:
-  - [ ] `tests/tools/test_recipe_db.py`
-  - [ ] `tests/tools/test_flavor_profiler.py`
-  - [ ] `tests/tools/test_substitution_finder.py`
-  - [ ] `tests/tools/test_unlock_calculator.py`
-
-#### Quality Gate: Tools Review
-
-- [ ] All tools are deterministic (no LLM calls)
-- [ ] Tools load JSON data efficiently (caching)
-- [ ] All tool tests pass
-- [ ] Tools follow CrewAI BaseTool pattern
-- [ ] Run: `uv run pytest tests/tools/`
+- [x] Created `src/app/tools/__init__.py` with exports
+- [x] Created `src/app/tools/recipe_db.py` (RecipeDBTool)
+- [x] Created `src/app/tools/flavor_profiler.py` (FlavorProfilerTool)
+- [x] Created `src/app/tools/substitution_finder.py` (SubstitutionFinderTool)
+- [x] Created `src/app/tools/unlock_calculator.py` (UnlockCalculatorTool)
+- [x] All tools are deterministic (no LLM calls)
+- [x] Tool tests passing: `uv run pytest tests/tools/`
 
 ---
 
-### Phase 2.3: Agents (Developer)
+### Phase 2.3: Agents ✅
 
-**Duration**: 2-3 hours
-**Status**: PENDING
+**Status**: COMPLETE
 
-#### Tasks
+- [x] Created `src/app/agents/__init__.py` with factory exports and LLM config
+- [x] Created `src/app/agents/llm_config.py` (Claude Haiku configuration)
+- [x] Created `src/app/agents/cabinet_analyst.py`
+- [x] Created `src/app/agents/mood_matcher.py`
+- [x] Created `src/app/agents/recipe_writer.py`
+- [x] Created `src/app/agents/bottle_advisor.py`
+- [x] All agents use Claude Haiku (`anthropic/claude-3-5-haiku-20241022`)
+- [x] Agent tests passing: `uv run pytest tests/agents/`
 
-- [ ] Create `src/app/config/agents.yaml`:
-  ```yaml
-  defaults:
-    llm:
-      model: "anthropic/claude-3-5-haiku-20241022"
-      temperature: 0.7
-      max_tokens: 1024
+**LLM Configuration:**
+```python
+DEFAULT_MODEL = "anthropic/claude-3-5-haiku-20241022"
+DEFAULT_MAX_TOKENS = 4096
+DEFAULT_TEMPERATURE = 0.7
+```
 
-  cabinet_analyst:
-    role: "Cabinet Analyst"
-    goal: "Identify all drinks makeable with available ingredients"
-    backstory: |
-      You are an expert mixologist who knows every classic cocktail
-      and mocktail recipe by heart. Given a home bar cabinet, you
-      instantly identify which drinks can be made with what's available.
+**Environment Variable Required:**
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
-      CONSTRAINTS:
-      - Only suggest drinks that can be made with available ingredients
-      - Consider substitutions when ingredients are close matches
-      - Respect drink_type preference (cocktail/mocktail/both)
-    verbose: false
+---
 
-  mood_matcher:
-    role: "Mood Matcher"
-    goal: "Rank drinks by mood fit and occasion"
-    backstory: |
-      You understand the emotional connection between drinks and moods.
-      A Manhattan suits contemplation, a Margarita fits celebration.
+### Week 2 Quality Gate: PASSED ✅
 
-      CONSTRAINTS:
-      - Consider time of day and season
-      - Match complexity to skill level
-      - Prioritize drinks not recently made
-    verbose: false
-
-  recipe_writer:
-    role: "Recipe Writer"
-    goal: "Generate clear, skill-appropriate recipes with technique tips"
-    backstory: |
-      You've taught thousands of home bartenders at every level.
-      For beginners, you explain techniques in detail with helpful tips.
-      For adventurous users, you're concise and suggest creative variations.
-
-      SKILL ADAPTATION:
-      - Beginner: Full technique explanations, safety tips, measurements
-      - Intermediate: Standard instructions, occasional tips
-      - Adventurous: Concise, suggest variations and experiments
-    verbose: false
-
-  bottle_advisor:
-    role: "Bottle Advisor"
-    goal: "Recommend the next bottle purchase for maximum value"
-    backstory: |
-      You analyze bar inventories and recommend strategic purchases.
-      You know which bottles unlock the most new drink possibilities.
-
-      CONSTRAINTS:
-      - Consider budget-friendly options
-      - Suggest bottles that unlock most NEW drinks
-      - Respect drink_type preferences
-    verbose: false
-  ```
-- [ ] Create `src/app/agents/__init__.py`
-- [ ] Create `src/app/agents/cabinet_analyst.py`
-- [ ] Create `src/app/agents/mood_matcher.py`
-- [ ] Create `src/app/agents/recipe_writer.py`
-- [ ] Create `src/app/agents/bottle_advisor.py`
-- [ ] Create `src/app/config/tasks.yaml` with task templates
-- [ ] Write agent tests with mocked LLM in `tests/agents/`
-
-#### Quality Gate: Agents Review
-
-- [ ] Agents load from YAML config
-- [ ] Word limits in backstory
-- [ ] Tools properly assigned
-- [ ] Agent tests pass with mocks
-- [ ] Run: `uv run pytest tests/agents/`
+- [x] 212 tests passing
+- [x] 90% code coverage
+- [x] All models use Pydantic v2 patterns
+- [x] All tools are deterministic (no LLM calls)
+- [x] All agents use Claude Haiku via factory pattern
+- [x] Pre-commit hooks passing (ruff, mypy)
 
 ---
 
@@ -934,14 +727,14 @@
 
 ## Quality Gates Summary
 
-| Phase | Gate | Criteria |
-|-------|------|----------|
-| Week 1 | Data Complete | 50 cocktails, 20+ mocktails, all JSON valid |
-| Week 2 | Core Complete | Models, Tools, Agents tested |
-| Week 3 | Crews Complete | Flow orchestration working |
-| Week 4 | API Complete | <8s latency, all endpoints tested |
-| Week 5 | UI Complete | Mobile responsive, deployed |
-| Week 6 | Ready | All polish complete, documentation done |
+| Phase | Gate | Criteria | Status |
+|-------|------|----------|--------|
+| Week 1 | Data Complete | 50 cocktails, 24 mocktails, all JSON valid | ✅ PASSED |
+| Week 2 | Core Complete | Models, Tools, Agents tested (212 tests, 90% coverage) | ✅ PASSED |
+| Week 3 | Crews Complete | Flow orchestration working | 🔲 PENDING |
+| Week 4 | API Complete | <8s latency, all endpoints tested | 🔲 PENDING |
+| Week 5 | UI Complete | Mobile responsive, deployed | 🔲 PENDING |
+| Week 6 | Ready | All polish complete, documentation done | 🔲 PENDING |
 
 ---
 

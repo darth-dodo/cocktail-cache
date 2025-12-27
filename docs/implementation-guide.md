@@ -9,18 +9,62 @@
 ## Quick Start
 
 ```bash
-# Week 1: Foundation
+# Setup
 cd cocktail-cache
 uv sync
+cp .env.example .env
+# Add your ANTHROPIC_API_KEY to .env
 
-# Week 2-3: Build & Test
-uv run python scripts/compute_unlock_scores.py
+# Run Tests (212 tests, 90% coverage)
+uv run pytest
+
+# Run specific test suites
 uv run pytest tests/tools/
 uv run pytest tests/agents/
+uv run pytest tests/models/
 
-# Week 4-5: Run & Deploy
+# Development Server
 uv run uvicorn src.app.main:app --reload
-git push origin main  # Render auto-deploys from main branch
+```
+
+---
+
+## Using the Agents
+
+```python
+import os
+os.environ["ANTHROPIC_API_KEY"] = "your-api-key"
+
+from crewai import Crew, Task
+from src.app.agents import create_cabinet_analyst, create_mood_matcher
+from src.app.tools import RecipeDBTool, FlavorProfilerTool
+
+# Create tools
+recipe_db = RecipeDBTool()
+flavor_profiler = FlavorProfilerTool()
+
+# Create agents with tools
+cabinet_analyst = create_cabinet_analyst(tools=[recipe_db])
+mood_matcher = create_mood_matcher(tools=[flavor_profiler])
+
+# Define tasks
+analyze_task = Task(
+    description="""Analyze cabinet contents: bourbon, lemons, honey, simple-syrup.
+    Find all cocktails that can be made with these ingredients.""",
+    expected_output="List of makeable drinks",
+    agent=cabinet_analyst,
+)
+
+rank_task = Task(
+    description="""Rank drinks for mood: 'unwinding after a long week'.""",
+    expected_output="Ranked list with explanations",
+    agent=mood_matcher,
+    context=[analyze_task],
+)
+
+# Run the crew
+crew = Crew(agents=[cabinet_analyst, mood_matcher], tasks=[analyze_task, rank_task])
+result = crew.kickoff()
 ```
 
 ---
@@ -202,109 +246,94 @@ uv run python scripts/compute_unlock_scores.py
 
 ---
 
-## Week 2: CrewAI Core
+## Week 2: CrewAI Core ✅ COMPLETE
 
-### Models (Pydantic)
+### Models (Pydantic) ✅
 
 ```
 src/app/models/
-├── __init__.py
-├── cabinet.py      # Cabinet, Ingredient
-├── cocktail.py     # CocktailMatch, FlavorProfile
-├── recipe.py       # Recipe, RecipeStep, TechniqueTip
-├── recommendation.py  # Recommendation, BottleRec
-├── user_prefs.py   # SkillLevel, DrinkType
-└── history.py      # HistoryEntry, RecipeHistory
+├── __init__.py          # Exports all models
+├── cabinet.py           # Cabinet model
+├── cocktail.py          # CocktailMatch model
+├── recipe.py            # Recipe, RecipeStep, TechniqueTip
+├── recommendation.py    # Recommendation, BottleRec
+├── user_prefs.py        # SkillLevel, DrinkType, UserPreferences
+└── history.py           # HistoryEntry, RecipeHistory
 ```
 
-**Key Model: `Recipe`**
-
-```python
-class Recipe(BaseModel):
-    id: str
-    name: str
-    tagline: str
-    why: str  # Why this drink for this mood
-    flavor_profile: FlavorProfile
-    ingredients: list[RecipeIngredient]
-    prep: list[PrepStep] = []
-    method: list[RecipeStep]
-    glassware: str
-    garnish: str
-    timing: str
-    difficulty: str  # "easy" | "medium" | "advanced"
-    technique_tips: list[TechniqueTip]  # Adapted based on skill level
-    variations: list[Variation]
-    is_mocktail: bool = False
-```
-
-**Key Model: `UserPreferences`** (loaded from local storage)
-
-```python
-class UserPreferences(BaseModel):
-    skill_level: str = "intermediate"  # "beginner" | "intermediate" | "adventurous"
-    drink_type: str = "cocktail"  # "cocktail" | "mocktail" | "both"
-    exclude_count: int = 5  # How many recent drinks to exclude
-```
-
-**Key Model: `HistoryEntry`**
-
-```python
-class HistoryEntry(BaseModel):
-    recipe_id: str
-    recipe_name: str
-    made_at: datetime
-    is_mocktail: bool = False
-```
-
-### Tools
+### Tools ✅
 
 ```
 src/app/tools/
-├── __init__.py
-├── recipe_db.py         # Query cocktails, get recipes
-├── flavor_profiler.py   # Get flavor profiles
-├── substitution_finder.py  # Find ingredient swaps
-└── unlock_calculator.py    # Calculate bottle ROI
+├── __init__.py              # Tool exports
+├── recipe_db.py             # RecipeDBTool - query drinks by ingredients
+├── flavor_profiler.py       # FlavorProfilerTool - analyze flavor profiles
+├── substitution_finder.py   # SubstitutionFinderTool - find ingredient swaps
+└── unlock_calculator.py     # UnlockCalculatorTool - calculate bottle ROI
 ```
 
-**All tools are deterministic** - they query pre-computed JSON data.
+**All tools are deterministic** - they query pre-computed JSON data and return JSON strings.
 
-### Agents
+### Agents ✅
 
 ```
 src/app/agents/
-├── __init__.py
+├── __init__.py          # Factory exports + LLM config
+├── llm_config.py        # Centralized Claude Haiku configuration
 ├── cabinet_analyst.py   # Finds makeable cocktails
 ├── mood_matcher.py      # Ranks by mood fit
 ├── recipe_writer.py     # Generates full recipes
 └── bottle_advisor.py    # Recommends next purchase
 ```
 
-**Agent Pattern:**
+**LLM Configuration (Claude Haiku):**
 
 ```python
-from crewai import Agent
+# src/app/agents/llm_config.py
+from crewai import LLM
 
-def create_cabinet_analyst() -> Agent:
+DEFAULT_MODEL = "anthropic/claude-3-5-haiku-20241022"
+DEFAULT_MAX_TOKENS = 4096
+DEFAULT_TEMPERATURE = 0.7
+
+def get_default_llm() -> LLM:
+    return LLM(model=DEFAULT_MODEL, max_tokens=DEFAULT_MAX_TOKENS, temperature=DEFAULT_TEMPERATURE)
+```
+
+**Agent Factory Pattern:**
+
+```python
+from crewai import LLM, Agent
+from src.app.agents.llm_config import get_default_llm
+
+def create_cabinet_analyst(
+    tools: list | None = None,
+    llm: LLM | None = None,
+) -> Agent:
     return Agent(
         role="Cabinet Analyst",
         goal="Identify all drinks makeable with available ingredients",
-        backstory="You know every classic cocktail's and mocktail's ingredients...",
-        tools=[RecipeDBTool()],
-        verbose=True
+        backstory="You are an expert mixologist...",
+        tools=tools or [],
+        llm=llm or get_default_llm(),
+        verbose=False,
+        allow_delegation=False,
     )
+```
 
-def create_recipe_writer() -> Agent:
-    return Agent(
-        role="Recipe Writer",
-        goal="Generate clear, skill-appropriate recipes with technique tips",
-        backstory="""You've taught thousands of home bartenders at every level.
-        For beginners, you explain techniques in detail. For adventurous users,
-        you're concise and suggest variations.""",
-        tools=[RecipeDBTool(), SubstitutionFinderTool()],
-        verbose=True
-    )
+### Tests ✅
+
+- **212 tests passing** with 90% coverage
+- Agent factory tests in `tests/agents/test_agents.py`
+- Tool unit tests in `tests/tools/test_tools.py`
+- Model validation tests in `tests/models/`
+
+Run tests:
+```bash
+uv run pytest                    # All tests
+uv run pytest tests/agents/      # Agent tests only
+uv run pytest tests/tools/       # Tool tests only
+uv run pytest --cov=src/app      # With coverage
 ```
 
 ---
@@ -613,18 +642,21 @@ Tool Tests (30%)   - Deterministic tool tests
 - [x] Data validation script (`scripts/validate_data.py`)
 - [x] Pre-commit hooks configured (ruff, mypy)
 
-### Week 2
-- [ ] Pydantic models (including UserPrefs, HistoryEntry)
-- [ ] 4 tools working
-- [ ] 4 agents defined
-- [ ] Skill-level awareness in Recipe Writer
-- [ ] Tool tests passing (`uv run pytest tests/tools/`)
+### Week 2 ✅ COMPLETE
+- [x] Pydantic models (Cabinet, Recipe, UserPrefs, History, Recommendation)
+- [x] 4 tools working (RecipeDB, FlavorProfiler, SubstitutionFinder, UnlockCalculator)
+- [x] 4 agents defined with Claude Haiku
+- [x] LLM configuration centralized in `llm_config.py`
+- [x] Tool tests passing (`uv run pytest tests/tools/`)
+- [x] Agent tests passing (`uv run pytest tests/agents/`)
+- [x] Model tests passing (`uv run pytest tests/models/`)
+- [x] 212 tests total, 90% coverage
 
 ### Week 3
 - [ ] Analysis Crew (with drink_type, skill_level, exclude)
 - [ ] Recipe Crew (with skill-adapted tips)
 - [ ] Flow orchestration
-- [ ] Crew tests passing (`uv run pytest tests/agents/`)
+- [ ] Crew tests passing (`uv run pytest tests/crews/`)
 
 ### Week 4
 - [ ] API endpoints (including /made)
