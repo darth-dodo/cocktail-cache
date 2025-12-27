@@ -28,6 +28,7 @@ repos:
           - types-requests
           - types-PyYAML
           - pydantic>=2.0
+          - crewai>=0.86.0
         args:
           - --ignore-missing-imports
           - --disable-error-code=misc

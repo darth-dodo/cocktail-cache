@@ -152,7 +152,7 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
 
     # Create the crew with sequential execution
     crew = Crew(
-        agents=agents,
+        agents=list(agents),
         tasks=tasks,
         process=Process.sequential,
         verbose=False,
