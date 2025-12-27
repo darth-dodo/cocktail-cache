@@ -6,6 +6,7 @@ ranking available cocktails based on the user's current mood and context.
 
 from crewai import LLM, Agent
 
+from src.app.agents.config import get_agent_config
 from src.app.agents.llm_config import get_default_llm
 
 
@@ -27,18 +28,13 @@ def create_mood_matcher(
     Returns:
         A configured CrewAI Agent instance.
     """
+    config = get_agent_config("mood_matcher")
     return Agent(
-        role="Mood Matcher",
-        goal="Rank drinks by mood fit and occasion",
-        backstory=(
-            "You understand the deep emotional connection between drinks and moods. "
-            "A Manhattan suits quiet contemplation; a Margarita fits celebration. "
-            "You consider time of day, season, and the user's stated mood when "
-            "ranking candidates. You match drink complexity to skill level and "
-            "prioritize drinks the user hasn't made recently."
-        ),
+        role=config["role"],
+        goal=config["goal"],
+        backstory=config["backstory"],
         tools=tools or [],
         llm=llm or get_default_llm(),
-        verbose=False,
-        allow_delegation=False,
+        verbose=config.get("verbose", False),
+        allow_delegation=config.get("allow_delegation", False),
     )

@@ -431,8 +431,9 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
         Configured Crew ready for execution.
 
     Performance:
-        - With bottle advice: 2 LLM calls, ~3-4 seconds
-        - Without bottle advice: 1 LLM call, ~2 seconds
+        - With bottle advice (sequential): 2 LLM calls, ~3-4 seconds
+        - With bottle advice (parallel): 2 LLM calls, ~1.5-2 seconds
+        - Without bottle advice: 1 LLM call, ~1.5-2 seconds
     """
     ...
 
@@ -448,6 +449,65 @@ def run_recipe_crew(inputs: dict, include_bottle_advice: bool = True) -> RecipeC
     """
     crew = create_recipe_crew(include_bottle_advice=include_bottle_advice)
     return crew.kickoff(inputs=inputs)
+```
+
+**Parallel Crew Functions (for concurrent execution):**
+
+```python
+# src/app/crews/recipe_crew.py
+
+def create_recipe_only_crew() -> Crew:
+    """Create a crew with only the Recipe Writer task.
+
+    Used for parallel execution where Recipe Writer and Bottle Advisor
+    run concurrently via asyncio.gather().
+
+    Returns:
+        Crew configured with single Recipe Writer task.
+    """
+    recipe_tools = [RecipeDBTool(), SubstitutionFinderTool()]
+    recipe_writer = create_recipe_writer(tools=recipe_tools)
+
+    recipe_task = Task(
+        description="...",
+        agent=recipe_writer,
+        output_pydantic=RecipeOutput,
+    )
+
+    return Crew(
+        agents=[recipe_writer],
+        tasks=[recipe_task],
+        process=Process.sequential,
+        verbose=False,
+    )
+
+
+def create_bottle_only_crew() -> Crew:
+    """Create a crew with only the Bottle Advisor task.
+
+    Used for parallel execution. This crew has no dependency on
+    Recipe Writer output - it only needs cabinet and drink_type
+    from the flow state.
+
+    Returns:
+        Crew configured with single Bottle Advisor task.
+    """
+    bottle_tools = [UnlockCalculatorTool()]
+    bottle_advisor = create_bottle_advisor(tools=bottle_tools)
+
+    bottle_task = Task(
+        description="...",
+        agent=bottle_advisor,
+        output_pydantic=BottleAdvisorOutput,
+        # NO context dependency - enables parallel execution
+    )
+
+    return Crew(
+        agents=[bottle_advisor],
+        tasks=[bottle_task],
+        process=Process.sequential,
+        verbose=False,
+    )
 ```
 
 ### Flow
@@ -500,11 +560,30 @@ class CocktailFlow(Flow[CocktailFlowState]):
         return self.state
 
     @listen(select)
-    def generate_recipe(self) -> CocktailFlowState:
-        # Run Recipe Crew, parse results
-        crew = create_recipe_crew(include_bottle_advice=self.include_bottle_advice)
-        result = crew.kickoff(inputs={...})
+    async def generate_recipe(self) -> CocktailFlowState:
+        # Run Recipe Crew with optional parallel execution
+        settings = get_settings()
+
+        if settings.PARALLEL_CREWS and self.include_bottle_advice:
+            # Parallel: Recipe Writer and Bottle Advisor run concurrently
+            await self._generate_parallel()
+        else:
+            # Sequential: Original behavior
+            crew = create_recipe_crew(include_bottle_advice=self.include_bottle_advice)
+            result = crew.kickoff(inputs={...})
         return self.state
+
+    async def _generate_parallel(self) -> None:
+        """Run Recipe Writer and Bottle Advisor in parallel using asyncio.gather()."""
+        recipe_crew = create_recipe_only_crew()
+        bottle_crew = create_bottle_only_crew()
+
+        recipe_result, bottle_result = await asyncio.gather(
+            recipe_crew.kickoff_async(inputs={...}),
+            bottle_crew.kickoff_async(inputs={...}),
+            return_exceptions=True,
+        )
+        # Handle results and exceptions...
 
 # Convenience functions
 def run_cocktail_flow(
@@ -757,14 +836,30 @@ Tool Tests (30%)   - Deterministic tool tests
 |-----------|---------|--------|
 | `fast_mode` | `True` | Uses unified Drink Recommender (1 LLM call) vs Cabinet Analyst + Mood Matcher (2 LLM calls) |
 | `include_bottle_advice` | `True` | When False, skips bottle advisor step saving 1 LLM call |
+| `PARALLEL_CREWS` | `True` | Environment variable. Runs Recipe Writer and Bottle Advisor concurrently |
 
 ### Performance by Mode
 
 | Mode | LLM Calls | Latency | Best For |
 |------|-----------|---------|----------|
 | Fast + no bottle | 2 | ~3-4s | Quick recommendations |
-| Fast + bottle (default) | 3 | ~5s | Standard experience |
-| Full + bottle | 4 | ~8s | Detailed analysis |
+| Fast + bottle (sequential) | 3 | ~5-6s | Fallback mode |
+| Fast + bottle (parallel) | 3 | ~3-4s | Standard experience (default) |
+| Full + bottle | 4 | ~6-8s | Detailed analysis |
+
+### Parallel Execution
+
+When `PARALLEL_CREWS=true` (the default), the Recipe Writer and Bottle Advisor execute concurrently:
+
+```bash
+# Enable parallel execution (default)
+export PARALLEL_CREWS=true
+
+# Disable for rollback
+export PARALLEL_CREWS=false
+```
+
+This reduces latency by approximately 40% for requests with bottle advice.
 
 ---
 
@@ -830,7 +925,7 @@ Tool Tests (30%)   - Deterministic tool tests
 
 ---
 
-*Implementation Guide v1.4*
+*Implementation Guide v1.5*
 *Applies BLUEPRINT.md patterns to Cocktail Cache*
-*Updated: Fast mode parameters, bottle advice toggle, environment configuration*
+*Updated: Added PARALLEL_CREWS feature, parallel crew functions, updated performance tables*
 *Last Updated: 2025-12-27*

@@ -70,7 +70,11 @@
     {"id": "ginger-syrup", "names": ["ginger syrup"]},
     {"id": "cinnamon-syrup", "names": ["cinnamon syrup"]},
     {"id": "vanilla-syrup", "names": ["vanilla syrup"]},
-    {"id": "lavender-syrup", "names": ["lavender syrup"]}
+    {"id": "lavender-syrup", "names": ["lavender syrup"]},
+    {"id": "cardamom", "names": ["cardamom", "ground cardamom", "cardamom pods"]},
+    {"id": "turmeric", "names": ["turmeric", "ground turmeric", "turmeric powder"]},
+    {"id": "creme-de-cassis", "names": ["creme de cassis", "cassis", "blackcurrant liqueur"]},
+    {"id": "creme-de-mure", "names": ["creme de mure", "blackberry liqueur"]}
   ],
   "fresh": [
     {"id": "lemon-juice", "names": ["lemon juice", "fresh lemon", "lemon"]},
@@ -83,6 +87,10 @@
     {"id": "pomegranate-juice", "names": ["pomegranate juice"]},
     {"id": "passion-fruit", "names": ["passion fruit", "passion fruit puree"]},
     {"id": "watermelon-juice", "names": ["watermelon juice", "fresh watermelon"]},
+    {"id": "blood-orange-juice", "names": ["blood orange juice", "fresh blood orange"]},
+    {"id": "mango-pulp", "names": ["mango pulp", "mango puree", "fresh mango"]},
+    {"id": "mixed-berries", "names": ["mixed berries", "berries", "berry mix"]},
+    {"id": "strawberry", "names": ["strawberry", "strawberries", "fresh strawberries"]},
     {"id": "mint", "names": ["mint", "fresh mint", "mint leaves"]},
     {"id": "basil", "names": ["basil", "fresh basil", "basil leaves"]},
     {"id": "rosemary", "names": ["rosemary", "fresh rosemary"]},

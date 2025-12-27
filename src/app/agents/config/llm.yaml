@@ -1,0 +1,23 @@
+# LLM configuration for CrewAI agents
+# Default model is Claude Haiku for fast, cost-effective inference
+
+default:
+  model: "anthropic/claude-3-5-haiku-20241022"
+  max_tokens: 4096
+  temperature: 0.7
+
+# Alternative configurations for different use cases
+fast:
+  model: "anthropic/claude-3-5-haiku-20241022"
+  max_tokens: 2048
+  temperature: 0.5
+
+creative:
+  model: "anthropic/claude-3-5-haiku-20241022"
+  max_tokens: 4096
+  temperature: 0.9
+
+precise:
+  model: "anthropic/claude-3-5-haiku-20241022"
+  max_tokens: 4096
+  temperature: 0.3

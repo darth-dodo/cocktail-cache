@@ -6,6 +6,7 @@ tailored to the user's skill level.
 
 from crewai import LLM, Agent
 
+from src.app.agents.config import get_agent_config
 from src.app.agents.llm_config import get_default_llm
 
 
@@ -28,18 +29,13 @@ def create_recipe_writer(
     Returns:
         A configured CrewAI Agent instance.
     """
+    config = get_agent_config("recipe_writer")
     return Agent(
-        role="Recipe Writer",
-        goal="Generate clear, skill-appropriate recipes with technique tips",
-        backstory=(
-            "You have taught thousands of home bartenders at every skill level. "
-            "For beginners, you provide detailed technique explanations, safety tips, "
-            "and precise measurements. For intermediate users, you give standard "
-            "instructions with occasional tips. For adventurous bartenders, you're "
-            "concise and suggest creative variations or experiments."
-        ),
+        role=config["role"],
+        goal=config["goal"],
+        backstory=config["backstory"],
         tools=tools or [],
         llm=llm or get_default_llm(),
-        verbose=False,
-        allow_delegation=False,
+        verbose=config.get("verbose", False),
+        allow_delegation=config.get("allow_delegation", False),
     )

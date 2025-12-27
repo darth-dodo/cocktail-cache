@@ -308,3 +308,149 @@ def _create_default_recipe(cocktail_id: str, raw_content: str) -> RecipeOutput:
         substitutions=[],
         is_mocktail=False,
     )
+
+
+def create_recipe_only_crew() -> Crew:
+    """Create a crew with only the Recipe Writer task.
+
+    This crew is designed for parallel execution scenarios where the
+    recipe generation runs independently of bottle advice. It contains
+    only the Recipe Writer agent and task.
+
+    Returns:
+        A configured CrewAI Crew instance with only the Recipe Writer.
+
+    Example:
+        crew = create_recipe_only_crew()
+        result = await crew.kickoff_async(inputs={
+            "cocktail_id": "manhattan",
+            "skill_level": "beginner",
+            "cabinet": ["bourbon", "sweet-vermouth", "angostura-bitters"],
+            "drink_type": "cocktail",
+        })
+    """
+    # Initialize tools for recipe writer
+    recipe_tools = [RecipeDBTool(), SubstitutionFinderTool()]
+    recipe_writer = create_recipe_writer(tools=recipe_tools)
+
+    # Create the recipe task (same as in create_recipe_crew)
+    recipe_task = Task(
+        description=(
+            "Generate a detailed recipe for the cocktail with ID '{cocktail_id}'.\n\n"
+            "User Context:\n"
+            "- Skill Level: {skill_level}\n"
+            "- Available Ingredients: {cabinet}\n"
+            "- Drink Type Preference: {drink_type}\n\n"
+            "Instructions:\n"
+            "1. Use the recipe_database tool to retrieve the full recipe details\n"
+            "2. Check if any ingredients are missing from the user's cabinet\n"
+            "3. If ingredients are missing, use substitution_finder to suggest alternatives\n"
+            "4. Adapt the recipe complexity and technique tips to the user's skill level:\n"
+            "   - beginner: Detailed explanations, safety tips, precise measurements\n"
+            "   - intermediate: Standard instructions with occasional tips\n"
+            "   - adventurous: Concise instructions, suggest creative variations\n"
+            "5. Include any relevant substitution options for missing ingredients\n\n"
+            "IMPORTANT: Return the result as a valid JSON object matching the RecipeOutput schema."
+        ),
+        expected_output=(
+            "A JSON object with structure:\n"
+            "{\n"
+            '  "id": "cocktail-id",\n'
+            '  "name": "Cocktail Name",\n'
+            '  "tagline": "Short catchy description",\n'
+            '  "why": "Why this drink matches the users mood",\n'
+            '  "flavor_profile": {"sweet": 30, "sour": 20, "bitter": 25, "spirit": 70},\n'
+            '  "ingredients": [\n'
+            '    {"amount": "2", "unit": "oz", "item": "bourbon"}\n'
+            "  ],\n"
+            '  "method": [\n'
+            '    {"action": "Add", "detail": "ingredients to mixing glass"}\n'
+            "  ],\n"
+            '  "glassware": "rocks",\n'
+            '  "garnish": "orange peel",\n'
+            '  "timing": "3 minutes",\n'
+            '  "difficulty": "easy",\n'
+            '  "technique_tips": [\n'
+            '    {"skill_level": "beginner", "tip": "Use large ice to slow dilution"}\n'
+            "  ],\n"
+            '  "substitutions": ["alternative ingredient suggestions"],\n'
+            '  "is_mocktail": false\n'
+            "}"
+        ),
+        agent=recipe_writer,
+        output_pydantic=RecipeOutput,
+    )
+
+    return Crew(
+        agents=[recipe_writer],
+        tasks=[recipe_task],
+        process=Process.sequential,
+        verbose=False,
+    )
+
+
+def create_bottle_only_crew() -> Crew:
+    """Create a crew with only the Bottle Advisor task.
+
+    This crew is designed for parallel execution scenarios where bottle
+    advice generation runs independently of recipe generation. The bottle
+    task does NOT have a context dependency on the recipe task.
+
+    Returns:
+        A configured CrewAI Crew instance with only the Bottle Advisor.
+
+    Example:
+        crew = create_bottle_only_crew()
+        result = await crew.kickoff_async(inputs={
+            "cabinet": ["bourbon", "sweet-vermouth", "angostura-bitters"],
+            "drink_type": "cocktail",
+        })
+    """
+    # Initialize tools for bottle advisor
+    bottle_tools = [UnlockCalculatorTool()]
+    bottle_advisor = create_bottle_advisor(tools=bottle_tools)
+
+    # Create the bottle task WITHOUT context dependency on recipe_task
+    bottle_task = Task(
+        description=(
+            "Recommend which bottle the user should buy next based on their "
+            "current cabinet and drink preferences.\n\n"
+            "User Context:\n"
+            "- Current Cabinet: {cabinet}\n"
+            "- Drink Type Preference: {drink_type}\n\n"
+            "Instructions:\n"
+            "1. Use the unlock_calculator tool to analyze which new bottles would "
+            "unlock the most additional drinks\n"
+            "2. Consider the drink type preference when making recommendations\n"
+            "3. Prioritize bottles that complement what the user already has\n"
+            "4. Focus on bottles that unlock NEW drinks the user cannot currently make\n"
+            "5. Provide 2-3 top recommendations with clear reasoning\n\n"
+            "IMPORTANT: Return the result as a valid JSON object matching the "
+            "BottleAdvisorOutput schema."
+        ),
+        expected_output=(
+            "A JSON object with structure:\n"
+            "{\n"
+            '  "recommendations": [\n'
+            "    {\n"
+            '      "ingredient": "ingredient-id",\n'
+            '      "ingredient_name": "Ingredient Name",\n'
+            '      "unlocks": 5,\n'
+            '      "drinks": ["Drink 1", "Drink 2"],\n'
+            '      "reasoning": "Why this is a good purchase"\n'
+            "    }\n"
+            "  ],\n"
+            '  "total_new_drinks": 10\n'
+            "}"
+        ),
+        agent=bottle_advisor,
+        # NO context dependency - runs independently
+        output_pydantic=BottleAdvisorOutput,
+    )
+
+    return Crew(
+        agents=[bottle_advisor],
+        tasks=[bottle_task],
+        process=Process.sequential,
+        verbose=False,
+    )

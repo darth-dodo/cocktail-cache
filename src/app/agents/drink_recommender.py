@@ -6,6 +6,7 @@ agent, reducing latency by eliminating the overhead of multiple LLM calls.
 
 from crewai import LLM, Agent
 
+from src.app.agents.config import get_agent_config
 from src.app.agents.llm_config import get_default_llm
 
 
@@ -34,20 +35,13 @@ def create_drink_recommender(
     Returns:
         A configured CrewAI Agent instance.
     """
+    config = get_agent_config("drink_recommender")
     return Agent(
-        role="Drink Recommender",
-        goal="Find and rank the best drinks based on available ingredients and mood",
-        backstory=(
-            "You are an expert mixologist and mood sommelier rolled into one. "
-            "You instantly know which drinks can be made from a home bar cabinet, "
-            "and you deeply understand the emotional connection between drinks and moods. "
-            "A Manhattan suits quiet contemplation; a Margarita fits celebration. "
-            "You efficiently analyze ingredients, match drinks to mood, consider "
-            "skill level, and provide ranked recommendations - all in one seamless process. "
-            "You never suggest drinks that require unavailable ingredients."
-        ),
+        role=config["role"],
+        goal=config["goal"],
+        backstory=config["backstory"],
         tools=tools or [],
         llm=llm or get_default_llm(),
-        verbose=False,
-        allow_delegation=False,
+        verbose=config.get("verbose", False),
+        allow_delegation=config.get("allow_delegation", False),
     )

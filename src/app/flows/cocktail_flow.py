@@ -8,12 +8,16 @@ Flow Architecture:
     1. receive_input: Entry point, validates and normalizes input
     2. analyze: Runs Analysis Crew (Cabinet Analyst -> Mood Matcher)
     3. generate_recipe: Runs Recipe Crew (Recipe Writer -> Bottle Advisor)
+       - Supports parallel execution of Recipe Writer and Bottle Advisor
+         when PARALLEL_CREWS is enabled (default: True)
 
 The flow uses structured Pydantic models for all crew I/O, ensuring
 reliable, typed data throughout the recommendation pipeline.
 """
 
+import asyncio
 import logging
+import time
 import uuid
 from typing import Any
 
@@ -22,7 +26,11 @@ from pydantic import BaseModel, Field
 
 from src.app.config import get_settings
 from src.app.crews.analysis_crew import create_analysis_crew
-from src.app.crews.recipe_crew import create_recipe_crew
+from src.app.crews.recipe_crew import (
+    create_bottle_only_crew,
+    create_recipe_crew,
+    create_recipe_only_crew,
+)
 from src.app.models import (
     AnalysisOutput,
     BottleAdvisorOutput,
@@ -318,12 +326,16 @@ class CocktailFlow(Flow[CocktailFlowState]):
         return self.state
 
     @listen(analyze)
-    def generate_recipe(self) -> CocktailFlowState:
+    async def generate_recipe(self) -> CocktailFlowState:
         """Run Recipe Crew to generate detailed recipe and bottle advice.
 
         This step creates and kicks off the Recipe Crew which:
         1. Uses Recipe Writer to generate a skill-appropriate recipe
         2. Uses Bottle Advisor to recommend next bottle purchases
+
+        When PARALLEL_CREWS is enabled (default) and bottle advice is requested,
+        the Recipe Writer and Bottle Advisor run in parallel for faster execution.
+        Otherwise, they run sequentially with the bottle advisor receiving recipe context.
 
         The crew returns structured RecipeOutput and BottleAdvisorOutput.
 
@@ -345,12 +357,122 @@ class CocktailFlow(Flow[CocktailFlowState]):
             f"(session {self.state.session_id})"
         )
 
+        settings = get_settings()
+        start_time = time.perf_counter()
+
+        # Choose execution mode based on settings and whether bottle advice is requested
+        if settings.PARALLEL_CREWS and self.state.include_bottle_advice:
+            await self._generate_parallel()
+            mode = "parallel"
+        else:
+            await self._generate_sequential()
+            mode = "sequential"
+
+        elapsed = time.perf_counter() - start_time
+        logger.info(f"Recipe generation ({mode}): {elapsed:.2f}s")
+
+        return self.state
+
+    async def _generate_parallel(self) -> None:
+        """Run Recipe Writer and Bottle Advisor in parallel.
+
+        This method executes both crews concurrently using asyncio.gather(),
+        providing significant latency reduction when both tasks are needed.
+
+        Error Handling:
+            - If recipe fails: Set error state, discard bottle result
+            - If bottle fails: Log warning, continue with recipe only
+            - If timeout (30s): Set error state
+        """
+        recipe_crew = create_recipe_only_crew()
+        bottle_crew = create_bottle_only_crew()
+
+        try:
+            # Run both crews in parallel with timeout
+            results = await asyncio.wait_for(
+                asyncio.gather(
+                    recipe_crew.kickoff_async(
+                        inputs={
+                            "cocktail_id": self.state.selected,
+                            "skill_level": self.state.skill_level,
+                            "cabinet": self.state.cabinet,
+                            "drink_type": self.state.drink_type,
+                        }
+                    ),
+                    bottle_crew.kickoff_async(
+                        inputs={
+                            "cabinet": self.state.cabinet,
+                            "drink_type": self.state.drink_type,
+                        }
+                    ),
+                    return_exceptions=True,  # Don't fail fast, handle individually
+                ),
+                timeout=30.0,
+            )
+
+            recipe_result, bottle_result = results
+
+            # Handle individual failures
+            if isinstance(recipe_result, Exception):
+                logger.error(f"Recipe generation failed: {recipe_result}")
+                self.state.error = f"Recipe generation failed: {recipe_result}"
+                return
+
+            bottle_result_valid: bool = True
+            if isinstance(bottle_result, Exception):
+                logger.warning(f"Bottle advice failed: {bottle_result}")
+                bottle_result_valid = False  # Continue without bottle advice
+
+            # Store raw output for debugging
+            self.state.recipe_raw = str(recipe_result)
+
+            # Extract recipe output
+            recipe_output = self._extract_recipe_from_result(recipe_result)
+            self.state.recipe = recipe_output
+
+            # Extract bottle output if available
+            if bottle_result_valid and not isinstance(bottle_result, Exception):
+                bottle_output = self._extract_bottle_from_result(bottle_result)
+                self.state.bottle_advice = bottle_output
+
+                # Create legacy format for API compatibility
+                if bottle_output and bottle_output.recommendations:
+                    top_rec = bottle_output.recommendations[0]
+                    self.state.next_bottle = {
+                        "ingredient": top_rec.ingredient,
+                        "unlocks": top_rec.unlocks,
+                        "drinks": top_rec.drinks,
+                    }
+            else:
+                self.state.bottle_advice = BottleAdvisorOutput(
+                    recommendations=[], total_new_drinks=0
+                )
+
+            logger.info(
+                f"Recipe generated for '{self.state.selected}' (parallel), "
+                f"has_bottle_advice={self.state.bottle_advice is not None}"
+            )
+
+        except TimeoutError:
+            logger.error("Recipe generation timed out after 30s")
+            self.state.error = "Recipe generation timed out"
+
+        except Exception as e:
+            logger.error(f"Parallel recipe generation failed: {e}", exc_info=True)
+            self.state.error = f"Recipe generation failed: {str(e)}"
+
+    async def _generate_sequential(self) -> None:
+        """Run Recipe Crew sequentially (original behavior).
+
+        This method maintains backwards compatibility by running the combined
+        Recipe Crew that chains Recipe Writer -> Bottle Advisor sequentially.
+        """
         try:
             # Create and run the Recipe Crew
             recipe_crew = create_recipe_crew(
                 include_bottle_advice=self.state.include_bottle_advice
             )
-            result = recipe_crew.kickoff(
+            result = await recipe_crew.kickoff_async(
                 inputs={
                     "cocktail_id": self.state.selected,
                     "skill_level": self.state.skill_level,
@@ -376,7 +498,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
                         recipe_output = task_0.pydantic
                     else:
                         recipe_output = self._parse_recipe_output(
-                            str(task_0), self.state.selected
+                            str(task_0), self.state.selected or ""
                         )
 
                 # Task 1: Bottle Advisor output (only if bottle advice was included)
@@ -403,7 +525,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
                 }
 
             logger.info(
-                f"Recipe generated for '{self.state.selected}', "
+                f"Recipe generated for '{self.state.selected}' (sequential), "
                 f"has_bottle_advice={bottle_output is not None}"
             )
 
@@ -411,7 +533,55 @@ class CocktailFlow(Flow[CocktailFlowState]):
             logger.error(f"Recipe generation failed: {e}", exc_info=True)
             self.state.error = f"Recipe generation failed: {str(e)}"
 
-        return self.state
+    def _extract_recipe_from_result(self, result: Any) -> RecipeOutput | None:
+        """Extract RecipeOutput from a crew result.
+
+        Args:
+            result: The CrewAI kickoff result.
+
+        Returns:
+            Parsed RecipeOutput or None if extraction fails.
+        """
+        # Try to get from pydantic attribute first
+        if hasattr(result, "pydantic") and isinstance(result.pydantic, RecipeOutput):
+            return result.pydantic
+
+        # Try to get from tasks_output
+        if hasattr(result, "tasks_output") and result.tasks_output:
+            task_0 = result.tasks_output[0]
+            if hasattr(task_0, "pydantic") and isinstance(
+                task_0.pydantic, RecipeOutput
+            ):
+                return task_0.pydantic
+
+        # Fallback to parsing
+        return self._parse_recipe_output(str(result), self.state.selected or "unknown")
+
+    def _extract_bottle_from_result(self, result: Any) -> BottleAdvisorOutput | None:
+        """Extract BottleAdvisorOutput from a crew result.
+
+        Args:
+            result: The CrewAI kickoff result.
+
+        Returns:
+            Parsed BottleAdvisorOutput or None if extraction fails.
+        """
+        # Try to get from pydantic attribute first
+        if hasattr(result, "pydantic") and isinstance(
+            result.pydantic, BottleAdvisorOutput
+        ):
+            return result.pydantic
+
+        # Try to get from tasks_output
+        if hasattr(result, "tasks_output") and result.tasks_output:
+            task_0 = result.tasks_output[0]
+            if hasattr(task_0, "pydantic") and isinstance(
+                task_0.pydantic, BottleAdvisorOutput
+            ):
+                return task_0.pydantic
+
+        # Fallback to parsing
+        return self._parse_bottle_output(str(result))
 
     def _parse_analysis_output(self, raw_output: str) -> AnalysisOutput:
         """Parse Analysis Crew output into structured AnalysisOutput.

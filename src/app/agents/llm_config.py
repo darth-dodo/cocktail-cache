@@ -1,32 +1,30 @@
 """LLM configuration for CrewAI agents.
 
 This module provides centralized LLM configuration for all agents,
-using Claude Haiku from Anthropic as the default model.
+loading settings from config/llm.yaml.
 """
 
 from crewai import LLM
 
-# Default LLM configuration using Claude Haiku
-# Claude Haiku is fast and cost-effective for agent tasks
-DEFAULT_MODEL = "anthropic/claude-3-5-haiku-20241022"
-DEFAULT_MAX_TOKENS = 4096
-DEFAULT_TEMPERATURE = 0.7
+from src.app.agents.config import get_llm_profile
 
 
 def get_default_llm() -> LLM:
     """Get the default LLM configuration for agents.
 
     Returns:
-        A configured LLM instance using Claude Haiku.
+        A configured LLM instance using the default profile from llm.yaml.
     """
+    config = get_llm_profile("default")
     return LLM(
-        model=DEFAULT_MODEL,
-        max_tokens=DEFAULT_MAX_TOKENS,
-        temperature=DEFAULT_TEMPERATURE,
+        model=config["model"],
+        max_tokens=config["max_tokens"],
+        temperature=config["temperature"],
     )
 
 
 def get_llm(
+    profile: str | None = None,
     model: str | None = None,
     max_tokens: int | None = None,
     temperature: float | None = None,
@@ -34,16 +32,21 @@ def get_llm(
     """Get a customized LLM configuration.
 
     Args:
-        model: The model identifier (e.g., "anthropic/claude-3-5-haiku-20241022").
-               Defaults to Claude Haiku.
-        max_tokens: Maximum tokens for the response. Required for Anthropic models.
-        temperature: Sampling temperature (0.0-1.0). Higher = more creative.
+        profile: Named profile from llm.yaml (e.g., 'fast', 'creative', 'precise').
+                 Overrides are applied on top of the profile settings.
+        model: Override the model identifier.
+        max_tokens: Override maximum tokens for the response.
+        temperature: Override sampling temperature (0.0-1.0).
 
     Returns:
         A configured LLM instance.
     """
+    # Start with profile or default config
+    config = get_llm_profile(profile or "default")
+
+    # Apply overrides
     return LLM(
-        model=model or DEFAULT_MODEL,
-        max_tokens=max_tokens or DEFAULT_MAX_TOKENS,
-        temperature=temperature or DEFAULT_TEMPERATURE,
+        model=model or config["model"],
+        max_tokens=max_tokens or config["max_tokens"],
+        temperature=temperature if temperature is not None else config["temperature"],
     )
