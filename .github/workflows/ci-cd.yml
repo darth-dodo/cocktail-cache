@@ -59,7 +59,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --frozen --all-extras
+          uv sync --frozen --extra dev
           uv pip list | grep -E "(ruff|mypy)" || echo "tools not found"
 
       - name: Run Ruff linter
@@ -96,7 +96,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install dependencies
-        run: uv sync --frozen --all-extras
+        run: uv sync --frozen --extra dev
 
       - name: Run tests with coverage
         run: uv run pytest -v --cov=src --cov-report=term-missing --cov-report=xml
