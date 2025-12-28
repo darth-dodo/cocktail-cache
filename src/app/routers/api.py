@@ -492,6 +492,31 @@ def _format_ingredient_name(names: list[str]) -> str:
     return names[0].title()
 
 
+class DrinkDetailResponse(BaseModel):
+    """Full drink details for the drink detail page."""
+
+    id: str = Field(..., description="Unique drink identifier")
+    name: str = Field(..., description="Display name of the drink")
+    tagline: str = Field(..., description="Short description")
+    difficulty: str = Field(
+        ..., description="Difficulty level (easy/medium/hard/advanced)"
+    )
+    is_mocktail: bool = Field(..., description="Whether this is a mocktail")
+    timing_minutes: int = Field(..., description="Preparation time in minutes")
+    tags: list[str] = Field(default_factory=list, description="Drink tags")
+    ingredients: list[dict[str, str]] = Field(
+        ..., description="List of ingredients with amount, unit, item"
+    )
+    method: list[dict[str, str]] = Field(
+        ..., description="List of method steps with action and detail"
+    )
+    glassware: str = Field(..., description="Type of glass to serve in")
+    garnish: str = Field(..., description="Garnish description")
+    flavor_profile: dict[str, int] = Field(
+        ..., description="Flavor profile with sweet, sour, bitter, spirit levels"
+    )
+
+
 @router.get("/drinks", response_model=DrinksResponse)
 async def get_drinks() -> DrinksResponse:
     """Get all available drinks for browsing.
@@ -520,6 +545,53 @@ async def get_drinks() -> DrinksResponse:
     ]
 
     return DrinksResponse(drinks=drinks, total=len(drinks))
+
+
+@router.get("/drinks/{drink_id}", response_model=DrinkDetailResponse)
+async def get_drink_by_id(drink_id: str) -> DrinkDetailResponse:
+    """Get a single drink by ID with full details.
+
+    Args:
+        drink_id: The unique identifier of the drink.
+
+    Returns:
+        DrinkDetailResponse with full drink data.
+
+    Raises:
+        HTTPException: If drink is not found.
+    """
+    from src.app.services.data_loader import load_all_drinks
+
+    all_drinks = load_all_drinks()
+
+    # Find the drink by ID
+    drink = next((d for d in all_drinks if d.id == drink_id), None)
+
+    if not drink:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Drink not found: {drink_id}",
+        )
+
+    return DrinkDetailResponse(
+        id=drink.id,
+        name=drink.name,
+        tagline=drink.tagline,
+        difficulty=drink.difficulty,
+        is_mocktail=drink.is_mocktail,
+        timing_minutes=drink.timing_minutes,
+        tags=drink.tags,
+        ingredients=[
+            {"amount": ing.amount, "unit": ing.unit, "item": ing.item}
+            for ing in drink.ingredients
+        ],
+        method=[
+            {"action": step.action, "detail": step.detail} for step in drink.method
+        ],
+        glassware=drink.glassware,
+        garnish=drink.garnish,
+        flavor_profile=drink.flavor_profile.model_dump(),
+    )
 
 
 @router.get("/ingredients", response_model=IngredientsResponse)

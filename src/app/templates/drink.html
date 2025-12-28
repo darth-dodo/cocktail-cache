@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Loading... - Cocktail Cache{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-2 sm:px-4">
+    <!-- Back Link -->
+    <a href="/browse" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 mb-6 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Browse
+    </a>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="text-center py-12">
+        <div class="flex justify-center gap-1 mb-4">
+            <span class="w-3 h-3 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+            <span class="w-3 h-3 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+            <span class="w-3 h-3 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+        </div>
+        <p class="text-stone-400 text-sm">Loading recipe...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="hidden text-center py-12">
+        <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <h3 id="error-title" class="text-lg font-medium text-red-400 mb-2">Drink not found</h3>
+        <p id="error-message" class="text-stone-500 text-sm mb-4">The requested drink could not be found.</p>
+        <a href="/browse" class="btn glass-btn-primary">Browse All Drinks</a>
+    </div>
+
+    <!-- Drink Content (hidden until loaded) -->
+    <div id="drink-content" class="hidden animate-fade-in">
+        <!-- Header Card -->
+        <div class="glass-card p-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 id="drink-name" class="text-2xl sm:text-3xl font-bold recipe-title mb-2"></h1>
+                    <p id="drink-tagline" class="text-stone-400 text-lg"></p>
+                </div>
+                <div class="flex flex-wrap gap-2 sm:flex-shrink-0">
+                    <span id="drink-type-badge" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                </div>
+            </div>
+
+            <!-- Meta Info -->
+            <div class="flex flex-wrap items-center gap-4 text-sm">
+                <span id="difficulty-badge" class="px-3 py-1 rounded-full font-medium"></span>
+                <span class="text-stone-400 flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="timing-text"></span>
+                </span>
+                <span class="text-stone-400 flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                    <span id="glassware-text"></span>
+                </span>
+            </div>
+
+            <!-- Tags -->
+            <div id="tags-container" class="flex flex-wrap gap-2 mt-4"></div>
+        </div>
+
+        <!-- Two Column Layout for larger screens -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <!-- Ingredients Column -->
+            <div class="lg:col-span-2">
+                <div class="glass-card p-6">
+                    <h2 class="text-lg font-semibold text-amber-300 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        Ingredients
+                    </h2>
+                    <ul id="ingredients-list" class="space-y-3"></ul>
+
+                    <!-- Garnish -->
+                    <div class="mt-4 pt-4 border-t border-amber-900/20">
+                        <p class="text-stone-500 text-xs uppercase tracking-wider mb-1">Garnish</p>
+                        <p id="garnish-text" class="text-stone-300"></p>
+                    </div>
+                </div>
+
+                <!-- Flavor Profile -->
+                <div class="glass-card p-6 mt-6">
+                    <h2 class="text-lg font-semibold text-amber-300 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Flavor Profile
+                    </h2>
+                    <div id="flavor-profile" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Method Column -->
+            <div class="lg:col-span-3">
+                <div class="glass-card p-6">
+                    <h2 class="text-lg font-semibold text-amber-300 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Method
+                    </h2>
+                    <ol id="method-list" class="space-y-4"></ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 mt-6">
+            <a href="/browse" class="btn glass-btn-secondary flex-1 sm:flex-none text-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Browse More Drinks
+            </a>
+            <a href="/" class="btn glass-btn-primary flex-1 sm:flex-none text-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Get AI Recommendation
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Get drink ID from template context
+const drinkId = "{{ drink_id }}";
+
+// DOM elements
+const loadingState = document.getElementById('loading-state');
+const errorState = document.getElementById('error-state');
+const drinkContent = document.getElementById('drink-content');
+const errorTitle = document.getElementById('error-title');
+const errorMessage = document.getElementById('error-message');
+
+// Initialize
+async function init() {
+    try {
+        const response = await fetch(`/api/drinks/${encodeURIComponent(drinkId)}`);
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                showError('Drink not found', `We couldn't find a drink with ID "${drinkId}".`);
+            } else {
+                showError('Error loading drink', 'Something went wrong. Please try again.');
+            }
+            return;
+        }
+
+        const drink = await response.json();
+        renderDrink(drink);
+
+    } catch (error) {
+        console.error('Failed to load drink:', error);
+        showError('Connection error', 'Failed to connect to the server. Please check your connection.');
+    }
+}
+
+function showError(title, message) {
+    loadingState.classList.add('hidden');
+    errorTitle.textContent = title;
+    errorMessage.textContent = message;
+    errorState.classList.remove('hidden');
+}
+
+function renderDrink(drink) {
+    // Update page title
+    document.title = `${drink.name} - Cocktail Cache`;
+
+    // Name and tagline
+    document.getElementById('drink-name').textContent = drink.name;
+    document.getElementById('drink-tagline').textContent = drink.tagline;
+
+    // Type badge
+    const typeBadge = document.getElementById('drink-type-badge');
+    if (drink.is_mocktail) {
+        typeBadge.textContent = 'Mocktail';
+        typeBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-600/30 border border-green-500/50 text-green-300';
+    } else {
+        typeBadge.textContent = 'Cocktail';
+        typeBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-amber-600/30 border border-amber-500/50 text-amber-300';
+    }
+
+    // Difficulty badge
+    const diffBadge = document.getElementById('difficulty-badge');
+    const diffColors = {
+        easy: 'bg-green-600/20 text-green-400 border border-green-500/30',
+        medium: 'bg-amber-600/20 text-amber-400 border border-amber-500/30',
+        hard: 'bg-orange-600/20 text-orange-400 border border-orange-500/30',
+        advanced: 'bg-red-600/20 text-red-400 border border-red-500/30'
+    };
+    diffBadge.textContent = drink.difficulty.charAt(0).toUpperCase() + drink.difficulty.slice(1);
+    diffBadge.className = `px-3 py-1 rounded-full font-medium ${diffColors[drink.difficulty] || diffColors.medium}`;
+
+    // Timing and glassware
+    document.getElementById('timing-text').textContent = `${drink.timing_minutes} min`;
+    document.getElementById('glassware-text').textContent = drink.glassware.charAt(0).toUpperCase() + drink.glassware.slice(1) + ' glass';
+
+    // Tags
+    const tagsContainer = document.getElementById('tags-container');
+    tagsContainer.innerHTML = '';
+    drink.tags.forEach(tag => {
+        const tagEl = document.createElement('span');
+        tagEl.className = 'text-xs text-stone-400 bg-stone-800/50 px-2.5 py-1 rounded';
+        tagEl.textContent = tag;
+        tagsContainer.appendChild(tagEl);
+    });
+
+    // Ingredients
+    const ingredientsList = document.getElementById('ingredients-list');
+    ingredientsList.innerHTML = '';
+    drink.ingredients.forEach(ing => {
+        const li = document.createElement('li');
+        li.className = 'glass-list-item flex justify-between items-center';
+
+        const itemName = ing.item.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const amount = `${ing.amount} ${ing.unit}`.trim();
+
+        li.innerHTML = `
+            <span class="text-stone-200">${itemName}</span>
+            <span class="text-amber-400 font-medium">${amount}</span>
+        `;
+        ingredientsList.appendChild(li);
+    });
+
+    // Garnish
+    document.getElementById('garnish-text').textContent = drink.garnish;
+
+    // Method steps
+    const methodList = document.getElementById('method-list');
+    methodList.innerHTML = '';
+    drink.method.forEach((step, index) => {
+        const li = document.createElement('li');
+        li.className = 'flex gap-4';
+        li.innerHTML = `
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600/20 border border-amber-500/30 flex items-center justify-center">
+                <span class="text-amber-400 text-sm font-medium">${index + 1}</span>
+            </div>
+            <div class="flex-1 pt-1">
+                <span class="text-amber-300 font-medium">${step.action}:</span>
+                <span class="text-stone-300 ml-1">${step.detail}</span>
+            </div>
+        `;
+        methodList.appendChild(li);
+    });
+
+    // Flavor profile
+    const flavorProfile = document.getElementById('flavor-profile');
+    flavorProfile.innerHTML = '';
+    const flavorLabels = {
+        sweet: { label: 'Sweet', color: 'bg-pink-500' },
+        sour: { label: 'Sour', color: 'bg-yellow-500' },
+        bitter: { label: 'Bitter', color: 'bg-orange-500' },
+        spirit: { label: 'Spirit-forward', color: 'bg-amber-500' }
+    };
+
+    Object.entries(drink.flavor_profile).forEach(([key, value]) => {
+        if (flavorLabels[key]) {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-stone-400">${flavorLabels[key].label}</span>
+                    <span class="text-stone-500">${value}%</span>
+                </div>
+                <div class="h-2 bg-stone-800 rounded-full overflow-hidden">
+                    <div class="h-full ${flavorLabels[key].color} rounded-full transition-all duration-500" style="width: ${value}%"></div>
+                </div>
+            `;
+            flavorProfile.appendChild(div);
+        }
+    });
+
+    // Show content
+    loadingState.classList.add('hidden');
+    drinkContent.classList.remove('hidden');
+}
+
+// Start
+init();
+</script>
+{% endblock %}

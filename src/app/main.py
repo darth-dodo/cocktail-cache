@@ -75,3 +75,21 @@ async def browse(request: Request) -> HTMLResponse:
         request=request,
         name="browse.html",
     )
+
+
+@app.get("/drink/{drink_id}", response_class=HTMLResponse)
+async def drink_detail(request: Request, drink_id: str) -> HTMLResponse:
+    """Render the drink detail page.
+
+    Args:
+        request: The FastAPI request object.
+        drink_id: The unique identifier of the drink.
+
+    Returns:
+        HTMLResponse with the drink detail template.
+    """
+    return templates.TemplateResponse(
+        request=request,
+        name="drink.html",
+        context={"drink_id": drink_id},
+    )

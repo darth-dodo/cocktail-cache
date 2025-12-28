@@ -6,90 +6,216 @@
 
 ---
 
-## Critical Bug: Ingredient ID Mismatch
-
-> **Priority**: HIGH - This causes "No drinks found" errors
-
-### Problem
-
-The frontend ingredient IDs don't match the cocktail recipe `item` values, causing matching to fail.
-
-| Frontend ID | Recipe Item | Status |
-|-------------|-------------|--------|
-| `angostura-bitters` | `angostura` | MISMATCH |
-| `rye-whiskey` | `rye` | MISMATCH |
-| `london-dry-gin` | `gin` | MISMATCH |
-| `fresh-lemon-juice` | `lemon-juice` | MISMATCH |
-| `fresh-lime-juice` | `lime-juice` | MISMATCH |
-| `fresh-mint` | `mint` | MISMATCH |
-| `blanco-tequila` | `tequila` | MISMATCH |
-| `aged-rum` | `dark-rum` | MISMATCH |
-| `coffee-liqueur` | `kahlua` | MISMATCH |
-| `green-chartreuse` | `chartreuse` | MISMATCH |
-| `maraschino-liqueur` | `maraschino` | MISMATCH |
-
-### Root Cause
-
-In `src/app/tools/recipe_db.py:_calculate_match()`:
-```python
-for ing in required_ingredients:
-    if ing in cabinet_set:  # Direct string match fails!
-        have.append(ing)
-```
-
-The matching uses exact string comparison, but IDs don't align.
-
-### Solution: Single Source of Truth
-
-**Recommended Approach**: Use `data/ingredients.json` as the canonical source for all ingredient IDs.
-
-1. **Create API endpoint** to serve ingredients:
-   ```python
-   @router.get("/ingredients")
-   def get_ingredients():
-       return load_ingredients()  # Returns ingredients.json data
-   ```
-
-2. **Load ingredients dynamically in frontend**:
-   ```javascript
-   async function loadIngredients() {
-       const response = await fetch('/api/ingredients');
-       const data = await response.json();
-       renderIngredientChips(data);
-   }
-   ```
-
-3. **Benefits**:
-   - No hardcoded ingredients in HTML
-   - IDs always match between frontend and recipes
-   - Easy to add new ingredients without code changes
-   - Categories already defined in ingredients.json
-
-4. **Data structure already exists**:
-   ```json
-   {
-     "spirits": [{"id": "bourbon", "names": ["bourbon", "bourbon whiskey"]}],
-     "modifiers": [{"id": "sweet-vermouth", "names": ["sweet vermouth"]}],
-     "bitters_syrups": [{"id": "angostura", "names": ["angostura bitters"]}],
-     "fresh": [{"id": "lemon-juice", "names": ["lemon juice", "lemon"]}]
-   }
-   ```
-
-5. **Implementation effort**: 2-3 hours
-
-### Status: FIXED ✅
-
-The fix has been implemented:
-- Created `GET /api/ingredients` endpoint that serves ingredients from `ingredients.json`
-- Updated frontend to load ingredients dynamically via API call
-- IDs now match between frontend and recipe database
-- All 372 tests passing
-
----
-
 ## Executive Summary
 
 This document outlines UX improvements for Cocktail Cache, organized by implementation effort and impact. The current chat-based interface with Raja the AI Mixologist provides a solid foundation, but several enhancements can significantly improve user retention, engagement, and satisfaction.
+
+---
+
+## 🚨 Critical Issue: App Fragmentation
+
+### The Problem
+
+The app currently feels **fragmented** - like two separate applications stitched together rather than a cohesive experience. This is the highest priority UX issue.
+
+### Root Causes
+
+| Issue | Chat Page (/) | Browse Page (/browse) |
+|-------|---------------|----------------------|
+| **Layout** | `max-w-lg` (512px) | `max-w-4xl` (896px) |
+| **Paradigm** | Conversational wizard | Traditional catalog |
+| **State** | Cabinet in memory only | No cabinet awareness |
+| **Destination** | Ephemeral recipe cards | Dead-end "View Recipe" |
+| **CSS** | 175+ lines inline | 40+ lines inline |
+
+### User Journey Fragmentation
+
+```
+CURRENT (Disconnected):
+
+[Chat/AI Path]              [Browse Path]
+     ↓                           ↓
+Select Cabinet              Filter/Search
+     ↓                           ↓
+Pick Mood                   Find Drink
+     ↓                           ↓
+Choose Skill                "View Recipe"
+     ↓                           ↓
+Get Recipe                   DEAD END ❌
+     ↓
+Made It/Another
+```
+
+### The Core Identity Problem
+
+**Q: What is this app?**
+- A chat bot? A recipe catalog? A bar management tool?
+- Currently: All three, badly connected.
+
+**Needed Identity:** *"Your personal bartender assistant that knows your cabinet"*
+
+Everything should flow from: **"What's in your cabinet?"**
+
+---
+
+## 🎯 Cohesion Strategy
+
+### The Unifying Element: Persistent Cabinet
+
+The cabinet is the key to making the app feel unified. When cabinet state persists and is visible everywhere, the user's context travels with them.
+
+### Proposed Unified Architecture
+
+```
+PROPOSED (Connected):
+
+                    [Landing]
+                   /         \
+          [AI Path]          [Browse Path]
+              ↓                    ↓
+        Cabinet Setup         Filter/Search
+              ↓                    ↓
+         Mood/Skill           View Drinks
+              ↓                    ↓
+        AI Recipe ←──────→ Drink Detail Page
+              ↓                    ↓
+         Made It!             "Make This"
+                                   ↓
+                            [Cabinet Match Check]
+```
+
+### Key Architectural Changes
+
+| Change | Impact | Effort |
+|--------|--------|--------|
+| Persistent cabinet (localStorage) | Enables continuity | 2 hrs |
+| Cabinet indicator in nav | Shows state everywhere | 1 hr |
+| Drink detail page (`/drink/:id`) | Central destination | 4 hrs |
+| `GET /api/drinks/:id` endpoint | Enables detail page | 2 hrs |
+| Cross-navigation links | Connects the paths | 30 min |
+| Standardized layout widths | Visual consistency | 30 min |
+
+---
+
+## 🔧 Immediate Cohesion Fixes
+
+### 1. Navigation Redesign
+
+**Current:** `Logo | Browse | API Docs`
+
+**Proposed:** `Logo | 🧴 Cabinet (3) | Browse | AI Mixologist`
+
+The cabinet indicator:
+- Shows current state at a glance
+- Provides access to modify from anywhere
+- Creates continuity across pages
+- Enables "What can I make?" from Browse
+
+### 2. Layout Standardization
+
+```css
+/* Before */
+.index-page { max-width: 512px; }  /* max-w-lg */
+.browse-page { max-width: 896px; } /* max-w-4xl */
+
+/* After */
+.content-pages { max-width: 672px; } /* max-w-2xl for chat */
+.grid-pages { max-width: 768px; }    /* max-w-3xl for browse */
+```
+
+### 3. Cross-Navigation Links
+
+**On Browse page:**
+> "Looking for something specific? [Ask Raja for a personalized pick →]"
+
+**On Chat page:**
+> "Or [browse all 50+ drinks →] in our collection"
+
+### 4. Fix Dead Ends
+
+**Browse "View Recipe"** currently shows a toast saying "try AI instead"
+
+**Fix:** Create `/drink/:id` route that shows full recipe with:
+- All ingredients with amounts
+- Full method/steps
+- "Can I make this?" based on cabinet
+- Missing ingredients list
+- "Ask AI for alternatives" link
+
+### 5. CSS Consolidation
+
+Move inline styles to shared `components.css`:
+
+```css
+/* Shared components to extract */
+.glass-chip { }
+.autocomplete-dropdown { }
+.line-clamp-2 { }
+.loading-dots { }
+.filter-btn { }
+```
+
+---
+
+## 📊 Fragmentation Impact Assessment
+
+| Metric | Current State | With Cohesion Fixes |
+|--------|---------------|---------------------|
+| Pages feel connected | 20% | 85% |
+| User can complete journey | 50% (Browse dead ends) | 100% |
+| State persists | 0% | 100% |
+| Shareable recipes | 0% | 100% |
+| Time to understand app | High (2 UIs) | Low (1 unified) |
+
+---
+
+## 🗓️ Cohesion Implementation Phases
+
+### Phase 0: Foundation (Day 1) - HIGHEST PRIORITY
+
+1. **Persistent Cabinet State** (2 hrs)
+   - localStorage for cabinet
+   - Load on any page
+   - Save on changes
+
+2. **Cabinet Nav Indicator** (1 hr)
+   - Show count in header
+   - Click to expand/edit
+   - Visible on all pages
+
+3. **Layout Consistency** (30 min)
+   - Standardize max-widths
+   - Match padding/margins
+
+4. **Cross-Links** (30 min)
+   - Add navigation between experiences
+
+### Phase 1: Central Destination (Day 2)
+
+5. **Drink Detail Page** (4 hrs)
+   - `/drink/:id` route
+   - Full recipe display
+   - Cabinet match indicator
+   - Share functionality
+
+6. **API Enhancement** (2 hrs)
+   - `GET /api/drinks/:id`
+   - Include full recipe data
+   - Accept cabinet param for match score
+
+### Phase 2: Browse Integration (Day 3)
+
+7. **"Makeable" Indicators** (3 hrs)
+   - Show match % on browse cards
+   - Filter by "Can make now"
+   - Highlight missing ingredients
+
+8. **Home Page Redesign** (4 hrs)
+   - Dual-path entry (AI vs Browse)
+   - Cabinet summary
+   - Recent drinks
+
+---
 
 ---
 

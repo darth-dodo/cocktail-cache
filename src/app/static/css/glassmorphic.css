@@ -206,6 +206,19 @@
     transform: translateY(-2px);
 }
 
+.glass-btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 200, 150, 0.2);
+    color: rgba(214, 211, 209, 0.7);
+    transition: all 0.2s ease;
+}
+
+.glass-btn-ghost:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: rgba(252, 165, 165, 1);
+}
+
 /* ================================
    List Items
    ================================ */
@@ -438,5 +451,326 @@
 
     .glass-list-item {
         border-width: 2px;
+    }
+}
+
+/* ================================
+   Chat Interface
+   ================================ */
+.chat-container {
+    height: calc(100vh - 140px);
+    height: calc(100dvh - 140px);
+    min-height: 400px;
+    max-height: 800px;
+}
+
+@media (max-width: 640px) {
+    .chat-container {
+        height: calc(100vh - 100px);
+        height: calc(100dvh - 100px);
+        max-height: none;
+    }
+}
+
+/* ================================
+   Chat Tab Navigation
+   ================================ */
+.chat-tab {
+    position: relative;
+    cursor: pointer;
+}
+
+.chat-tab:hover {
+    background: rgba(217, 119, 6, 0.1);
+}
+
+.chat-tab.active,
+.chat-tab[data-active="true"] {
+    color: #fbbf24;
+    border-bottom-color: #f59e0b;
+}
+
+/* ================================
+   Glass Chips (Tags & Toggles)
+   ================================ */
+.glass-chip {
+    background: rgba(255, 245, 235, 0.03);
+    border: 1px solid rgba(255, 200, 150, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.glass-chip:hover {
+    background: rgba(217, 119, 6, 0.15);
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.glass-chip.active {
+    background: rgba(217, 119, 6, 0.25);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+/* Ingredient chips - compact interactive tags */
+.ingredient-chip {
+    cursor: pointer;
+}
+
+.ingredient-chip.active {
+    background: rgba(217, 119, 6, 0.3);
+    border-color: rgba(251, 191, 36, 0.5);
+    color: #fde68a;
+}
+
+/* ================================
+   Chat Messages
+   ================================ */
+.chat-message-bot,
+.glass-message-bot {
+    background: rgba(255, 245, 235, 0.05);
+    border: 1px solid rgba(255, 200, 150, 0.08);
+}
+
+.chat-message-user,
+.glass-message-user {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.4), rgba(180, 83, 9, 0.4));
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+/* ================================
+   Collapsible Sections
+   ================================ */
+.collapsible-trigger {
+    cursor: pointer;
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-out;
+}
+
+.collapsible-content.open {
+    max-height: 500px;
+}
+
+/* Category accordion (for ingredient selection) */
+.category-trigger {
+    cursor: pointer;
+}
+
+.category-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+.category-content.open {
+    max-height: 200px;
+}
+
+/* ================================
+   Autocomplete Dropdown
+   ================================ */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: rgba(28, 25, 23, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 200, 150, 0.15);
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.autocomplete-dropdown.hidden {
+    display: none;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid rgba(255, 200, 150, 0.05);
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+    background: rgba(217, 119, 6, 0.2);
+}
+
+.autocomplete-item.selected {
+    background: rgba(217, 119, 6, 0.3);
+}
+
+.autocomplete-emoji {
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.autocomplete-name {
+    flex: 1;
+    color: #fef3e2;
+    font-size: 0.875rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.autocomplete-category {
+    flex-shrink: 0;
+    color: rgba(251, 191, 36, 0.6);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Scrollbar for autocomplete */
+.autocomplete-dropdown::-webkit-scrollbar {
+    width: 4px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.4);
+    border-radius: 2px;
+}
+
+/* ================================
+   Interactive Elements
+   ================================ */
+/* Mood chips, skill buttons, and similar interactive elements */
+.mood-chip,
+.skill-btn {
+    cursor: pointer;
+}
+
+/* Filter buttons (browse page) */
+.filter-btn,
+.difficulty-btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover,
+.difficulty-btn:hover {
+    background: rgba(217, 119, 6, 0.15);
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+/* ================================
+   Drink Cards (Browse Page)
+   ================================ */
+.drink-card {
+    transition: all 0.2s ease;
+    min-height: 220px;
+}
+
+.drink-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Drinks grid alignment */
+#drinks-grid {
+    align-items: stretch;
+}
+
+/* ================================
+   Utility Classes
+   ================================ */
+/* Line clamp for truncating multi-line text */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ================================
+   Additional Animations
+   ================================ */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.animate-bounce-dots {
+    animation: bounce 0.6s ease-in-out infinite;
+}
+
+/* ================================
+   Narrow Scrollbars (Chat Areas)
+   ================================ */
+.scrollbar-narrow::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scrollbar-narrow::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3);
+    border-radius: 2px;
+}
+
+#chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3);
+    border-radius: 2px;
+}
+
+/* ================================
+   Extra Small Breakpoint (xs: 400px)
+   ================================ */
+@media (min-width: 400px) {
+    .xs\:inline {
+        display: inline;
+    }
+    .xs\:hidden {
+        display: none;
+    }
+}
+
+/* ================================
+   Reduced Motion - Extended
+   ================================ */
+@media (prefers-reduced-motion: reduce) {
+    .collapsible-content,
+    .category-content {
+        transition: none;
+    }
+
+    .drink-card:hover {
+        transform: none;
+    }
+
+    .glass-chip,
+    .filter-btn,
+    .difficulty-btn,
+    .autocomplete-item {
+        transition: none;
     }
 }
