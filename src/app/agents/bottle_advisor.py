@@ -31,11 +31,11 @@ def create_bottle_advisor(
     """
     config = get_agent_config("bottle_advisor")
     return Agent(
-        role=config["role"],
-        goal=config["goal"],
-        backstory=config["backstory"],
+        role=config.role,
+        goal=config.goal,
+        backstory=config.backstory,
         tools=tools or [],
         llm=llm or get_default_llm(),
-        verbose=config.get("verbose", False),
-        allow_delegation=config.get("allow_delegation", False),
+        verbose=config.verbose,
+        allow_delegation=config.allow_delegation,
     )

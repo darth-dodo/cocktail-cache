@@ -7,6 +7,9 @@ then suggesting strategic bottle purchases based on the user's cabinet.
 Uses structured Pydantic models for reliable, typed outputs.
 """
 
+import logging
+import time
+
 from crewai import Crew, Process, Task
 
 from src.app.agents import create_bottle_advisor, create_recipe_writer
@@ -17,7 +20,16 @@ from src.app.models import (
     RecipeOutput,
     SkillLevel,
 )
-from src.app.tools import RecipeDBTool, SubstitutionFinderTool, UnlockCalculatorTool
+from src.app.services.drink_data import (
+    DrinkTypeFilter,
+    format_bottle_recommendations_for_prompt,
+    format_recipe_for_prompt,
+    get_drink_by_id,
+    get_substitutions_for_ingredients,
+    get_unlock_recommendations,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
@@ -44,14 +56,19 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
             "skill_level": "beginner",
             "cabinet": ["bourbon", "sweet-vermouth", "angostura-bitters"],
             "drink_type": "cocktail",
+            "recipe_data": "...",  # Pre-computed recipe data
+            "substitutions_data": "...",  # Pre-computed substitutions
+            "bottle_recommendations": "...",  # Pre-computed recommendations
         })
         # Access structured outputs via result.tasks_output
     """
-    # Initialize tools for each agent
-    recipe_tools = [RecipeDBTool(), SubstitutionFinderTool()]
+    logger.info(
+        f"Creating recipe crew with include_bottle_advice={include_bottle_advice}"
+    )
 
-    # Create agents with their specialized tools
-    recipe_writer = create_recipe_writer(tools=recipe_tools)
+    # Create agents without tools - data is injected directly into prompts
+    recipe_writer = create_recipe_writer(tools=[])
+    logger.debug("Recipe Writer agent created")
 
     # Build agents and tasks lists based on configuration
     agents = [recipe_writer]
@@ -65,15 +82,19 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
             "- Skill Level: {skill_level}\n"
             "- Available Ingredients: {cabinet}\n"
             "- Drink Type Preference: {drink_type}\n\n"
+            "Complete Recipe Data (pre-loaded):\n"
+            "{recipe_data}\n\n"
+            "Available Substitutions:\n"
+            "{substitutions_data}\n\n"
             "Instructions:\n"
-            "1. Use the recipe_database tool to retrieve the full recipe details\n"
+            "1. Use the recipe data provided above to create a complete recipe response\n"
             "2. Check if any ingredients are missing from the user's cabinet\n"
-            "3. If ingredients are missing, use substitution_finder to suggest alternatives\n"
+            "3. Include the substitution options listed above for any missing ingredients\n"
             "4. Adapt the recipe complexity and technique tips to the user's skill level:\n"
             "   - beginner: Detailed explanations, safety tips, precise measurements\n"
             "   - intermediate: Standard instructions with occasional tips\n"
             "   - adventurous: Concise instructions, suggest creative variations\n"
-            "5. Include any relevant substitution options for missing ingredients\n\n"
+            "5. Generate a 'why' explanation for why this drink matches the user's context\n\n"
             "IMPORTANT: Return the result as a valid JSON object matching the RecipeOutput schema."
         ),
         expected_output=(
@@ -108,8 +129,9 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
 
     # Task 2 (Optional): Recommend next bottle purchase with structured output
     if include_bottle_advice:
-        bottle_tools = [UnlockCalculatorTool()]
-        bottle_advisor = create_bottle_advisor(tools=bottle_tools)
+        # Create bottle advisor without tools - data is injected directly into prompts
+        bottle_advisor = create_bottle_advisor(tools=[])
+        logger.debug("Bottle Advisor agent created")
         agents.append(bottle_advisor)
 
         bottle_task = Task(
@@ -119,13 +141,14 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
                 "User Context:\n"
                 "- Current Cabinet: {cabinet}\n"
                 "- Drink Type Preference: {drink_type}\n\n"
+                "Pre-computed Bottle Recommendations (based on unlock potential):\n"
+                "{bottle_recommendations}\n\n"
                 "Instructions:\n"
-                "1. Use the unlock_calculator tool to analyze which new bottles would "
-                "unlock the most additional drinks\n"
+                "1. Use the pre-computed recommendations above to create your response\n"
                 "2. Consider the drink type preference when making recommendations\n"
                 "3. Prioritize bottles that complement what the user already has\n"
                 "4. Focus on bottles that unlock NEW drinks the user cannot currently make\n"
-                "5. Provide 2-3 top recommendations with clear reasoning\n\n"
+                "5. Select the top 2-3 recommendations and provide clear reasoning for each\n\n"
                 "IMPORTANT: Return the result as a valid JSON object matching the "
                 "BottleAdvisorOutput schema."
             ),
@@ -158,6 +181,9 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
         verbose=False,
     )
 
+    logger.debug(
+        f"Recipe crew created with {len(agents)} agents and {len(tasks)} tasks"
+    )
     return crew
 
 
@@ -193,6 +219,11 @@ def run_recipe_crew(
         for rec in result.bottle_advice.recommendations:
             print(f"Buy {rec.ingredient_name}: unlocks {rec.unlocks} drinks")
     """
+    start_time = time.perf_counter()
+    logger.info(
+        f"run_recipe_crew started: cocktail_id={cocktail_id}, skill_level={skill_level}, "
+        f"drink_type={drink_type}, cabinet_size={len(cabinet)}, include_bottle_advice={include_bottle_advice}"
+    )
 
     # Normalize enum values to strings for template substitution
     skill_str = (
@@ -200,15 +231,74 @@ def run_recipe_crew(
     )
     drink_str = drink_type.value if isinstance(drink_type, DrinkType) else drink_type
 
+    # Pre-compute all data for prompt injection (eliminates tool call latency)
+    data_start = time.perf_counter()
+
+    # 1. Get complete recipe data
+    drink = get_drink_by_id(cocktail_id)
+    if drink:
+        recipe_data = format_recipe_for_prompt(drink)
+        logger.debug(f"Recipe data loaded for '{drink.get('name', cocktail_id)}'")
+    else:
+        recipe_data = f"Recipe not found for ID: {cocktail_id}"
+        logger.warning(f"Recipe not found for cocktail_id={cocktail_id}")
+
+    # 2. Get substitutions for all ingredients in the recipe
+    if drink:
+        ingredient_ids = [ing["item"] for ing in drink.get("ingredients", [])]
+        substitutions = get_substitutions_for_ingredients(ingredient_ids)
+        if substitutions:
+            subs_lines = []
+            for ing, subs in substitutions.items():
+                subs_lines.append(f"- {ing}: {', '.join(subs)}")
+            substitutions_data = "\n".join(subs_lines)
+            logger.debug(f"Found substitutions for {len(substitutions)} ingredients")
+        else:
+            substitutions_data = "No substitutions available for the ingredients."
+            logger.debug("No substitutions found for recipe ingredients")
+    else:
+        substitutions_data = "No substitutions available (recipe not found)."
+
+    # 3. Get bottle recommendations (only if needed)
+    if include_bottle_advice:
+        # Map drink_type string to the format expected by get_unlock_recommendations
+        unlock_drink_type: DrinkTypeFilter = "both"
+        if drink_str == "cocktail":
+            unlock_drink_type = "cocktails"
+        elif drink_str == "mocktail":
+            unlock_drink_type = "mocktails"
+
+        recommendations = get_unlock_recommendations(
+            cabinet, unlock_drink_type, top_n=5
+        )
+        bottle_recommendations = format_bottle_recommendations_for_prompt(
+            recommendations
+        )
+        logger.debug(f"Generated {len(recommendations)} bottle recommendations")
+    else:
+        bottle_recommendations = ""
+        logger.debug("Bottle advice skipped (include_bottle_advice=False)")
+
+    data_elapsed_ms = (time.perf_counter() - data_start) * 1000
+    logger.debug(f"Data pre-computation completed in {data_elapsed_ms:.2f}ms")
+
     crew = create_recipe_crew(include_bottle_advice=include_bottle_advice)
+
+    crew_start = time.perf_counter()
+    logger.debug("Kicking off recipe crew")
     result = crew.kickoff(
         inputs={
             "cocktail_id": cocktail_id,
             "skill_level": skill_str,
             "cabinet": cabinet,
             "drink_type": drink_str,
+            "recipe_data": recipe_data,
+            "substitutions_data": substitutions_data,
+            "bottle_recommendations": bottle_recommendations,
         }
     )
+    crew_elapsed_ms = (time.perf_counter() - crew_start) * 1000
+    logger.debug(f"Crew execution completed in {crew_elapsed_ms:.2f}ms")
 
     # Extract structured outputs from tasks_output
     recipe_output: RecipeOutput | None = None
@@ -222,8 +312,14 @@ def run_recipe_crew(
                 task_0.pydantic, RecipeOutput
             ):
                 recipe_output = task_0.pydantic
+                logger.debug(
+                    f"Recipe output extracted from pydantic: {recipe_output.name}"
+                )
             else:
                 # Try to parse from raw
+                logger.warning(
+                    "Recipe pydantic output unavailable, attempting raw parse"
+                )
                 recipe_output = _parse_recipe_output(str(task_0), cocktail_id)
 
         # Task 1: Bottle Advisor output (only if bottle advice was included)
@@ -233,25 +329,44 @@ def run_recipe_crew(
                 task_1.pydantic, BottleAdvisorOutput
             ):
                 bottle_output = task_1.pydantic
+                logger.debug(
+                    f"Bottle output extracted from pydantic: {len(bottle_output.recommendations)} recommendations"
+                )
             else:
                 # Try to parse from raw
+                logger.warning(
+                    "Bottle pydantic output unavailable, attempting raw parse"
+                )
                 bottle_output = _parse_bottle_output(str(task_1))
 
     # Fallback: try to get from final result pydantic
     if recipe_output is None and hasattr(result, "pydantic") and result.pydantic:
         if isinstance(result.pydantic, RecipeOutput):
             recipe_output = result.pydantic
+            logger.debug("Recipe output extracted from final result pydantic")
         elif isinstance(result.pydantic, BottleAdvisorOutput):
             bottle_output = result.pydantic
+            logger.debug("Bottle output extracted from final result pydantic")
 
     # Create default recipe if still None
     if recipe_output is None:
+        logger.error(
+            f"Failed to extract recipe output for {cocktail_id}, using default"
+        )
         recipe_output = _create_default_recipe(cocktail_id, str(result))
 
     # Create default bottle output if None
     if bottle_output is None:
+        if include_bottle_advice:
+            logger.warning("No bottle output available, using empty default")
         bottle_output = BottleAdvisorOutput(recommendations=[], total_new_drinks=0)
 
+    total_elapsed_ms = (time.perf_counter() - start_time) * 1000
+    logger.info(
+        f"run_recipe_crew completed: recipe='{recipe_output.name}', "
+        f"bottle_recommendations={len(bottle_output.recommendations)} in {total_elapsed_ms:.2f}ms "
+        f"(data: {data_elapsed_ms:.2f}ms, crew: {crew_elapsed_ms:.2f}ms)"
+    )
     return RecipeCrewOutput(recipe=recipe_output, bottle_advice=bottle_output)
 
 
@@ -264,10 +379,13 @@ def _parse_recipe_output(raw: str, cocktail_id: str) -> RecipeOutput:
         json_match = re.search(r"\{[\s\S]*\}", raw)
         if json_match:
             data = json.loads(json_match.group())
-            return RecipeOutput(**data)
-    except (json.JSONDecodeError, ValueError):
-        pass
+            parsed = RecipeOutput(**data)
+            logger.debug(f"Successfully parsed recipe from raw output: {parsed.name}")
+            return parsed
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.error(f"Failed to parse recipe output: {e}")
 
+    logger.warning(f"Returning default recipe for {cocktail_id}")
     return _create_default_recipe(cocktail_id, raw)
 
 
@@ -280,10 +398,15 @@ def _parse_bottle_output(raw: str) -> BottleAdvisorOutput:
         json_match = re.search(r"\{[\s\S]*\}", raw)
         if json_match:
             data = json.loads(json_match.group())
-            return BottleAdvisorOutput(**data)
-    except (json.JSONDecodeError, ValueError):
-        pass
+            parsed = BottleAdvisorOutput(**data)
+            logger.debug(
+                f"Successfully parsed bottle output: {len(parsed.recommendations)} recommendations"
+            )
+            return parsed
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.error(f"Failed to parse bottle output: {e}")
 
+    logger.warning("Returning empty bottle recommendations")
     return BottleAdvisorOutput(recommendations=[], total_new_drinks=0)
 
 
@@ -292,6 +415,7 @@ def _create_default_recipe(cocktail_id: str, raw_content: str) -> RecipeOutput:
     from src.app.models import FlavorProfile
     from src.app.models.recipe import RecipeIngredient, RecipeStep
 
+    logger.warning(f"Creating default recipe for {cocktail_id} due to parsing failure")
     return RecipeOutput(
         id=cocktail_id,
         name=cocktail_id.replace("-", " ").title(),
@@ -327,11 +451,15 @@ def create_recipe_only_crew() -> Crew:
             "skill_level": "beginner",
             "cabinet": ["bourbon", "sweet-vermouth", "angostura-bitters"],
             "drink_type": "cocktail",
+            "recipe_data": "...",  # Pre-computed recipe data
+            "substitutions_data": "...",  # Pre-computed substitutions
         })
     """
-    # Initialize tools for recipe writer
-    recipe_tools = [RecipeDBTool(), SubstitutionFinderTool()]
-    recipe_writer = create_recipe_writer(tools=recipe_tools)
+    logger.info("Creating recipe-only crew (for parallel execution)")
+
+    # Create recipe writer without tools - data is injected directly into prompts
+    recipe_writer = create_recipe_writer(tools=[])
+    logger.debug("Recipe Writer agent created")
 
     # Create the recipe task (same as in create_recipe_crew)
     recipe_task = Task(
@@ -341,15 +469,19 @@ def create_recipe_only_crew() -> Crew:
             "- Skill Level: {skill_level}\n"
             "- Available Ingredients: {cabinet}\n"
             "- Drink Type Preference: {drink_type}\n\n"
+            "Complete Recipe Data (pre-loaded):\n"
+            "{recipe_data}\n\n"
+            "Available Substitutions:\n"
+            "{substitutions_data}\n\n"
             "Instructions:\n"
-            "1. Use the recipe_database tool to retrieve the full recipe details\n"
+            "1. Use the recipe data provided above to create a complete recipe response\n"
             "2. Check if any ingredients are missing from the user's cabinet\n"
-            "3. If ingredients are missing, use substitution_finder to suggest alternatives\n"
+            "3. Include the substitution options listed above for any missing ingredients\n"
             "4. Adapt the recipe complexity and technique tips to the user's skill level:\n"
             "   - beginner: Detailed explanations, safety tips, precise measurements\n"
             "   - intermediate: Standard instructions with occasional tips\n"
             "   - adventurous: Concise instructions, suggest creative variations\n"
-            "5. Include any relevant substitution options for missing ingredients\n\n"
+            "5. Generate a 'why' explanation for why this drink matches the user's context\n\n"
             "IMPORTANT: Return the result as a valid JSON object matching the RecipeOutput schema."
         ),
         expected_output=(
@@ -381,12 +513,14 @@ def create_recipe_only_crew() -> Crew:
         output_pydantic=RecipeOutput,
     )
 
-    return Crew(
+    crew = Crew(
         agents=[recipe_writer],
         tasks=[recipe_task],
         process=Process.sequential,
         verbose=False,
     )
+    logger.debug("Recipe-only crew created with 1 agent and 1 task")
+    return crew
 
 
 def create_bottle_only_crew() -> Crew:
@@ -404,11 +538,14 @@ def create_bottle_only_crew() -> Crew:
         result = await crew.kickoff_async(inputs={
             "cabinet": ["bourbon", "sweet-vermouth", "angostura-bitters"],
             "drink_type": "cocktail",
+            "bottle_recommendations": "...",  # Pre-computed recommendations
         })
     """
-    # Initialize tools for bottle advisor
-    bottle_tools = [UnlockCalculatorTool()]
-    bottle_advisor = create_bottle_advisor(tools=bottle_tools)
+    logger.info("Creating bottle-only crew (for parallel execution)")
+
+    # Create bottle advisor without tools - data is injected directly into prompts
+    bottle_advisor = create_bottle_advisor(tools=[])
+    logger.debug("Bottle Advisor agent created")
 
     # Create the bottle task WITHOUT context dependency on recipe_task
     bottle_task = Task(
@@ -418,13 +555,14 @@ def create_bottle_only_crew() -> Crew:
             "User Context:\n"
             "- Current Cabinet: {cabinet}\n"
             "- Drink Type Preference: {drink_type}\n\n"
+            "Pre-computed Bottle Recommendations (based on unlock potential):\n"
+            "{bottle_recommendations}\n\n"
             "Instructions:\n"
-            "1. Use the unlock_calculator tool to analyze which new bottles would "
-            "unlock the most additional drinks\n"
+            "1. Use the pre-computed recommendations above to create your response\n"
             "2. Consider the drink type preference when making recommendations\n"
             "3. Prioritize bottles that complement what the user already has\n"
             "4. Focus on bottles that unlock NEW drinks the user cannot currently make\n"
-            "5. Provide 2-3 top recommendations with clear reasoning\n\n"
+            "5. Select the top 2-3 recommendations and provide clear reasoning for each\n\n"
             "IMPORTANT: Return the result as a valid JSON object matching the "
             "BottleAdvisorOutput schema."
         ),
@@ -448,9 +586,11 @@ def create_bottle_only_crew() -> Crew:
         output_pydantic=BottleAdvisorOutput,
     )
 
-    return Crew(
+    crew = Crew(
         agents=[bottle_advisor],
         tasks=[bottle_task],
         process=Process.sequential,
         verbose=False,
     )
+    logger.debug("Bottle-only crew created with 1 agent and 1 task")
+    return crew

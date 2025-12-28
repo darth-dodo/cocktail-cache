@@ -17,9 +17,9 @@ def get_default_llm() -> LLM:
     """
     config = get_llm_profile("default")
     return LLM(
-        model=config["model"],
-        max_tokens=config["max_tokens"],
-        temperature=config["temperature"],
+        model=config.model,
+        max_tokens=config.max_tokens,
+        temperature=config.temperature,
     )
 
 
@@ -46,7 +46,7 @@ def get_llm(
 
     # Apply overrides
     return LLM(
-        model=model or config["model"],
-        max_tokens=max_tokens or config["max_tokens"],
-        temperature=temperature if temperature is not None else config["temperature"],
+        model=model or config.model,
+        max_tokens=max_tokens or config.max_tokens,
+        temperature=temperature if temperature is not None else config.temperature,
     )

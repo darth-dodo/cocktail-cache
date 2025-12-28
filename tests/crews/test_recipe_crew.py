@@ -107,58 +107,28 @@ class TestRecipeCrewTasks:
             assert isinstance(task, Task)
 
 
-class TestRecipeCrewToolAssignments:
-    """Tests for tool assignments on Recipe Crew agents."""
+class TestRecipeCrewToolFreeArchitecture:
+    """Tests verifying tool-free architecture (data is pre-injected into prompts)."""
 
-    def test_recipe_writer_has_tools(self):
-        """Recipe Writer should have at least one tool."""
+    def test_recipe_writer_has_no_tools(self):
+        """Recipe Writer should have no tools (data is pre-injected)."""
         crew = create_recipe_crew()
         recipe_writer = crew.agents[0]
         assert recipe_writer.role == "Recipe Writer"
-        assert len(recipe_writer.tools) >= 1
+        assert len(recipe_writer.tools) == 0
 
-    def test_recipe_writer_has_recipe_db_tool(self):
-        """Recipe Writer should have RecipeDBTool assigned."""
-        crew = create_recipe_crew()
-        recipe_writer = crew.agents[0]
-
-        tool_types = [type(tool).__name__ for tool in recipe_writer.tools]
-        assert "RecipeDBTool" in tool_types
-
-    def test_recipe_writer_has_substitution_finder_tool(self):
-        """Recipe Writer should have SubstitutionFinderTool assigned."""
-        crew = create_recipe_crew()
-        recipe_writer = crew.agents[0]
-
-        tool_types = [type(tool).__name__ for tool in recipe_writer.tools]
-        assert "SubstitutionFinderTool" in tool_types
-
-    def test_bottle_advisor_has_tools(self):
-        """Bottle Advisor should have at least one tool."""
+    def test_bottle_advisor_has_no_tools(self):
+        """Bottle Advisor should have no tools (data is pre-injected)."""
         crew = create_recipe_crew()
         bottle_advisor = crew.agents[1]
         assert bottle_advisor.role == "Bottle Advisor"
-        assert len(bottle_advisor.tools) >= 1
+        assert len(bottle_advisor.tools) == 0
 
-    def test_bottle_advisor_has_unlock_calculator_tool(self):
-        """Bottle Advisor should have UnlockCalculatorTool assigned."""
+    def test_all_agents_are_tool_free(self):
+        """All agents should have no tools in tool-free architecture."""
         crew = create_recipe_crew()
-        bottle_advisor = crew.agents[1]
-
-        tool_types = [type(tool).__name__ for tool in bottle_advisor.tools]
-        assert "UnlockCalculatorTool" in tool_types
-
-    def test_tools_are_instantiated(self):
-        """Tools should be actual instances, not classes."""
-        crew = create_recipe_crew()
-
         for agent in crew.agents:
-            for tool in agent.tools:
-                # Tool should be an instance, not a class
-                assert not isinstance(tool, type)
-                # Tool should have required attributes
-                assert hasattr(tool, "name")
-                assert hasattr(tool, "description")
+            assert len(agent.tools) == 0, f"Agent '{agent.role}' should have no tools"
 
 
 class TestRecipeCrewConfiguration:
@@ -353,38 +323,17 @@ class TestRunRecipeCrewFunction:
             assert isinstance(drink_type, str)
 
 
-class TestRecipeWriterToolCount:
-    """Tests for Recipe Writer's tool configuration."""
+class TestToolFreeAgentConfiguration:
+    """Tests verifying agents have no tools (tool-free architecture)."""
 
-    def test_recipe_writer_has_exactly_two_tools(self):
-        """Recipe Writer should have exactly 2 tools."""
+    def test_recipe_writer_has_no_tools(self):
+        """Recipe Writer should have no tools (data is pre-injected)."""
         crew = create_recipe_crew()
         recipe_writer = crew.agents[0]
-        assert len(recipe_writer.tools) == 2
+        assert len(recipe_writer.tools) == 0
 
-    def test_recipe_writer_tool_types(self):
-        """Recipe Writer should have RecipeDBTool and SubstitutionFinderTool."""
-        crew = create_recipe_crew()
-        recipe_writer = crew.agents[0]
-
-        tool_types = {type(tool).__name__ for tool in recipe_writer.tools}
-        expected_types = {"RecipeDBTool", "SubstitutionFinderTool"}
-        assert tool_types == expected_types
-
-
-class TestBottleAdvisorToolCount:
-    """Tests for Bottle Advisor's tool configuration."""
-
-    def test_bottle_advisor_has_exactly_one_tool(self):
-        """Bottle Advisor should have exactly 1 tool."""
+    def test_bottle_advisor_has_no_tools(self):
+        """Bottle Advisor should have no tools (data is pre-injected)."""
         crew = create_recipe_crew()
         bottle_advisor = crew.agents[1]
-        assert len(bottle_advisor.tools) == 1
-
-    def test_bottle_advisor_tool_type(self):
-        """Bottle Advisor should have UnlockCalculatorTool."""
-        crew = create_recipe_crew()
-        bottle_advisor = crew.agents[1]
-
-        tool_types = {type(tool).__name__ for tool in bottle_advisor.tools}
-        assert tool_types == {"UnlockCalculatorTool"}
+        assert len(bottle_advisor.tools) == 0

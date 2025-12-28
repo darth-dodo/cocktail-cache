@@ -81,13 +81,11 @@ class TestAnalysisCrewFastMode:
         crew = create_analysis_crew(fast_mode=True)
         assert len(crew.tasks) == 1
 
-    def test_fast_mode_agent_has_both_tools(self):
-        """Fast mode agent should have both RecipeDBTool and FlavorProfilerTool."""
+    def test_fast_mode_agent_has_no_tools(self):
+        """Fast mode agent should have no tools (data is pre-injected into prompts)."""
         crew = create_analysis_crew(fast_mode=True)
         agent = crew.agents[0]
-        tool_types = [type(tool).__name__ for tool in agent.tools]
-        assert "RecipeDBTool" in tool_types
-        assert "FlavorProfilerTool" in tool_types
+        assert len(agent.tools) == 0
 
 
 class TestAnalysisCrewTasks:
@@ -145,50 +143,28 @@ class TestAnalysisCrewTasks:
             assert isinstance(task, Task)
 
 
-class TestAnalysisCrewToolAssignments:
-    """Tests for tool assignments on Analysis Crew agents (full mode)."""
+class TestAnalysisCrewToolFreeArchitecture:
+    """Tests verifying tool-free architecture (data is pre-injected into prompts)."""
 
-    def test_cabinet_analyst_has_tools(self):
-        """Cabinet Analyst should have at least one tool."""
+    def test_cabinet_analyst_has_no_tools(self):
+        """Cabinet Analyst should have no tools (data is pre-injected)."""
         crew = create_analysis_crew(fast_mode=False)
         cabinet_analyst = crew.agents[0]
         assert cabinet_analyst.role == "Cabinet Analyst"
-        assert len(cabinet_analyst.tools) >= 1
+        assert len(cabinet_analyst.tools) == 0
 
-    def test_cabinet_analyst_has_recipe_db_tool(self):
-        """Cabinet Analyst should have RecipeDBTool assigned."""
-        crew = create_analysis_crew(fast_mode=False)
-        cabinet_analyst = crew.agents[0]
-
-        tool_types = [type(tool).__name__ for tool in cabinet_analyst.tools]
-        assert "RecipeDBTool" in tool_types
-
-    def test_mood_matcher_has_tools(self):
-        """Mood Matcher should have at least one tool."""
+    def test_mood_matcher_has_no_tools(self):
+        """Mood Matcher should have no tools (data is pre-injected)."""
         crew = create_analysis_crew(fast_mode=False)
         mood_matcher = crew.agents[1]
         assert mood_matcher.role == "Mood Matcher"
-        assert len(mood_matcher.tools) >= 1
+        assert len(mood_matcher.tools) == 0
 
-    def test_mood_matcher_has_flavor_profiler_tool(self):
-        """Mood Matcher should have FlavorProfilerTool assigned."""
+    def test_all_agents_are_tool_free(self):
+        """All agents should have no tools in tool-free architecture."""
         crew = create_analysis_crew(fast_mode=False)
-        mood_matcher = crew.agents[1]
-
-        tool_types = [type(tool).__name__ for tool in mood_matcher.tools]
-        assert "FlavorProfilerTool" in tool_types
-
-    def test_tools_are_instantiated(self):
-        """Tools should be actual instances, not classes."""
-        crew = create_analysis_crew(fast_mode=False)
-
         for agent in crew.agents:
-            for tool in agent.tools:
-                # Tool should be an instance, not a class
-                assert not isinstance(tool, type)
-                # Tool should have required attributes
-                assert hasattr(tool, "name")
-                assert hasattr(tool, "description")
+            assert len(agent.tools) == 0, f"Agent '{agent.role}' should have no tools"
 
 
 class TestAnalysisCrewConfiguration:
@@ -228,12 +204,12 @@ class TestAnalysisCrewTaskDescriptions:
         description_lower = analyze_task.description.lower()
         assert "cabinet" in description_lower
 
-    def test_analyze_task_mentions_drink_type(self):
-        """Analyze task description should mention drink type filter."""
+    def test_analyze_task_mentions_drinks(self):
+        """Analyze task description should mention drinks."""
         crew = create_analysis_crew(fast_mode=False)
         analyze_task = crew.tasks[0]
         description_lower = analyze_task.description.lower()
-        assert "drink" in description_lower and "type" in description_lower
+        assert "drink" in description_lower
 
     def test_match_task_mentions_mood(self):
         """Match task description should mention mood."""
@@ -249,12 +225,12 @@ class TestAnalysisCrewTaskDescriptions:
         description_lower = match_task.description.lower()
         assert "skill" in description_lower
 
-    def test_match_task_mentions_exclude(self):
-        """Match task description should mention exclude/history."""
+    def test_match_task_mentions_ranking(self):
+        """Match task description should mention ranking."""
         crew = create_analysis_crew(fast_mode=False)
         match_task = crew.tasks[1]
         description_lower = match_task.description.lower()
-        assert "exclude" in description_lower or "history" in description_lower
+        assert "rank" in description_lower
 
 
 class TestAnalysisCrewExpectedOutputs:

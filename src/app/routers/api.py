@@ -163,9 +163,12 @@ class BottleRecData(BaseModel):
     """Bottle recommendation data."""
 
     ingredient: str = Field(..., description="Ingredient ID to purchase")
+    ingredient_name: str = Field(
+        ..., description="Human-readable name of the ingredient"
+    )
     unlocks: int = Field(..., description="Number of new drinks this unlocks")
-    drinks: list[str] | None = Field(
-        default=None,
+    drinks: list[str] = Field(
+        default_factory=list,
         description="Names of drinks this ingredient would unlock",
     )
 
@@ -213,7 +216,9 @@ class FlowResponse(BaseModel):
                 },
                 "next_bottle": {
                     "ingredient": "sweet-vermouth",
+                    "ingredient_name": "Sweet Vermouth",
                     "unlocks": 4,
+                    "drinks": ["Manhattan", "Negroni", "Boulevardier"],
                 },
                 "alternatives": [
                     {"id": "old-fashioned", "name": "Old Fashioned", "mood_score": 85}
@@ -345,10 +350,16 @@ def _state_to_response(
         ingredient = state.next_bottle.get("ingredient")
         unlocks = state.next_bottle.get("unlocks")
         if ingredient and unlocks is not None:
+            # Get ingredient_name from state or derive from ingredient ID
+            ingredient_name = state.next_bottle.get("ingredient_name")
+            if not ingredient_name:
+                # Derive human-readable name from ingredient ID
+                ingredient_name = ingredient.replace("-", " ").title()
             next_bottle = BottleRecData(
                 ingredient=ingredient,
+                ingredient_name=ingredient_name,
                 unlocks=unlocks,
-                drinks=state.next_bottle.get("drinks"),
+                drinks=state.next_bottle.get("drinks") or [],
             )
 
     # Extract alternatives (candidates excluding selected)
