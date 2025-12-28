@@ -869,12 +869,30 @@ def _get_ingredient_display_name(ingredient_id: str) -> str:
     return ingredient_id.replace("-", " ").title()
 
 
+def _is_bottle_ingredient(ingredient_id: str) -> bool:
+    """Check if an ingredient is a bottle (spirit or liqueur/modifier).
+
+    Returns True for spirits and liqueurs/modifiers.
+    Returns False for accessories like juices, syrups, bitters, mixers, fresh produce.
+    """
+    from src.app.services.data_loader import load_ingredients
+
+    ingredients_db = load_ingredients()
+
+    # Check if ingredient is in spirits or modifiers categories
+    spirits_ids = {ing.id for ing in ingredients_db.spirits}
+    modifiers_ids = {ing.id for ing in ingredients_db.modifiers}
+
+    return ingredient_id in spirits_ids or ingredient_id in modifiers_ids
+
+
 @router.post("/suggest-bottles", response_model=SuggestBottlesResponse)
 async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesResponse:
     """Get bottle purchase recommendations based on your cabinet.
 
-    Returns ranked recommendations of which bottles appear in the most drinks
-    that you don't already have ingredients for.
+    Returns ranked recommendations of which bottles (spirits and liqueurs)
+    appear in the most drinks that you don't already have ingredients for.
+    Excludes accessories like juices, syrups, bitters, and fresh produce.
 
     Args:
         request: Request with cabinet ingredients and filters.
@@ -937,10 +955,15 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
             )
 
     # Build recommendations sorted by drink count
+    # Only include bottles (spirits and modifiers), not accessories
     all_recommendations = []
     for ing_id, drinks_list in ingredient_drinks.items():
         # Skip ingredients already in cabinet
         if ing_id in cabinet_set:
+            continue
+
+        # Only include bottles (spirits and liqueurs/modifiers)
+        if not _is_bottle_ingredient(ing_id):
             continue
 
         all_recommendations.append(
