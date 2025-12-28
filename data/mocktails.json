@@ -1199,7 +1199,7 @@
   {
     "id": "spicy-paloma-mocktail",
     "name": "Spicy Paloma Mocktail",
-    "tagline": "Mexican-inspired grapefruit refresher with a jalape\u00f1o kick",
+    "tagline": "Mexican-inspired grapefruit refresher with a jalapeño kick",
     "ingredients": [
       {
         "amount": "2",
@@ -1230,7 +1230,7 @@
     "method": [
       {
         "action": "Muddle",
-        "detail": "Press jalape\u00f1o slices to release heat"
+        "detail": "Press jalapeño slices to release heat"
       },
       {
         "action": "Shake",
@@ -1246,7 +1246,7 @@
       }
     ],
     "glassware": "highball",
-    "garnish": "grapefruit wedge and jalape\u00f1o slice",
+    "garnish": "grapefruit wedge and jalapeño slice",
     "flavor_profile": {
       "sweet": 25,
       "sour": 40,
