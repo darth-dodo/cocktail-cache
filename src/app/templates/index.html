@@ -797,13 +797,18 @@ function showRecipe(data) {
         clone.querySelector('#bottle-rec').classList.remove('hidden');
     }
 
+    // Get button references from the clone BEFORE appending to DOM
+    const madeItBtn = clone.querySelector('#made-it-btn');
+    const anotherBtn = clone.querySelector('#another-btn');
+
     chatMessages.appendChild(clone);
 
     // Initialize collapsibles for the new recipe card
     setTimeout(() => {
         initCollapsibles(chatMessages);
-        document.getElementById('made-it-btn').addEventListener('click', onMadeIt);
-        document.getElementById('another-btn').addEventListener('click', onAnother);
+        // Use the button references we captured from the clone
+        madeItBtn.addEventListener('click', onMadeIt);
+        anotherBtn.addEventListener('click', onAnother);
     }, 50);
 
     scrollToBottom();
