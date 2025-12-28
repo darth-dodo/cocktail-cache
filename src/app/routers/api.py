@@ -802,3 +802,126 @@ async def _handle_made(request: FlowRequest) -> FlowResponse:
         alternatives=None,
         error=None,
     )
+
+
+# =============================================================================
+# Suggest Bottles Endpoint
+# =============================================================================
+
+
+class SuggestBottlesRequest(BaseModel):
+    """Request model for bottle suggestions."""
+
+    cabinet: list[str] = Field(
+        default_factory=list,
+        description="List of ingredient IDs the user already has",
+    )
+    drink_type: str = Field(
+        default="both",
+        description="Filter by drink type: 'cocktails', 'mocktails', or 'both'",
+    )
+    limit: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum number of recommendations to return",
+    )
+
+
+class UnlockedDrink(BaseModel):
+    """A drink that would be unlocked by purchasing a bottle."""
+
+    id: str = Field(..., description="Drink identifier")
+    name: str = Field(..., description="Display name")
+    is_mocktail: bool = Field(..., description="Whether it's a mocktail")
+    difficulty: str = Field(..., description="Difficulty level")
+
+
+class BottleRecommendation(BaseModel):
+    """A single bottle recommendation."""
+
+    ingredient_id: str = Field(..., description="Ingredient ID to purchase")
+    ingredient_name: str = Field(..., description="Human-readable ingredient name")
+    new_drinks_unlocked: int = Field(
+        ..., description="Number of new drinks this unlocks"
+    )
+    drinks: list[UnlockedDrink] = Field(
+        ..., description="List of drinks this would unlock"
+    )
+
+
+class SuggestBottlesResponse(BaseModel):
+    """Response model for bottle suggestions."""
+
+    cabinet_size: int = Field(..., description="Number of ingredients in cabinet")
+    drinks_makeable_now: int = Field(..., description="Drinks currently makeable")
+    recommendations: list[BottleRecommendation] = Field(
+        ..., description="Ranked list of bottle recommendations"
+    )
+    total_available_recommendations: int = Field(
+        ..., description="Total recommendations before limit applied"
+    )
+
+
+def _get_ingredient_display_name(ingredient_id: str) -> str:
+    """Convert ingredient ID to human-readable name."""
+    # Convert kebab-case to title case
+    return ingredient_id.replace("-", " ").title()
+
+
+@router.post("/suggest-bottles", response_model=SuggestBottlesResponse)
+async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesResponse:
+    """Get bottle purchase recommendations based on your cabinet.
+
+    Returns ranked recommendations of which bottles would unlock the most
+    new drinks based on your current cabinet ingredients.
+
+    Args:
+        request: Request with cabinet ingredients and filters.
+
+    Returns:
+        SuggestBottlesResponse with ranked bottle recommendations.
+    """
+    import json
+
+    from src.app.tools.unlock_calculator import UnlockCalculatorTool
+
+    logger.info(
+        f"Suggest bottles request: cabinet_size={len(request.cabinet)}, "
+        f"drink_type={request.drink_type}, limit={request.limit}"
+    )
+
+    # Use the existing UnlockCalculatorTool
+    tool = UnlockCalculatorTool()
+    result_json = tool._run(
+        cabinet=request.cabinet,
+        drink_type=request.drink_type,  # type: ignore
+        limit=request.limit,
+    )
+    result = json.loads(result_json)
+
+    # Transform to response format
+    recommendations = [
+        BottleRecommendation(
+            ingredient_id=rec["ingredient_id"],
+            ingredient_name=_get_ingredient_display_name(rec["ingredient_id"]),
+            new_drinks_unlocked=rec["new_drinks_unlocked"],
+            drinks=[
+                UnlockedDrink(
+                    id=drink["id"],
+                    name=drink["name"],
+                    is_mocktail=drink["is_mocktail"],
+                    difficulty=drink["difficulty"],
+                )
+                for drink in rec["drinks"]
+            ],
+        )
+        for rec in result.get("recommendations", [])
+    ]
+
+    return SuggestBottlesResponse(
+        cabinet_size=result["query"]["cabinet_size"],
+        drinks_makeable_now=result["current_status"]["drinks_you_can_make"],
+        recommendations=recommendations,
+        total_available_recommendations=result["total_recommendations"],
+    )

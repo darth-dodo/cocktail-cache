@@ -93,3 +93,12 @@ async def drink_detail(request: Request, drink_id: str) -> HTMLResponse:
         name="drink.html",
         context={"drink_id": drink_id},
     )
+
+
+@app.get("/suggest-bottle", response_class=HTMLResponse)
+async def suggest_bottle_page(request: Request) -> HTMLResponse:
+    """Render the suggest bottle page for recommendations on what to buy."""
+    return templates.TemplateResponse(
+        request=request,
+        name="suggest-bottle.html",
+    )
