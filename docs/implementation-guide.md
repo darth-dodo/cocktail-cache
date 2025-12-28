@@ -81,7 +81,7 @@ result = crew.kickoff()
 
 ---
 
-## Week 1: Foundation
+## Session 1: Foundation
 
 ### Day 1-2: Project Setup
 
@@ -258,7 +258,7 @@ uv run python scripts/compute_unlock_scores.py
 
 ---
 
-## Week 2: CrewAI Core ✅ COMPLETE
+## Session 2: CrewAI Core ✅ COMPLETE
 
 ### Models (Pydantic) ✅
 
@@ -350,7 +350,7 @@ uv run pytest --cov=src/app      # With coverage
 
 ---
 
-## Week 3: Crews & Flow (COMPLETE)
+## Session 3: Crews & Flow (COMPLETE)
 
 ### Crews
 
@@ -627,7 +627,7 @@ def request_another(state: CocktailFlowState) -> CocktailFlowState:
 
 ---
 
-## Week 4: API & UI (COMPLETE)
+## Session 4: API & UI (COMPLETE)
 
 ### Chat Interface with Raja
 
@@ -723,7 +723,7 @@ class RecipeCrewOutput(BaseModel):
 
 ---
 
-## Week 5-6: Frontend Implementation (COMPLETE)
+## Session 5-6: Frontend Implementation (COMPLETE)
 
 ### Template Architecture
 
@@ -1049,7 +1049,7 @@ This reduces latency by approximately 40% for requests with bottle advice.
 
 ## Checklist
 
-### Week 1 ✅ COMPLETE
+### Session 1 ✅ COMPLETE
 - [x] Project structure (`src/` layout)
 - [x] `pyproject.toml` configured
 - [x] `uv sync` installs all dependencies
@@ -1063,7 +1063,7 @@ This reduces latency by approximately 40% for requests with bottle advice.
 - [x] Data validation script (`scripts/validate_data.py`)
 - [x] Pre-commit hooks configured (ruff, mypy)
 
-### Week 2 ✅ COMPLETE
+### Session 2 ✅ COMPLETE
 - [x] Pydantic models (Cabinet, Recipe, UserPrefs, History, Recommendation)
 - [x] 4 tools working (RecipeDB, FlavorProfiler, SubstitutionFinder, UnlockCalculator)
 - [x] 4 agents defined with Claude Haiku
@@ -1073,7 +1073,7 @@ This reduces latency by approximately 40% for requests with bottle advice.
 - [x] Model tests passing (`uv run pytest tests/models/`)
 - [x] 212 tests total, 90% coverage
 
-### Week 3 (COMPLETE)
+### Session 3 (COMPLETE)
 - [x] Analysis Crew with fast mode (Drink Recommender) and full mode
 - [x] Recipe Crew with optional bottle advice
 - [x] Structured Pydantic outputs (AnalysisOutput, RecipeOutput, BottleAdvisorOutput)
@@ -1083,7 +1083,7 @@ This reduces latency by approximately 40% for requests with bottle advice.
 - [x] Flow tests passing (`uv run pytest tests/flows/`)
 - [x] 127 new tests, 339 total tests, 87% coverage
 
-### Week 4 (COMPLETE)
+### Session 4 (COMPLETE)
 - [x] API endpoints (/recommend, /another)
 - [x] Session management (in-memory)
 - [x] Fast mode enabled by default (~50% faster)
@@ -1092,7 +1092,7 @@ This reduces latency by approximately 40% for requests with bottle advice.
 - [x] Fixed ingredient IDs matching database
 - [x] Mobile responsive design
 
-### Week 5 (COMPLETE)
+### Session 5 (COMPLETE)
 - [x] Conversational chat interface (not HTMX form)
 - [x] Drink type toggle (Cocktail/Mocktail/Both)
 - [x] Skill level selector
@@ -1102,7 +1102,7 @@ This reduces latency by approximately 40% for requests with bottle advice.
 - [x] GitHub Actions CI/CD workflow
 - [x] Deployed to Render
 
-### Week 6 (COMPLETE)
+### Session 6 (COMPLETE)
 - [x] Tabbed navigation (Chat/Cabinet/Browse) in main interface
 - [x] Cabinet panel with categorized ingredient picker
 - [x] Ingredient autocomplete with search functionality
@@ -1120,5 +1120,5 @@ This reduces latency by approximately 40% for requests with bottle advice.
 
 *Implementation Guide v2.0*
 *Applies BLUEPRINT.md patterns to Cocktail Cache*
-*Updated: Week 6 UX improvements - tabbed navigation, browse page, drink detail page, cabinet management*
+*Updated: Session 6 UX improvements - tabbed navigation, browse page, drink detail page, cabinet management*
 *Last Updated: 2025-12-28*

@@ -20,7 +20,7 @@
 
 ## Implementation Status
 
-> **Current Phase**: Week 6 UX Improvements Complete
+> **Current Phase**: Session 6 UX Improvements Complete
 
 ### Completed Components
 
@@ -53,7 +53,7 @@
 | `substitutions.json` | 118 rules | 7 substitution maps |
 | `unlock_scores.json` | 110 entries | Pre-computed ROI |
 
-### Actual Project Structure (Week 6)
+### Actual Project Structure (Session 6)
 
 ```
 cocktail-cache/

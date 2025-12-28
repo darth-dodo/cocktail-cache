@@ -8,9 +8,9 @@
 1. A polished, usable product for home drink enthusiasts who want to explore what they can make
 2. A CrewAI learning project demonstrating multi-agent orchestration patterns
 
-**Timeline**: 4-6 weeks to Polished MVP
+**Timeline**: 4-6 sessions to Polished MVP
 
-**Current Status**: Week 6 complete with enhanced UX features including browse/search functionality, tabbed navigation, and individual drink detail pages.
+**Current Status**: Session 6 complete with enhanced UX features including browse/search functionality, tabbed navigation, and individual drink detail pages.
 
 ---
 
@@ -244,7 +244,7 @@ So that I can make informed choices.
 | FR-11.5 | "Spirit-free" badge on recipes | P0 | Done | Clear visual indicator |
 | FR-11.6 | Mocktail-specific technique tips | P1 | Planned | Building complexity without alcohol |
 
-### FR-12: Browse and Search (Week 6)
+### FR-12: Browse and Search (Session 6)
 
 | ID | Requirement | Priority | Status | Notes |
 |----|-------------|----------|--------|-------|
@@ -256,7 +256,7 @@ So that I can make informed choices.
 | FR-12.6 | "Ask AI Instead" option from browse | P1 | Done | Link to chat interface for personalized recommendations |
 | FR-12.7 | Drink cards with key info preview | P0 | Done | Name, tagline, type badge, difficulty, timing |
 
-### FR-13: Tabbed Navigation (Week 6)
+### FR-13: Tabbed Navigation (Session 6)
 
 | ID | Requirement | Priority | Status | Notes |
 |----|-------------|----------|--------|-------|
@@ -539,7 +539,7 @@ Since this is also a learning project, the architecture should demonstrate:
 3. New recommendation appears (excluding previous)
 4. Repeat as needed
 
-**Flow 4: Browse and Search (New in Week 6)**
+**Flow 4: Browse and Search (New in Session 6)**
 1. Navigate to Browse tab or /browse page
 2. Browse full catalog of 142 drinks
 3. Use search to filter by name
@@ -590,9 +590,9 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ## MVP Scope
 
-### Completed (Weeks 1-6)
+### Completed (Sessions 1-6)
 
-| Feature | Week | Status |
+| Feature | Session | Status |
 |---------|------|--------|
 | Project setup, CrewAI config | 1 | Done |
 | Cocktail database (103 drinks) | 1 | Done |
@@ -633,7 +633,7 @@ Since this is also a learning project, the architecture should demonstrate:
 | LLM cost unsustainable | Medium | Medium | Cache common requests, use Haiku for simple tasks |
 | Invalid recipe generation | Low | High | Validate against DB, fallback to cached recipes |
 | Cocktail DB licensing issues | Low | High | Build our own from public domain sources |
-| Mobile UX fails | Medium | High | Test on real devices week 3 |
+| Mobile UX fails | Medium | High | Test on real devices session 3 |
 | CrewAI breaking changes | Low | Medium | Pin versions, follow changelog |
 
 ---
@@ -654,9 +654,9 @@ Since this is also a learning project, the architecture should demonstrate:
 
 | Decision | Options | Decide By |
 |----------|---------|-----------|
-| Crew parallelization | Sequential vs parallel | Week 2 |
-| Caching strategy | Redis vs in-memory | Week 3 |
-| Cocktail data source | Curate vs license | Week 1 |
+| Crew parallelization | Sequential vs parallel | Session 2 |
+| Caching strategy | Redis vs in-memory | Session 3 |
+| Cocktail data source | Curate vs license | Session 1 |
 
 ---
 
@@ -695,12 +695,12 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ## Development Timeline (Completed)
 
-1. **Week 1**: Project setup + cocktail database curation (103 cocktails, 39 mocktails)
-2. **Week 2**: CrewAI agents and crews with parallel execution
-3. **Week 3**: FastAPI + HTMX frontend
-4. **Week 4**: Integration + "next bottle" logic
-5. **Week 5**: Mobile optimization + Render deployment
-6. **Week 6**: UX improvements - browse/search, tabbed navigation, drink detail pages
+1. **Session 1**: Project setup + cocktail database curation (103 cocktails, 39 mocktails)
+2. **Session 2**: CrewAI agents and crews with parallel execution
+3. **Session 3**: FastAPI + HTMX frontend
+4. **Session 4**: Integration + "next bottle" logic
+5. **Session 5**: Mobile optimization + Render deployment
+6. **Session 6**: UX improvements - browse/search, tabbed navigation, drink detail pages
 
 ## Future Enhancements
 
@@ -716,4 +716,4 @@ Since this is also a learning project, the architecture should demonstrate:
 *Created: 2025-12-27*
 *Updated: 2025-12-28*
 *Status: In Production*
-*Changes: Week 6 UX improvements - added browse/search functionality (FR-12), tabbed navigation (FR-13), individual drink detail pages, ingredient autocomplete, updated drink counts (142 total: 103 cocktails + 39 mocktails), revised user flows*
+*Changes: Session 6 UX improvements - added browse/search functionality (FR-12), tabbed navigation (FR-13), individual drink detail pages, ingredient autocomplete, updated drink counts (142 total: 103 cocktails + 39 mocktails), revised user flows*

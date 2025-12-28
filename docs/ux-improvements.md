@@ -2,20 +2,20 @@
 
 > **Document Version**: 2.0
 > **Last Updated**: December 2025
-> **Current State**: Week 6 - Unified Interface Complete
+> **Current State**: Session 6 - Unified Interface Complete
 > **Focus**: Documenting completed features and prioritizing remaining enhancements
 
 ---
 
 ## Executive Summary
 
-This document tracks UX improvements for Cocktail Cache, the conversational AI mixologist web application. Week 6 delivered a major interface consolidation that unified the previously fragmented chat and browse experiences into a cohesive, tabbed interface.
+This document tracks UX improvements for Cocktail Cache, the conversational AI mixologist web application. Session 6 delivered a major interface consolidation that unified the previously fragmented chat and browse experiences into a cohesive, tabbed interface.
 
 **Key Milestone**: The app now feels like a single, unified product rather than two separate applications stitched together.
 
 ---
 
-## Completed Features (Week 6)
+## Completed Features (Session 6)
 
 ### 1. Tabbed Navigation System
 
@@ -181,7 +181,7 @@ Drink database significantly expanded to provide more variety.
 
 ### Cohesion Fixes Delivered
 
-| Issue (from Week 4) | Resolution |
+| Issue (from Session 4) | Resolution |
 |---------------------|------------|
 | Fragmented layouts (`max-w-lg` vs `max-w-4xl`) | Standardized to `max-w-2xl` for chat |
 | Disconnected state (cabinet in memory only) | localStorage persistence + cross-page events |
@@ -462,7 +462,7 @@ async function fetchWithRetry(url, options, retries = 3) {
 
 ### Decision 1: Tabbed Navigation vs Sidebar
 
-**Date**: Week 6
+**Date**: Session 6
 **Decision**: Tabbed navigation in unified header
 **Rationale**:
 - Mobile-first: tabs work better on narrow screens
@@ -479,7 +479,7 @@ async function fetchWithRetry(url, options, retries = 3) {
 
 ### Decision 2: Cabinet as Tab vs Modal
 
-**Date**: Week 6
+**Date**: Session 6
 **Decision**: Cabinet as dedicated tab panel
 **Rationale**:
 - Users spend significant time managing ingredients
@@ -491,7 +491,7 @@ async function fetchWithRetry(url, options, retries = 3) {
 
 ### Decision 3: Browse as Separate Page vs Tab Content
 
-**Date**: Week 6
+**Date**: Session 6
 **Decision**: Browse links to `/browse` route (full page)
 **Rationale**:
 - Browse needs more horizontal space for grid layout
@@ -503,7 +503,7 @@ async function fetchWithRetry(url, options, retries = 3) {
 
 ### Decision 4: localStorage vs Backend Storage
 
-**Date**: Week 5-6
+**Date**: Session 5-6
 **Decision**: localStorage for all user data (cabinet, history, favorites)
 **Rationale**:
 - Privacy-first: no user data leaves device
@@ -534,7 +534,7 @@ async function fetchWithRetry(url, options, retries = 3) {
 
 ## Metrics and Success Criteria
 
-| Metric | Baseline (Week 4) | Target | Measurement |
+| Metric | Baseline (Session 4) | Target | Measurement |
 |--------|-------------------|--------|-------------|
 | Return user rate | Unknown | +30% | localStorage presence on second visit |
 | Session duration | ~2 min | +50% | Page visibility API |
@@ -563,5 +563,5 @@ async function fetchWithRetry(url, options, retries = 3) {
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | Week 4 | Initial UX analysis and improvement proposals |
-| 2.0 | Week 6 | Updated with completed features, restructured pending items |
+| 1.0 | Session 4 | Initial UX analysis and improvement proposals |
+| 2.0 | Session 6 | Updated with completed features, restructured pending items |

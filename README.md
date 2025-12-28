@@ -8,7 +8,7 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
 
 ## Development Status
 
-> **Current Phase**: Week 5 UX Improvements Complete
+> **Current Phase**: Session 5 UX Improvements Complete
 
 | Component | Status | Details |
 |-----------|--------|---------|
@@ -262,7 +262,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 ## Documentation
 
 - [Architecture](docs/architecture.md) - System design and agent specifications
-- [Implementation Guide](docs/implementation-guide.md) - Build order and weekly milestones
+- [Implementation Guide](docs/implementation-guide.md) - Build order and session milestones
 - [Tasks](tasks.md) - Development task tracker with phase status
 
 ---

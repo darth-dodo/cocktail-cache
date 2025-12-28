@@ -1,12 +1,12 @@
 # Cocktail Cache - Implementation Tasks
 
-> **Status**: Week 6 UX Improvements In Progress
+> **Status**: Session 6 UX Improvements In Progress
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI -> UX Polish
 >
 > **Test Coverage**: 339 tests passing, 87% coverage
 
-## Recent Changes (Week 6 - UX Improvements)
+## Recent Changes (Session 6 - UX Improvements)
 
 - **Tabbed Navigation**: Consolidated Chat/Cabinet/Browse into unified header with tab switching
 - **Browse Page**: Full drink catalog with search, type filters (Cocktail/Mocktail), and difficulty filters
@@ -15,7 +15,7 @@
 - **Expanded Dataset**: 142 drinks (up from 74) with better coverage across categories
 - **Cabinet Panel**: Dedicated tab for managing ingredients with persistent localStorage
 
-## Previous Changes (Week 4)
+## Previous Changes (Session 4)
 
 - **Fast Mode for Analysis Crew**: `fast_mode=True` (default) uses unified Drink Recommender agent for ~50% faster response
 - **Optional Bottle Advice**: `include_bottle_advice=False` to skip bottle recommendations
@@ -27,7 +27,7 @@
 
 ---
 
-## Week 1: Foundation
+## Session 1: Foundation
 
 ### Phase 1.1: Project Infrastructure (Architect)
 
@@ -233,7 +233,7 @@
 
 ---
 
-### Phase 1.7: Week 1 Validation (QA)
+### Phase 1.7: Session 1 Validation (QA)
 
 **Duration**: 30 minutes
 **Status**: COMPLETE
@@ -247,7 +247,7 @@
 - [x] Test basic project setup (`uv sync`, `make lint`)
 - [x] Pre-commit hooks pass (ruff, mypy, trailing whitespace)
 
-#### Quality Gate: Week 1 Complete
+#### Quality Gate: Session 1 Complete
 
 - [x] Project structure matches BLUEPRINT.md conventions
 - [x] 50 cocktails in DB with all fields
@@ -264,7 +264,7 @@
 
 ---
 
-## Week 2: CrewAI Core ✅ COMPLETE
+## Session 2: CrewAI Core ✅ COMPLETE
 
 ### Phase 2.1: Pydantic Models ✅
 
@@ -322,7 +322,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### Week 2 Quality Gate: PASSED ✅
+### Session 2 Quality Gate: PASSED ✅
 
 - [x] 212 tests passing
 - [x] 90% code coverage
@@ -333,7 +333,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Week 3: Crews & Flow ✅ COMPLETE
+## Session 3: Crews & Flow ✅ COMPLETE
 
 ### Phase 3.1: Analysis Crew (Developer)
 
@@ -404,7 +404,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-### Week 3 Quality Gate: PASSED ✅
+### Session 3 Quality Gate: PASSED ✅
 
 - [x] 127 new tests for crews and flows
 - [x] 339 total tests passing
@@ -415,7 +415,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Week 4: API & UI (COMPLETE)
+## Session 4: API & UI (COMPLETE)
 
 ### Phase 4.1: FastAPI Setup
 
@@ -474,10 +474,10 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Week 5: UI & Deploy (COMPLETE)
+## Session 5: UI & Deploy (COMPLETE)
 
 > Note: UI implementation used a chat interface instead of HTMX form approach.
-> See Week 4 Phase 4.2 for chat UI details.
+> See Session 4 Phase 4.2 for chat UI details.
 
 ### Phase 5.1: Chat UI (COMPLETE)
 
@@ -495,7 +495,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Week 6: UX Improvements (IN PROGRESS)
+## Session 6: UX Improvements (IN PROGRESS)
 
 ### Phase 6.1: Navigation & Discovery ✅ COMPLETE
 
@@ -603,7 +603,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 - [x] README.md updated with fast mode and Raja
 - [x] Architecture.md updated with crew diagrams
-- [x] Implementation guide updated with Week 4 progress
+- [x] Implementation guide updated with Session 4 progress
 - [ ] API documentation (OpenAPI export)
 - [ ] User guide
 - [ ] Demo video/screenshots
@@ -643,14 +643,14 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 | Phase | Gate | Criteria | Status |
 |-------|------|----------|--------|
-| Week 1 | Data Complete | 50 cocktails, 24 mocktails, all JSON valid | PASSED |
-| Week 2 | Core Complete | Models, Tools, Agents tested (212 tests, 90% coverage) | PASSED |
-| Week 3 | Crews Complete | Flow orchestration working (339 tests, 87% coverage) | PASSED |
-| Week 4 | API Complete | Fast mode, chat UI, structured outputs | PASSED |
-| Week 5 | UI Complete | Mobile responsive, deployed to Render | PASSED |
-| Week 6 | UX Polish | Navigation, discovery, error handling, accessibility | IN PROGRESS |
+| Session 1 | Data Complete | 50 cocktails, 24 mocktails, all JSON valid | PASSED |
+| Session 2 | Core Complete | Models, Tools, Agents tested (212 tests, 90% coverage) | PASSED |
+| Session 3 | Crews Complete | Flow orchestration working (339 tests, 87% coverage) | PASSED |
+| Session 4 | API Complete | Fast mode, chat UI, structured outputs | PASSED |
+| Session 5 | UI Complete | Mobile responsive, deployed to Render | PASSED |
+| Session 6 | UX Polish | Navigation, discovery, error handling, accessibility | IN PROGRESS |
 
-### Week 6 UX Progress
+### Session 6 UX Progress
 
 | Feature | Status | Priority |
 |---------|--------|----------|
