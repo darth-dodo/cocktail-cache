@@ -484,12 +484,38 @@ def _get_ingredient_emoji(ingredient_id: str, category: str) -> str:
     return CATEGORY_CONFIG.get(category, {}).get("default_emoji", "🍹")
 
 
+def _smart_title_case(text: str) -> str:
+    """Convert text to title case, handling apostrophes and special cases properly.
+
+    Unlike str.title(), this handles:
+    - Apostrophes: "lyre's" -> "Lyre's" (not "Lyre'S")
+    - Common abbreviations preserved
+    """
+    if not text:
+        return text
+
+    words = text.split()
+    result = []
+
+    for word in words:
+        if "'" in word:
+            # Handle apostrophes: capitalize first letter, keep rest of word structure
+            parts = word.split("'")
+            # Capitalize first part, keep second part lowercase
+            titled = parts[0].capitalize() + "'" + "'".join(parts[1:]).lower()
+            result.append(titled)
+        else:
+            result.append(word.capitalize())
+
+    return " ".join(result)
+
+
 def _format_ingredient_name(names: list[str]) -> str:
     """Get the best display name from the names list."""
     if not names:
         return "Unknown"
-    # Use the first name, title-cased
-    return names[0].title()
+    # Use the first name with smart title casing
+    return _smart_title_case(names[0])
 
 
 class DrinkDetailResponse(BaseModel):
@@ -865,8 +891,8 @@ class SuggestBottlesResponse(BaseModel):
 
 def _get_ingredient_display_name(ingredient_id: str) -> str:
     """Convert ingredient ID to human-readable name."""
-    # Convert kebab-case to title case
-    return ingredient_id.replace("-", " ").title()
+    # Convert kebab-case to title case with proper apostrophe handling
+    return _smart_title_case(ingredient_id.replace("-", " "))
 
 
 def _is_bottle_ingredient(ingredient_id: str) -> bool:

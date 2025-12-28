@@ -53,7 +53,15 @@
             .replace(/-/g, ' ')
             .replace(/_/g, ' ')
             .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .map(word => {
+                // Handle apostrophes properly: "lyre's" -> "Lyre's" not "Lyre'S"
+                if (word.includes("'")) {
+                    const parts = word.split("'");
+                    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() +
+                           "'" + parts.slice(1).join("'").toLowerCase();
+                }
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            })
             .join(' ');
     }
 
