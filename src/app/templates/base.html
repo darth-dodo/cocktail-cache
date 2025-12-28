@@ -66,7 +66,7 @@
 
     {% block head_extra %}{% endblock %}
 </head>
-<body class="min-h-screen bg-gradient-to-br from-stone-950 via-amber-950/40 to-stone-950">
+<body class="h-screen overflow-hidden bg-gradient-to-br from-stone-950 via-amber-950/40 to-stone-950">
     <!-- Animated background orbs - warm amber/burgundy tones -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div class="absolute -top-40 -right-40 w-80 h-80 bg-amber-600/15 rounded-full blur-3xl animate-pulse"></div>
@@ -74,170 +74,21 @@
         <div class="absolute -bottom-40 right-1/3 w-72 h-72 bg-rose-900/15 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
     </div>
 
-    <!-- Main content wrapper -->
-    <div class="relative z-10">
-        <!-- Navigation -->
-        <nav class="glass-nav sticky top-0 z-50">
-            <div class="container mx-auto px-4">
-                <div class="flex items-center justify-between h-16">
-                    <a href="/" class="flex items-center gap-3 text-white hover:text-amber-300 transition-colors">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        <span class="text-xl font-bold bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-                            Cocktail Cache
-                        </span>
-                    </a>
-                    <div class="flex items-center gap-2 sm:gap-4">
-                        <!-- Cabinet Indicator -->
-                        <a href="/" id="cabinet-indicator" class="cabinet-indicator btn btn-ghost btn-sm text-gray-300 hover:text-amber-300 relative" aria-label="Your Cabinet">
-                            <svg class="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                            <span class="hidden sm:inline">Cabinet</span>
-                            <span id="cabinet-badge" class="cabinet-badge hidden">0</span>
-                        </a>
-                        <a href="/browse" class="btn btn-ghost btn-sm text-gray-300 hover:text-amber-300" aria-label="Browse Drinks">
-                            <svg class="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                            <span class="hidden sm:inline">Browse</span>
-                        </a>
-                        <a href="/suggest-bottle" class="btn btn-ghost btn-sm text-gray-300 hover:text-amber-300" aria-label="Suggest a Bottle">
-                            <svg class="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="hidden sm:inline">Suggest</span>
-                        </a>
-                        <a href="/suggest-bottle" class="btn btn-ghost btn-sm text-gray-300 hover:text-amber-300" aria-label="Suggest a Bottle">
-                            <svg class="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                            </svg>
-                            <span class="hidden sm:inline">Suggest Bottle</span>
-                            <span class="sm:hidden">Suggest</span>
-                        </a>
-                        <a href="/docs" class="btn btn-ghost btn-sm text-gray-300 hover:text-white" aria-label="API Documentation">
-                            <span class="hidden sm:inline">API Docs</span>
-                            <span class="sm:hidden">API</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Page content -->
-        <main class="container mx-auto px-4 py-8">
+    <!-- Main content wrapper - full height flex container -->
+    <div class="relative z-10 h-full flex flex-col">
+        <!-- Page content - takes remaining space -->
+        <main class="flex-1 flex flex-col min-h-0">
             {% block content %}{% endblock %}
         </main>
 
-        <!-- Footer -->
-        <footer class="glass-footer mt-auto py-6">
-            <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
-                <p>Crafted with AI-powered recommendations</p>
-                <p class="mt-1 text-gray-500">Drink responsibly</p>
+        <!-- Footer - fixed at bottom, minimal -->
+        <footer class="flex-shrink-0 py-2">
+            <div class="text-center">
+                <p class="text-[10px] text-stone-600">Drink responsibly</p>
             </div>
         </footer>
     </div>
 
     {% block scripts %}{% endblock %}
-
-    <!-- Cabinet Indicator Script -->
-    <script>
-    (function() {
-        const CABINET_STORAGE_KEY = 'cocktail-cache-cabinet';
-
-        function getCabinetFromStorage() {
-            try {
-                const stored = localStorage.getItem(CABINET_STORAGE_KEY);
-                return stored ? JSON.parse(stored) : [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function updateCabinetIndicator() {
-            const cabinet = getCabinetFromStorage();
-            const badge = document.getElementById('cabinet-badge');
-            const indicator = document.getElementById('cabinet-indicator');
-
-            if (!badge || !indicator) return;
-
-            const count = cabinet.length;
-
-            if (count > 0) {
-                badge.textContent = count;
-                badge.classList.remove('hidden');
-                indicator.classList.add('has-items');
-            } else {
-                badge.classList.add('hidden');
-                indicator.classList.remove('has-items');
-            }
-        }
-
-        // Update on page load
-        document.addEventListener('DOMContentLoaded', updateCabinetIndicator);
-
-        // Listen for storage events from other tabs
-        window.addEventListener('storage', function(e) {
-            if (e.key === CABINET_STORAGE_KEY) {
-                updateCabinetIndicator();
-            }
-        });
-
-        // Custom event for same-tab updates
-        window.addEventListener('cabinet-updated', updateCabinetIndicator);
-
-        // Expose utility for other scripts
-        window.CabinetIndicator = {
-            update: updateCabinetIndicator,
-            STORAGE_KEY: CABINET_STORAGE_KEY
-        };
-    })();
-    </script>
-
-    <!-- Cabinet Indicator Styles -->
-    <style>
-    .cabinet-indicator {
-        position: relative;
-    }
-
-    .cabinet-indicator.has-items {
-        color: #fbbf24;
-    }
-
-    .cabinet-badge {
-        position: absolute;
-        top: 0;
-        right: 0;
-        min-width: 16px;
-        height: 16px;
-        padding: 0 4px;
-        font-size: 10px;
-        font-weight: 600;
-        line-height: 16px;
-        text-align: center;
-        background: linear-gradient(135deg, rgba(217, 119, 6, 0.9), rgba(180, 83, 9, 0.9));
-        border: 1px solid rgba(251, 191, 36, 0.4);
-        border-radius: 8px;
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
-        transform: translate(25%, -25%);
-    }
-
-    .cabinet-badge.hidden {
-        display: none;
-    }
-
-    @media (max-width: 640px) {
-        .cabinet-badge {
-            min-width: 14px;
-            height: 14px;
-            font-size: 9px;
-            line-height: 14px;
-            padding: 0 3px;
-            transform: translate(30%, -30%);
-        }
-    }
-    </style>
 </body>
 </html>
