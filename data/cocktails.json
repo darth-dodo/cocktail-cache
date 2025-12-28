@@ -235,69 +235,6 @@
     "is_mocktail": false
   },
   {
-    "id": "sazerac",
-    "name": "Sazerac",
-    "tagline": "New Orleans heritage in a glass",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "rye"
-      },
-      {
-        "amount": "0.25",
-        "unit": "oz",
-        "item": "absinthe"
-      },
-      {
-        "amount": "1",
-        "unit": "tsp",
-        "item": "simple-syrup"
-      },
-      {
-        "amount": "3",
-        "unit": "dashes",
-        "item": "peychauds"
-      }
-    ],
-    "method": [
-      {
-        "action": "Rinse",
-        "detail": "chilled rocks glass with absinthe, discard excess"
-      },
-      {
-        "action": "Combine",
-        "detail": "whiskey, syrup, and bitters in mixing glass with ice"
-      },
-      {
-        "action": "Stir",
-        "detail": "for 30 seconds until well-chilled"
-      },
-      {
-        "action": "Strain",
-        "detail": "into prepared glass, no ice"
-      }
-    ],
-    "glassware": "rocks",
-    "garnish": "lemon peel, expressed and discarded",
-    "flavor_profile": {
-      "sweet": 20,
-      "sour": 0,
-      "bitter": 35,
-      "spirit": 85
-    },
-    "tags": [
-      "whiskey",
-      "stirred",
-      "classic",
-      "new-orleans",
-      "anise"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
-    "is_mocktail": false
-  },
-  {
     "id": "mint-julep",
     "name": "Mint Julep",
     "tagline": "Southern refreshment at its finest",
@@ -354,260 +291,6 @@
       "refreshing",
       "classic",
       "mint"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "paper-plane",
-    "name": "Paper Plane",
-    "tagline": "Modern classic with perfect equal-parts harmony",
-    "ingredients": [
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "bourbon"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "fernet-branca"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "aperol"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lemon-juice"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into chilled coupe"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "none",
-    "flavor_profile": {
-      "sweet": 35,
-      "sour": 40,
-      "bitter": 35,
-      "spirit": 40
-    },
-    "tags": [
-      "whiskey",
-      "shaken",
-      "modern-classic",
-      "bitter",
-      "citrus"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "penicillin",
-    "name": "Penicillin",
-    "tagline": "Smoky, spicy, and surprisingly medicinal",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "scotch"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "ginger-syrup"
-      },
-      {
-        "amount": "0.25",
-        "unit": "oz",
-        "item": "scotch"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "blended scotch, lemon, and syrup to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into rocks glass over fresh ice"
-      },
-      {
-        "action": "Float",
-        "detail": "Islay scotch on top"
-      }
-    ],
-    "glassware": "rocks",
-    "garnish": "candied ginger",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 45,
-      "bitter": 10,
-      "spirit": 65
-    },
-    "tags": [
-      "whiskey",
-      "scotch",
-      "shaken",
-      "modern-classic",
-      "ginger",
-      "smoky"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
-    "is_mocktail": false
-  },
-  {
-    "id": "new-york-sour",
-    "name": "New York Sour",
-    "tagline": "A whiskey sour crowned with red wine",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "bourbon"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "simple-syrup"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "red-wine"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "bourbon, lemon, and syrup to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into rocks glass over fresh ice"
-      },
-      {
-        "action": "Float",
-        "detail": "red wine carefully over the back of a spoon"
-      }
-    ],
-    "glassware": "rocks",
-    "garnish": "lemon wheel, cherry",
-    "flavor_profile": {
-      "sweet": 35,
-      "sour": 45,
-      "bitter": 15,
-      "spirit": 50
-    },
-    "tags": [
-      "whiskey",
-      "shaken",
-      "citrus",
-      "wine",
-      "layered"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
-    "is_mocktail": false
-  },
-  {
-    "id": "hot-toddy",
-    "name": "Hot Toddy",
-    "tagline": "Warming comfort for cold nights",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "bourbon"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "honey-syrup"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "4",
-        "unit": "oz",
-        "item": "hot-water"
-      },
-      {
-        "amount": "1",
-        "unit": "stick",
-        "item": "cinnamon-syrup"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "bourbon, honey syrup, and lemon to warmed mug"
-      },
-      {
-        "action": "Pour",
-        "detail": "hot water over"
-      },
-      {
-        "action": "Stir",
-        "detail": "gently to combine"
-      },
-      {
-        "action": "Add",
-        "detail": "cinnamon stick"
-      }
-    ],
-    "glassware": "mug",
-    "garnish": "lemon wheel, cinnamon stick",
-    "flavor_profile": {
-      "sweet": 35,
-      "sour": 25,
-      "bitter": 5,
-      "spirit": 45
-    },
-    "tags": [
-      "whiskey",
-      "hot",
-      "winter",
-      "soothing",
-      "honey"
     ],
     "difficulty": "easy",
     "timing_minutes": 3,
@@ -717,59 +400,6 @@
     "is_mocktail": false
   },
   {
-    "id": "gin-and-tonic",
-    "name": "Gin & Tonic",
-    "tagline": "Crisp, refreshing, and endlessly customizable",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "gin"
-      },
-      {
-        "amount": "4",
-        "unit": "oz",
-        "item": "tonic-water"
-      }
-    ],
-    "method": [
-      {
-        "action": "Fill",
-        "detail": "highball glass with ice"
-      },
-      {
-        "action": "Add",
-        "detail": "gin"
-      },
-      {
-        "action": "Top",
-        "detail": "with tonic water"
-      },
-      {
-        "action": "Stir",
-        "detail": "gently once to combine"
-      }
-    ],
-    "glassware": "highball",
-    "garnish": "lime wedge",
-    "flavor_profile": {
-      "sweet": 15,
-      "sour": 10,
-      "bitter": 35,
-      "spirit": 45
-    },
-    "tags": [
-      "gin",
-      "built",
-      "refreshing",
-      "highball",
-      "simple"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 2,
-    "is_mocktail": false
-  },
-  {
     "id": "tom-collins",
     "name": "Tom Collins",
     "tagline": "A tall, refreshing gin lemonade with sparkle",
@@ -830,381 +460,6 @@
     ],
     "difficulty": "easy",
     "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "french-75",
-    "name": "French 75",
-    "tagline": "Champagne elegance with a gin backbone",
-    "ingredients": [
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "gin"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "simple-syrup"
-      },
-      {
-        "amount": "3",
-        "unit": "oz",
-        "item": "champagne"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "gin, lemon, and syrup to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "for 10-12 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into champagne flute"
-      },
-      {
-        "action": "Top",
-        "detail": "with champagne"
-      }
-    ],
-    "glassware": "flute",
-    "garnish": "lemon twist",
-    "flavor_profile": {
-      "sweet": 25,
-      "sour": 35,
-      "bitter": 5,
-      "spirit": 45
-    },
-    "tags": [
-      "gin",
-      "shaken",
-      "champagne",
-      "elegant",
-      "celebratory"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "last-word",
-    "name": "Last Word",
-    "tagline": "Prohibition-era equal parts perfection",
-    "ingredients": [
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "gin"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "chartreuse"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "maraschino"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lime-juice"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into chilled coupe"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "none",
-    "flavor_profile": {
-      "sweet": 35,
-      "sour": 40,
-      "bitter": 20,
-      "spirit": 50
-    },
-    "tags": [
-      "gin",
-      "shaken",
-      "equal-parts",
-      "herbal",
-      "classic"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "aviation",
-    "name": "Aviation",
-    "tagline": "A floral, violet-hued classic from the golden age",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "gin"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "maraschino"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "0.25",
-        "unit": "oz",
-        "item": "creme-de-violette"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into chilled coupe"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "brandied cherry",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 45,
-      "bitter": 5,
-      "spirit": 55
-    },
-    "tags": [
-      "gin",
-      "shaken",
-      "floral",
-      "citrus",
-      "classic"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "bramble",
-    "name": "Bramble",
-    "tagline": "British summertime in a glass",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "gin"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "simple-syrup"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "creme-de-mure"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "gin, lemon, and syrup to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "for 10-12 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into rocks glass filled with crushed ice"
-      },
-      {
-        "action": "Drizzle",
-        "detail": "creme de mure over the top"
-      }
-    ],
-    "glassware": "rocks",
-    "garnish": "fresh blackberries, lemon slice",
-    "flavor_profile": {
-      "sweet": 40,
-      "sour": 40,
-      "bitter": 5,
-      "spirit": 45
-    },
-    "tags": [
-      "gin",
-      "shaken",
-      "fruity",
-      "british",
-      "modern-classic"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "corpse-reviver-2",
-    "name": "Corpse Reviver #2",
-    "tagline": "The ultimate morning-after cure",
-    "ingredients": [
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "gin"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "cointreau"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "dry-vermouth"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "1",
-        "unit": "dash",
-        "item": "absinthe"
-      }
-    ],
-    "method": [
-      {
-        "action": "Rinse",
-        "detail": "coupe with absinthe, discard excess"
-      },
-      {
-        "action": "Add",
-        "detail": "remaining ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into prepared coupe"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "none",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 45,
-      "bitter": 15,
-      "spirit": 50
-    },
-    "tags": [
-      "gin",
-      "shaken",
-      "equal-parts",
-      "citrus",
-      "classic"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
-    "is_mocktail": false
-  },
-  {
-    "id": "clover-club",
-    "name": "Clover Club",
-    "tagline": "Pre-Prohibition elegance with raspberry silk",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "gin"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "raspberry-syrup"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "egg-white"
-      }
-    ],
-    "method": [
-      {
-        "action": "Dry shake",
-        "detail": "all ingredients without ice for 15 seconds"
-      },
-      {
-        "action": "Add",
-        "detail": "ice to shaker"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into chilled coupe"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "fresh raspberries",
-    "flavor_profile": {
-      "sweet": 40,
-      "sour": 40,
-      "bitter": 5,
-      "spirit": 50
-    },
-    "tags": [
-      "gin",
-      "shaken",
-      "fruity",
-      "egg-white",
-      "classic"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
     "is_mocktail": false
   },
   {
@@ -1803,64 +1058,6 @@
     "is_mocktail": false
   },
   {
-    "id": "dark-n-stormy",
-    "name": "Dark 'n' Stormy",
-    "tagline": "Bermuda's signature spiced refresher",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "dark-rum"
-      },
-      {
-        "amount": "4",
-        "unit": "oz",
-        "item": "ginger-beer"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "lime-juice"
-      }
-    ],
-    "method": [
-      {
-        "action": "Fill",
-        "detail": "highball glass with ice"
-      },
-      {
-        "action": "Add",
-        "detail": "lime juice"
-      },
-      {
-        "action": "Pour",
-        "detail": "ginger beer"
-      },
-      {
-        "action": "Float",
-        "detail": "dark rum on top"
-      }
-    ],
-    "glassware": "highball",
-    "garnish": "lime wedge",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 25,
-      "bitter": 10,
-      "spirit": 45
-    },
-    "tags": [
-      "rum",
-      "built",
-      "ginger",
-      "refreshing",
-      "layered"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 2,
-    "is_mocktail": false
-  },
-  {
     "id": "mai-tai",
     "name": "Mai Tai",
     "tagline": "The ultimate tiki icon, complex and tropical",
@@ -1984,187 +1181,6 @@
     "is_mocktail": false
   },
   {
-    "id": "hurricane",
-    "name": "Hurricane",
-    "tagline": "New Orleans party fuel since 1940s",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "dark-rum"
-      },
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "white-rum"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "passion-fruit-syrup"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "orange-juice"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "lime-juice"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into hurricane glass over fresh ice"
-      }
-    ],
-    "glassware": "hurricane",
-    "garnish": "orange slice, cherry",
-    "flavor_profile": {
-      "sweet": 50,
-      "sour": 35,
-      "bitter": 0,
-      "spirit": 50
-    },
-    "tags": [
-      "rum",
-      "shaken",
-      "tropical",
-      "fruity",
-      "new-orleans"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "cuba-libre",
-    "name": "Cuba Libre",
-    "tagline": "Rum and Coke elevated with fresh lime",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "white-rum"
-      },
-      {
-        "amount": "4",
-        "unit": "oz",
-        "item": "cola"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "lime-juice"
-      }
-    ],
-    "method": [
-      {
-        "action": "Fill",
-        "detail": "highball glass with ice"
-      },
-      {
-        "action": "Add",
-        "detail": "rum and lime juice"
-      },
-      {
-        "action": "Top",
-        "detail": "with cola"
-      },
-      {
-        "action": "Stir",
-        "detail": "gently to combine"
-      }
-    ],
-    "glassware": "highball",
-    "garnish": "lime wedge",
-    "flavor_profile": {
-      "sweet": 40,
-      "sour": 20,
-      "bitter": 10,
-      "spirit": 35
-    },
-    "tags": [
-      "rum",
-      "built",
-      "simple",
-      "refreshing",
-      "crowd-pleaser"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 2,
-    "is_mocktail": false
-  },
-  {
-    "id": "painkiller",
-    "name": "Painkiller",
-    "tagline": "The British Virgin Islands' tropical remedy",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "dark-rum"
-      },
-      {
-        "amount": "4",
-        "unit": "oz",
-        "item": "pineapple-juice"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "orange-juice"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "coconut-cream"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into hurricane glass over fresh ice"
-      }
-    ],
-    "glassware": "hurricane",
-    "garnish": "grated nutmeg, orange slice",
-    "flavor_profile": {
-      "sweet": 50,
-      "sour": 20,
-      "bitter": 0,
-      "spirit": 40
-    },
-    "tags": [
-      "rum",
-      "shaken",
-      "tropical",
-      "creamy",
-      "tiki"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
     "id": "margarita",
     "name": "Margarita",
     "tagline": "The undisputed king of tequila cocktails",
@@ -2223,73 +1239,6 @@
     "is_mocktail": false
   },
   {
-    "id": "paloma",
-    "name": "Paloma",
-    "tagline": "Mexico's favorite tequila refresher",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "tequila"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "lime-juice"
-      },
-      {
-        "amount": "4",
-        "unit": "oz",
-        "item": "lemon-lime-soda"
-      },
-      {
-        "amount": "1",
-        "unit": "pinch",
-        "item": "salt"
-      }
-    ],
-    "method": [
-      {
-        "action": "Rim",
-        "detail": "highball glass with salt (optional)"
-      },
-      {
-        "action": "Fill",
-        "detail": "glass with ice"
-      },
-      {
-        "action": "Add",
-        "detail": "tequila and lime juice"
-      },
-      {
-        "action": "Top",
-        "detail": "with grapefruit soda"
-      },
-      {
-        "action": "Stir",
-        "detail": "gently to combine"
-      }
-    ],
-    "glassware": "highball",
-    "garnish": "grapefruit wedge, salt rim",
-    "flavor_profile": {
-      "sweet": 25,
-      "sour": 35,
-      "bitter": 20,
-      "spirit": 45
-    },
-    "tags": [
-      "tequila",
-      "built",
-      "refreshing",
-      "grapefruit",
-      "mexican"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 2,
-    "is_mocktail": false
-  },
-  {
     "id": "tequila-sunrise",
     "name": "Tequila Sunrise",
     "tagline": "A stunning gradient of tropical color",
@@ -2342,501 +1291,6 @@
       "fruity",
       "layered",
       "crowd-pleaser"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 2,
-    "is_mocktail": false
-  },
-  {
-    "id": "tommys-margarita",
-    "name": "Tommy's Margarita",
-    "tagline": "The purist's margarita with agave focus",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "tequila"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "lime-juice"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "agave-syrup"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into rocks glass over fresh ice"
-      }
-    ],
-    "glassware": "rocks",
-    "garnish": "lime wheel",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 50,
-      "bitter": 0,
-      "spirit": 55
-    },
-    "tags": [
-      "tequila",
-      "shaken",
-      "citrus",
-      "modern-classic",
-      "agave"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "naked-and-famous",
-    "name": "Naked and Famous",
-    "tagline": "Modern equal-parts mezcal magic",
-    "ingredients": [
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "mezcal"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "yellow-chartreuse"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "aperol"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lime-juice"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into chilled coupe"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "none",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 40,
-      "bitter": 25,
-      "spirit": 50
-    },
-    "tags": [
-      "mezcal",
-      "shaken",
-      "equal-parts",
-      "smoky",
-      "modern-classic"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "oaxaca-old-fashioned",
-    "name": "Oaxaca Old Fashioned",
-    "tagline": "Smoky mezcal meets the timeless template",
-    "ingredients": [
-      {
-        "amount": "1.5",
-        "unit": "oz",
-        "item": "reposado-tequila"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "mezcal"
-      },
-      {
-        "amount": "1",
-        "unit": "tsp",
-        "item": "agave-syrup"
-      },
-      {
-        "amount": "2",
-        "unit": "dashes",
-        "item": "angostura"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "all ingredients to mixing glass with ice"
-      },
-      {
-        "action": "Stir",
-        "detail": "for 30 seconds until well-chilled"
-      },
-      {
-        "action": "Strain",
-        "detail": "into rocks glass over large ice cube"
-      }
-    ],
-    "glassware": "rocks",
-    "garnish": "flamed orange peel",
-    "flavor_profile": {
-      "sweet": 20,
-      "sour": 0,
-      "bitter": 25,
-      "spirit": 80
-    },
-    "tags": [
-      "tequila",
-      "mezcal",
-      "stirred",
-      "smoky",
-      "modern-classic"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
-    "is_mocktail": false
-  },
-  {
-    "id": "el-diablo",
-    "name": "El Diablo",
-    "tagline": "Tequila's devilishly good ginger kick",
-    "ingredients": [
-      {
-        "amount": "1.5",
-        "unit": "oz",
-        "item": "reposado-tequila"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "creme-de-cassis"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lime-juice"
-      },
-      {
-        "amount": "3",
-        "unit": "oz",
-        "item": "ginger-beer"
-      }
-    ],
-    "method": [
-      {
-        "action": "Add",
-        "detail": "tequila, cassis, and lime to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "for 10-12 seconds"
-      },
-      {
-        "action": "Strain",
-        "detail": "into highball glass over fresh ice"
-      },
-      {
-        "action": "Top",
-        "detail": "with ginger beer"
-      }
-    ],
-    "glassware": "highball",
-    "garnish": "lime wheel, blackberries",
-    "flavor_profile": {
-      "sweet": 35,
-      "sour": 30,
-      "bitter": 10,
-      "spirit": 40
-    },
-    "tags": [
-      "tequila",
-      "shaken",
-      "ginger",
-      "fruity",
-      "refreshing"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "sidecar",
-    "name": "Sidecar",
-    "tagline": "Elegant cognac and citrus from the Jazz Age",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "cognac"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "cointreau"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "lemon-juice"
-      }
-    ],
-    "method": [
-      {
-        "action": "Rim",
-        "detail": "coupe with sugar (optional)"
-      },
-      {
-        "action": "Add",
-        "detail": "all ingredients to shaker with ice"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into prepared coupe"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "orange peel, sugar rim",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 45,
-      "bitter": 5,
-      "spirit": 55
-    },
-    "tags": [
-      "brandy",
-      "shaken",
-      "citrus",
-      "classic",
-      "elegant"
-    ],
-    "difficulty": "easy",
-    "timing_minutes": 3,
-    "is_mocktail": false
-  },
-  {
-    "id": "pisco-sour",
-    "name": "Pisco Sour",
-    "tagline": "Peru's national treasure with silky foam",
-    "ingredients": [
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "pisco"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "lime-juice"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "simple-syrup"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "egg-white"
-      },
-      {
-        "amount": "3",
-        "unit": "dashes",
-        "item": "angostura"
-      }
-    ],
-    "method": [
-      {
-        "action": "Dry shake",
-        "detail": "pisco, lime, syrup, and egg white for 15 seconds"
-      },
-      {
-        "action": "Add",
-        "detail": "ice to shaker"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into chilled coupe"
-      },
-      {
-        "action": "Garnish",
-        "detail": "with bitters drops on foam"
-      }
-    ],
-    "glassware": "coupe",
-    "garnish": "angostura bitters drops",
-    "flavor_profile": {
-      "sweet": 30,
-      "sour": 50,
-      "bitter": 10,
-      "spirit": 50
-    },
-    "tags": [
-      "pisco",
-      "shaken",
-      "citrus",
-      "egg-white",
-      "classic"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
-    "is_mocktail": false
-  },
-  {
-    "id": "amaretto-sour",
-    "name": "Amaretto Sour",
-    "tagline": "The redemption of a once-maligned classic",
-    "ingredients": [
-      {
-        "amount": "1.5",
-        "unit": "oz",
-        "item": "amaretto"
-      },
-      {
-        "amount": "0.75",
-        "unit": "oz",
-        "item": "bourbon"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "lemon-juice"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "simple-syrup"
-      },
-      {
-        "amount": "0.5",
-        "unit": "oz",
-        "item": "egg-white"
-      }
-    ],
-    "method": [
-      {
-        "action": "Dry shake",
-        "detail": "all ingredients without ice for 15 seconds"
-      },
-      {
-        "action": "Add",
-        "detail": "ice to shaker"
-      },
-      {
-        "action": "Shake",
-        "detail": "vigorously for 12-15 seconds"
-      },
-      {
-        "action": "Double strain",
-        "detail": "into rocks glass over fresh ice"
-      }
-    ],
-    "glassware": "rocks",
-    "garnish": "brandied cherry, lemon peel",
-    "flavor_profile": {
-      "sweet": 45,
-      "sour": 40,
-      "bitter": 5,
-      "spirit": 40
-    },
-    "tags": [
-      "liqueur",
-      "shaken",
-      "citrus",
-      "egg-white",
-      "modern-classic"
-    ],
-    "difficulty": "medium",
-    "timing_minutes": 4,
-    "is_mocktail": false
-  },
-  {
-    "id": "aperol-spritz",
-    "name": "Aperol Spritz",
-    "tagline": "Italian summer in effervescent form",
-    "ingredients": [
-      {
-        "amount": "3",
-        "unit": "oz",
-        "item": "champagne"
-      },
-      {
-        "amount": "2",
-        "unit": "oz",
-        "item": "aperol"
-      },
-      {
-        "amount": "1",
-        "unit": "oz",
-        "item": "soda-water"
-      }
-    ],
-    "method": [
-      {
-        "action": "Fill",
-        "detail": "wine glass with ice"
-      },
-      {
-        "action": "Add",
-        "detail": "prosecco"
-      },
-      {
-        "action": "Add",
-        "detail": "Aperol"
-      },
-      {
-        "action": "Top",
-        "detail": "with club soda"
-      },
-      {
-        "action": "Stir",
-        "detail": "gently to combine"
-      }
-    ],
-    "glassware": "wine",
-    "garnish": "orange slice",
-    "flavor_profile": {
-      "sweet": 35,
-      "sour": 15,
-      "bitter": 30,
-      "spirit": 25
-    },
-    "tags": [
-      "aperitivo",
-      "built",
-      "bubbly",
-      "refreshing",
-      "italian"
     ],
     "difficulty": "easy",
     "timing_minutes": 2,
@@ -2906,9 +1360,823 @@
     "is_mocktail": false
   },
   {
+    "id": "aviation",
+    "name": "Aviation",
+    "tagline": "A violet-hued classic with floral elegance",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "maraschino"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "creme-de-violette"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "brandied cherry",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 55
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "floral",
+      "elegant"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "last-word",
+    "name": "Last Word",
+    "tagline": "Equal parts perfection from the Prohibition era",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "chartreuse"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "maraschino"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "none or lime wheel",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 35,
+      "bitter": 20,
+      "spirit": 50
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "prohibition",
+      "herbaceous"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "paper-plane",
+    "name": "Paper Plane",
+    "tagline": "A modern classic of perfect equal parts",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "aperol"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "amaro-nonino"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "none",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 25,
+      "spirit": 40
+    },
+    "tags": [
+      "whiskey",
+      "shaken",
+      "modern-classic",
+      "bitter",
+      "elegant"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "penicillin",
+    "name": "Penicillin",
+    "tagline": "A smoky, spicy whisky cure-all",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "scotch"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "honey-syrup"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "ginger-syrup"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "islay-scotch"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "scotch, lemon, honey syrup, and ginger syrup to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over fresh ice"
+      },
+      {
+        "action": "Float",
+        "detail": "Islay scotch on top"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "candied ginger",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 35,
+      "bitter": 10,
+      "spirit": 65
+    },
+    "tags": [
+      "whiskey",
+      "shaken",
+      "modern-classic",
+      "ginger",
+      "smoky"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "corpse-reviver-2",
+    "name": "Corpse Reviver #2",
+    "tagline": "The legendary morning-after cure",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lillet-blanc"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "cointreau"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "absinthe"
+      }
+    ],
+    "method": [
+      {
+        "action": "Rinse",
+        "detail": "coupe glass with absinthe and discard excess"
+      },
+      {
+        "action": "Add",
+        "detail": "remaining ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into prepared glass"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 40,
+      "bitter": 15,
+      "spirit": 45
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "citrus",
+      "prohibition"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "french-75",
+    "name": "French 75",
+    "tagline": "Elegant champagne cocktail with a citrus kick",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "champagne"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "gin, lemon juice, and syrup to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 10 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into chilled flute"
+      },
+      {
+        "action": "Top",
+        "detail": "with champagne"
+      }
+    ],
+    "glassware": "flute",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 35
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "champagne",
+      "elegant",
+      "celebration"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "bees-knees",
+    "name": "Bee's Knees",
+    "tagline": "Prohibition-era gin sour with golden honey",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "honey-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 50
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "prohibition",
+      "citrus",
+      "honey"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "blood-and-sand",
+    "name": "Blood and Sand",
+    "tagline": "A fruity scotch cocktail inspired by silent film",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "scotch"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "sweet-vermouth"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "cherry-heering"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "orange-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "orange peel",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 20,
+      "bitter": 10,
+      "spirit": 45
+    },
+    "tags": [
+      "whiskey",
+      "shaken",
+      "classic",
+      "fruity",
+      "scotch"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "rob-roy",
+    "name": "Rob Roy",
+    "tagline": "Scotland's answer to the Manhattan",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "scotch"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "sweet-vermouth"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "brandied cherry",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 0,
+      "bitter": 20,
+      "spirit": 65
+    },
+    "tags": [
+      "whiskey",
+      "stirred",
+      "classic",
+      "scotch",
+      "elegant"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "rusty-nail",
+    "name": "Rusty Nail",
+    "tagline": "Sweet and smoky Scotch simplicity",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "scotch"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "drambuie"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "ingredients to rocks glass"
+      },
+      {
+        "action": "Add ice",
+        "detail": "a large ice cube"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 0,
+      "bitter": 10,
+      "spirit": 70
+    },
+    "tags": [
+      "whiskey",
+      "stirred",
+      "classic",
+      "scotch",
+      "sweet",
+      "built"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "godfather",
+    "name": "Godfather",
+    "tagline": "A simple Italian-American nightcap",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "amaretto"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "ingredients to rocks glass"
+      },
+      {
+        "action": "Add ice",
+        "detail": "a large ice cube"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "none",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 0,
+      "bitter": 10,
+      "spirit": 65
+    },
+    "tags": [
+      "whiskey",
+      "stirred",
+      "classic",
+      "sweet",
+      "built",
+      "nightcap"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "sidecar",
+    "name": "Sidecar",
+    "tagline": "The elegant French brandy classic",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "cognac"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "cointreau"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into sugar-rimmed coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist, optional sugar rim",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 55
+    },
+    "tags": [
+      "brandy",
+      "shaken",
+      "classic",
+      "citrus",
+      "elegant"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "between-the-sheets",
+    "name": "Between the Sheets",
+    "tagline": "A potent three-spirit sour",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "cognac"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "white-rum"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "cointreau"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 55
+    },
+    "tags": [
+      "brandy",
+      "rum",
+      "shaken",
+      "classic",
+      "citrus",
+      "strong"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "brandy-alexander",
+    "name": "Brandy Alexander",
+    "tagline": "A decadent dessert in a glass",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "cognac"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "creme-de-cacao"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "cream"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "grated nutmeg",
+    "flavor_profile": {
+      "sweet": 55,
+      "sour": 0,
+      "bitter": 5,
+      "spirit": 40
+    },
+    "tags": [
+      "brandy",
+      "shaken",
+      "classic",
+      "creamy",
+      "dessert",
+      "sweet"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
     "id": "singapore-sling",
     "name": "Singapore Sling",
-    "tagline": "Raffles Hotel's legendary tropical creation",
+    "tagline": "The legendary tropical gin creation from Raffles",
     "ingredients": [
       {
         "amount": "1.5",
@@ -2918,7 +2186,7 @@
       {
         "amount": "0.5",
         "unit": "oz",
-        "item": "chambord"
+        "item": "cherry-heering"
       },
       {
         "amount": "0.25",
@@ -2958,36 +2226,3540 @@
       },
       {
         "action": "Shake",
-        "detail": "vigorously for 15-20 seconds"
+        "detail": "vigorously for 15 seconds"
       },
       {
         "action": "Strain",
-        "detail": "into hurricane glass over fresh ice"
+        "detail": "into ice-filled hurricane glass"
       }
     ],
     "glassware": "hurricane",
-    "garnish": "pineapple wedge, cherry",
+    "garnish": "pineapple wedge and cherry",
     "flavor_profile": {
-      "sweet": 45,
-      "sour": 30,
+      "sweet": 50,
+      "sour": 25,
       "bitter": 10,
-      "spirit": 40
+      "spirit": 35
     },
     "tags": [
       "gin",
       "shaken",
+      "classic",
       "tropical",
+      "fruity",
+      "tiki-adjacent"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 5,
+    "is_mocktail": false
+  },
+  {
+    "id": "caipirinha",
+    "name": "Caipirinha",
+    "tagline": "Brazil's national cocktail with fresh lime",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "cachaca"
+      },
+      {
+        "amount": "1",
+        "unit": "whole",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "2",
+        "unit": "tsp",
+        "item": "sugar"
+      }
+    ],
+    "method": [
+      {
+        "action": "Cut",
+        "detail": "lime into wedges"
+      },
+      {
+        "action": "Muddle",
+        "detail": "lime and sugar in rocks glass"
+      },
+      {
+        "action": "Add",
+        "detail": "cacha\u00e7a and crushed ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "briefly to combine"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lime wheel",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 45,
+      "bitter": 5,
+      "spirit": 55
+    },
+    "tags": [
+      "cachaca",
+      "muddled",
+      "classic",
+      "citrus",
+      "brazilian",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "pisco-sour",
+    "name": "Pisco Sour",
+    "tagline": "Peru's silky national treasure",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "pisco"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "egg-white"
+      },
+      {
+        "amount": "3",
+        "unit": "dashes",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Dry shake",
+        "detail": "all ingredients except bitters without ice"
+      },
+      {
+        "action": "Add ice",
+        "detail": "to shaker"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      },
+      {
+        "action": "Garnish",
+        "detail": "drop bitters on foam"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "angostura drops on foam",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 45,
+      "bitter": 10,
+      "spirit": 50
+    },
+    "tags": [
+      "pisco",
+      "shaken",
+      "classic",
+      "egg-white",
+      "citrus",
+      "peruvian"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "bramble",
+    "name": "Bramble",
+    "tagline": "A British summer garden in a glass",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "creme-de-mure"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "gin, lemon, and syrup to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass filled with crushed ice"
+      },
+      {
+        "action": "Drizzle",
+        "detail": "cr\u00e8me de m\u00fbre over top"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "fresh blackberries and lemon slice",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 45
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "modern-classic",
+      "fruity",
+      "berry",
+      "british"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "amaretto-sour",
+    "name": "Amaretto Sour",
+    "tagline": "The sophisticated version with bourbon backbone",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "amaretto"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "egg-white"
+      }
+    ],
+    "method": [
+      {
+        "action": "Dry shake",
+        "detail": "all ingredients without ice"
+      },
+      {
+        "action": "Add ice",
+        "detail": "to shaker"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into rocks glass with fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "brandied cherry and lemon peel",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 35
+    },
+    "tags": [
+      "amaretto",
+      "whiskey",
+      "shaken",
+      "modern-classic",
+      "egg-white",
+      "citrus"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "the-journalist",
+    "name": "The Journalist",
+    "tagline": "A complex gin martini variation",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "dry-vermouth"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "sweet-vermouth"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "cointreau"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 25,
+      "bitter": 20,
+      "spirit": 50
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
       "complex",
-      "tiki"
+      "vermouth"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "zombie",
+    "name": "Zombie",
+    "tagline": "Donn Beach's legendary rum powerhouse",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "white-rum"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "overproof-rum"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "falernum"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "cinnamon-syrup"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "grenadine"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients except overproof rum to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into tiki mug or hurricane glass filled with crushed ice"
+      },
+      {
+        "action": "Float",
+        "detail": "overproof rum on top"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "mint sprig, lime wheel, and cherry",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 30,
+      "bitter": 10,
+      "spirit": 75
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "tropical",
+      "strong",
+      "classic"
+    ],
+    "difficulty": "advanced",
+    "timing_minutes": 6,
+    "is_mocktail": false
+  },
+  {
+    "id": "painkiller",
+    "name": "Painkiller",
+    "tagline": "British Virgin Islands' creamy tropical cure",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "pineapple-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "coconut-cream"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into ice-filled hurricane glass"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "freshly grated nutmeg and orange slice",
+    "flavor_profile": {
+      "sweet": 55,
+      "sour": 15,
+      "bitter": 5,
+      "spirit": 40
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "tropical",
+      "creamy",
+      "fruity"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "navy-grog",
+    "name": "Navy Grog",
+    "tagline": "Donn Beach's tribute to naval rum traditions",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "white-rum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "demerara-rum"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "honey-syrup"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients except soda to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into double rocks glass filled with crushed ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "ice cone with mint sprig",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 35,
+      "bitter": 10,
+      "spirit": 55
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "tropical",
+      "citrus",
+      "classic"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "hurricane",
+    "name": "Hurricane",
+    "tagline": "New Orleans' famous Bourbon Street classic",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "white-rum"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "passion-fruit"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grenadine"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into hurricane glass filled with ice"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "orange slice and cherry",
+    "flavor_profile": {
+      "sweet": 55,
+      "sour": 25,
+      "bitter": 5,
+      "spirit": 45
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "tropical",
+      "fruity",
+      "new-orleans"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "planters-punch",
+    "name": "Planter's Punch",
+    "tagline": "The original Caribbean rum punch",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "dashes",
+        "item": "angostura"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "rum, lime, syrup, and bitters to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into highball glass filled with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "orange slice, cherry, and mint",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 35,
+      "bitter": 15,
+      "spirit": 45
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "tropical",
+      "classic",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "jungle-bird",
+    "name": "Jungle Bird",
+    "tagline": "A bitter-sweet tropical masterpiece",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "campari"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "pineapple-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "pineapple frond",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 30,
+      "bitter": 35,
+      "spirit": 40
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "bitter",
+      "tropical",
+      "modern-classic"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "fog-cutter",
+    "name": "Fog Cutter",
+    "tagline": "Trader Vic's powerful triple-spirit creation",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "white-rum"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "brandy"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "orgeat"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "dry-sherry"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients except sherry to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into tiki mug or pilsner glass filled with crushed ice"
+      },
+      {
+        "action": "Float",
+        "detail": "sherry on top"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "mint sprig",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 55
+    },
+    "tags": [
+      "rum",
+      "gin",
+      "brandy",
+      "shaken",
+      "tiki",
+      "tropical",
+      "strong"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 5,
+    "is_mocktail": false
+  },
+  {
+    "id": "scorpion",
+    "name": "Scorpion",
+    "tagline": "Trader Vic's bowl drink for sharing",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "white-rum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "cognac"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "orgeat"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into scorpion bowl or large glass with crushed ice"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "gardenia flower or orchid, mint",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 50
+    },
+    "tags": [
+      "rum",
+      "brandy",
+      "shaken",
+      "tiki",
+      "tropical",
+      "shareable"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "three-dots-and-a-dash",
+    "name": "Three Dots and a Dash",
+    "tagline": "Donn Beach's WWII victory celebration",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "rhum-agricole"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "falernum"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "honey-syrup"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into tiki mug filled with crushed ice"
+      }
+    ],
+    "glassware": "hurricane",
+    "garnish": "three cherries and a pineapple stick (morse code V for Victory)",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 30,
+      "bitter": 10,
+      "spirit": 50
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "tropical",
+      "classic",
+      "historic"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "jet-pilot",
+    "name": "Jet Pilot",
+    "tagline": "A turbocharged Zombie variation",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "demerara-rum"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "overproof-rum"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "falernum"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "cinnamon-syrup"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "angostura"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "absinthe"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into double rocks glass filled with crushed ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "mint sprig",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 30,
+      "bitter": 15,
+      "spirit": 70
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "tropical",
+      "strong",
+      "complex"
     ],
     "difficulty": "advanced",
     "timing_minutes": 5,
     "is_mocktail": false
   },
   {
+    "id": "queens-park-swizzle",
+    "name": "Queen's Park Swizzle",
+    "tagline": "Trinidad's sophisticated mojito cousin",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "8",
+        "unit": "leaves",
+        "item": "mint"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "mint, lime, and syrup to collins glass"
+      },
+      {
+        "action": "Muddle",
+        "detail": "gently to release mint oils"
+      },
+      {
+        "action": "Add",
+        "detail": "crushed ice and rum"
+      },
+      {
+        "action": "Swizzle",
+        "detail": "with barspoon until glass frosts"
+      },
+      {
+        "action": "Top",
+        "detail": "with more crushed ice"
+      },
+      {
+        "action": "Dash",
+        "detail": "bitters on top"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "mint bouquet",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 35,
+      "bitter": 15,
+      "spirit": 50
+    },
+    "tags": [
+      "rum",
+      "swizzle",
+      "tiki",
+      "herbal",
+      "refreshing",
+      "classic"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "saturn",
+    "name": "Saturn",
+    "tagline": "A space-age tropical gin creation",
+    "ingredients": [
+      {
+        "amount": "1.25",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "passion-fruit-syrup"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "falernum"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "orgeat"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into coupe or tiki mug with crushed ice"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 30,
+      "bitter": 10,
+      "spirit": 45
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "tiki",
+      "tropical",
+      "modern-classic",
+      "fruity"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "chartreuse-swizzle",
+    "name": "Chartreuse Swizzle",
+    "tagline": "An herbal tiki fusion from San Francisco",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "chartreuse"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "falernum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "pineapple-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to collins glass"
+      },
+      {
+        "action": "Fill",
+        "detail": "with crushed ice"
+      },
+      {
+        "action": "Swizzle",
+        "detail": "with barspoon until glass frosts"
+      },
+      {
+        "action": "Top",
+        "detail": "with more crushed ice"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "mint sprig and grated nutmeg",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 30,
+      "bitter": 25,
+      "spirit": 45
+    },
+    "tags": [
+      "chartreuse",
+      "swizzle",
+      "tiki",
+      "herbal",
+      "modern-classic",
+      "tropical"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "suffering-bastard",
+    "name": "Suffering Bastard",
+    "tagline": "Cairo's hangover cure from WWII",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "angostura"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "ginger-beer"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "gin, bourbon, lime, and bitters to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "briefly to combine"
+      },
+      {
+        "action": "Strain",
+        "detail": "into collins glass filled with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with ginger beer"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "mint sprig and orange slice",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 25,
+      "bitter": 15,
+      "spirit": 45
+    },
+    "tags": [
+      "gin",
+      "whiskey",
+      "shaken",
+      "tiki",
+      "ginger",
+      "refreshing",
+      "historic"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "port-au-prince",
+    "name": "Port au Prince",
+    "tagline": "A grapefruit-forward Caribbean refresher",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "falernum"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "grapefruit twist",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 40,
+      "bitter": 15,
+      "spirit": 45
+    },
+    "tags": [
+      "rum",
+      "shaken",
+      "tiki",
+      "citrus",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "naked-and-famous",
+    "name": "Naked and Famous",
+    "tagline": "A smoky, bitter Last Word variation",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "mezcal"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "aperol"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "yellow-chartreuse"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "none",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 35,
+      "bitter": 30,
+      "spirit": 45
+    },
+    "tags": [
+      "mezcal",
+      "shaken",
+      "modern-classic",
+      "smoky",
+      "bitter"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "division-bell",
+    "name": "Division Bell",
+    "tagline": "A mezcal riff on the classic Last Word",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "mezcal"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "aperol"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "maraschino"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "grapefruit twist",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 35,
+      "bitter": 25,
+      "spirit": 45
+    },
+    "tags": [
+      "mezcal",
+      "shaken",
+      "modern-classic",
+      "smoky",
+      "bitter"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "oaxaca-old-fashioned",
+    "name": "Oaxaca Old Fashioned",
+    "tagline": "A smoky Mexican twist on the original cocktail",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "reposado-tequila"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "mezcal"
+      },
+      {
+        "amount": "1",
+        "unit": "tsp",
+        "item": "agave-syrup"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over large ice cube"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "flamed orange peel",
+    "flavor_profile": {
+      "sweet": 25,
+      "sour": 0,
+      "bitter": 25,
+      "spirit": 70
+    },
+    "tags": [
+      "tequila",
+      "mezcal",
+      "stirred",
+      "modern-classic",
+      "smoky"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "tommys-margarita",
+    "name": "Tommy's Margarita",
+    "tagline": "San Francisco's agave-forward margarita",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "tequila"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "agave-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lime wheel",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 45,
+      "bitter": 5,
+      "spirit": 55
+    },
+    "tags": [
+      "tequila",
+      "shaken",
+      "modern-classic",
+      "citrus",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "final-ward",
+    "name": "Final Ward",
+    "tagline": "A whiskey variation on the Last Word",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "rye"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "chartreuse"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "maraschino"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "brandied cherry",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 35,
+      "bitter": 20,
+      "spirit": 50
+    },
+    "tags": [
+      "whiskey",
+      "shaken",
+      "modern-classic",
+      "herbaceous"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "gold-rush",
+    "name": "Gold Rush",
+    "tagline": "A honey-sweetened whiskey sour",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "honey-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lemon wheel",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 50
+    },
+    "tags": [
+      "whiskey",
+      "shaken",
+      "modern-classic",
+      "citrus",
+      "honey"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "gimlet",
+    "name": "Gimlet",
+    "tagline": "The refreshing gin and lime cordial classic",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-cordial"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lime wheel",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 55
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "citrus",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "white-lady",
+    "name": "White Lady",
+    "tagline": "An elegant gin sour with silky egg white",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "cointreau"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "egg-white"
+      }
+    ],
+    "method": [
+      {
+        "action": "Dry shake",
+        "detail": "all ingredients without ice"
+      },
+      {
+        "action": "Add ice",
+        "detail": "to shaker"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 45
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "egg-white",
+      "citrus",
+      "elegant"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "south-side",
+    "name": "South Side",
+    "tagline": "A minty gin sour from Prohibition Chicago",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "6",
+        "unit": "leaves",
+        "item": "mint"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "mint gently in shaker"
+      },
+      {
+        "action": "Add",
+        "detail": "remaining ingredients with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "mint leaf",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 50
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "herbal",
+      "refreshing",
+      "prohibition"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "clover-club",
+    "name": "Clover Club",
+    "tagline": "A pre-Prohibition raspberry gin sour",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "dry-vermouth"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "raspberry-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "egg-white"
+      }
+    ],
+    "method": [
+      {
+        "action": "Dry shake",
+        "detail": "all ingredients without ice"
+      },
+      {
+        "action": "Add ice",
+        "detail": "to shaker"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "fresh raspberries",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 35,
+      "bitter": 10,
+      "spirit": 40
+    },
+    "tags": [
+      "gin",
+      "shaken",
+      "classic",
+      "egg-white",
+      "fruity",
+      "elegant"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "trinidad-sour",
+    "name": "Trinidad Sour",
+    "tagline": "The audacious bitters-forward sour",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "angostura"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "rye"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "orgeat"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12-15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "none",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 35,
+      "bitter": 45,
+      "spirit": 35
+    },
+    "tags": [
+      "bitters",
+      "whiskey",
+      "shaken",
+      "modern-classic",
+      "unique",
+      "bold"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "new-york-sour",
+    "name": "New York Sour",
+    "tagline": "A whiskey sour with a red wine float",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "egg-white"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "red-wine"
+      }
+    ],
+    "method": [
+      {
+        "action": "Dry shake",
+        "detail": "bourbon, lemon, syrup, and egg white"
+      },
+      {
+        "action": "Add ice",
+        "detail": "to shaker"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass with fresh ice"
+      },
+      {
+        "action": "Float",
+        "detail": "red wine on top"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lemon wheel and cherry",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 50
+    },
+    "tags": [
+      "whiskey",
+      "shaken",
+      "classic",
+      "egg-white",
+      "wine",
+      "elegant"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "industry-sour",
+    "name": "Industry Sour",
+    "tagline": "A bold bartender's handshake",
+    "ingredients": [
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "fernet-branca"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "chartreuse"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "none",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 40,
+      "bitter": 40,
+      "spirit": 35
+    },
+    "tags": [
+      "fernet",
+      "chartreuse",
+      "shaken",
+      "modern-classic",
+      "bitter",
+      "herbaceous"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "midnight-margarita",
+    "name": "Midnight Margarita",
+    "tagline": "A smoky, mysterious mezcal margarita",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "mezcal"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "agave-syrup"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "cointreau"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into salt-rimmed rocks glass over fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lime wheel with sal de gusano rim",
+    "flavor_profile": {
+      "sweet": 25,
+      "sour": 40,
+      "bitter": 10,
+      "spirit": 60
+    },
+    "tags": [
+      "mezcal",
+      "shaken",
+      "modern-classic",
+      "smoky",
+      "citrus"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "enzoni",
+    "name": "Enzoni",
+    "tagline": "A refreshing Negroni meets grapes",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "campari"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "5",
+        "unit": "whole",
+        "item": "strawberry"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "grapes in shaker"
+      },
+      {
+        "action": "Add",
+        "detail": "remaining ingredients with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into rocks glass over fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "grapes on pick",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 35,
+      "bitter": 30,
+      "spirit": 40
+    },
+    "tags": [
+      "gin",
+      "campari",
+      "shaken",
+      "modern-classic",
+      "fruity",
+      "bitter"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "americano",
+    "name": "Americano",
+    "tagline": "The original bitter Italian aperitivo",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "campari"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "sweet-vermouth"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "add Campari and vermouth to highball glass"
+      },
+      {
+        "action": "Add ice",
+        "detail": "fill with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "orange slice",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 0,
+      "bitter": 45,
+      "spirit": 25
+    },
+    "tags": [
+      "campari",
+      "vermouth",
+      "built",
+      "classic",
+      "bitter",
+      "low-abv",
+      "aperitivo"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "sbagliato",
+    "name": "Sbagliato",
+    "tagline": "The 'mistaken' Negroni with prosecco",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "campari"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "sweet-vermouth"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "champagne"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "add Campari and vermouth to rocks glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with prosecco"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "orange slice",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 5,
+      "bitter": 40,
+      "spirit": 20
+    },
+    "tags": [
+      "campari",
+      "vermouth",
+      "built",
+      "modern-classic",
+      "bitter",
+      "low-abv",
+      "sparkling"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "aperol-spritz",
+    "name": "Aperol Spritz",
+    "tagline": "Italy's beloved sunset-colored aperitivo",
+    "ingredients": [
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "champagne"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "aperol"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "add prosecco and Aperol to wine glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with splash of soda"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "orange slice",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 10,
+      "bitter": 30,
+      "spirit": 15
+    },
+    "tags": [
+      "aperol",
+      "built",
+      "classic",
+      "bitter",
+      "low-abv",
+      "sparkling",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "hugo-spritz",
+    "name": "Hugo Spritz",
+    "tagline": "A floral Alpine spritz with elderflower",
+    "ingredients": [
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "champagne"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "elderflower-liqueur"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "soda-water"
+      },
+      {
+        "amount": "4",
+        "unit": "leaves",
+        "item": "mint"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "add elderflower liqueur to wine glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "mint leaves"
+      },
+      {
+        "action": "Top",
+        "detail": "with prosecco and soda"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "mint sprig and lime wheel",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 10,
+      "bitter": 5,
+      "spirit": 15
+    },
+    "tags": [
+      "elderflower",
+      "built",
+      "modern-classic",
+      "floral",
+      "low-abv",
+      "sparkling",
+      "herbal"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "bamboo",
+    "name": "Bamboo",
+    "tagline": "A dry, elegant low-proof stirred classic",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "dry-sherry"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "dry-vermouth"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "orange-bitters"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 20,
+      "sour": 5,
+      "bitter": 25,
+      "spirit": 30
+    },
+    "tags": [
+      "sherry",
+      "vermouth",
+      "stirred",
+      "classic",
+      "dry",
+      "low-abv",
+      "elegant"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "adonis",
+    "name": "Adonis",
+    "tagline": "A sweeter, nutty sherry cocktail",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "dry-sherry"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "sweet-vermouth"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "orange-bitters"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "orange twist",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 0,
+      "bitter": 20,
+      "spirit": 25
+    },
+    "tags": [
+      "sherry",
+      "vermouth",
+      "stirred",
+      "classic",
+      "low-abv",
+      "elegant"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "sherry-cobbler",
+    "name": "Sherry Cobbler",
+    "tagline": "A fruity, refreshing wine-based classic",
+    "ingredients": [
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "oloroso-sherry"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "slices",
+        "item": "cucumber"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "orange with syrup in shaker"
+      },
+      {
+        "action": "Add",
+        "detail": "sherry and ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "briefly to combine"
+      },
+      {
+        "action": "Strain",
+        "detail": "into goblet filled with crushed ice"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "orange slice, berries, and mint",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 10,
+      "bitter": 10,
+      "spirit": 25
+    },
+    "tags": [
+      "sherry",
+      "shaken",
+      "classic",
+      "fruity",
+      "low-abv",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "contessa",
+    "name": "Contessa",
+    "tagline": "A lighter, more approachable Negroni",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "aperol"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "dry-vermouth"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over large ice cube"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "orange twist",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 5,
+      "bitter": 30,
+      "spirit": 35
+    },
+    "tags": [
+      "gin",
+      "aperol",
+      "stirred",
+      "modern-classic",
+      "bitter",
+      "low-abv"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "chrysanthemum",
+    "name": "Chrysanthemum",
+    "tagline": "A herbal, aromatic vermouth cocktail",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "dry-vermouth"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "benedictine"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "absinthe"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "orange twist",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 0,
+      "bitter": 20,
+      "spirit": 25
+    },
+    "tags": [
+      "vermouth",
+      "stirred",
+      "classic",
+      "herbal",
+      "low-abv",
+      "aromatic"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "milano-torino",
+    "name": "Milano-Torino",
+    "tagline": "The ancestor of the Americano and Negroni",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "campari"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "sweet-vermouth"
+      }
+    ],
+    "method": [
+      {
+        "action": "Build",
+        "detail": "add both ingredients to rocks glass"
+      },
+      {
+        "action": "Add ice",
+        "detail": "fill with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "orange slice",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 0,
+      "bitter": 45,
+      "spirit": 25
+    },
+    "tags": [
+      "campari",
+      "vermouth",
+      "built",
+      "classic",
+      "bitter",
+      "low-abv"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "gin-and-tonic",
+    "name": "Gin & Tonic",
+    "tagline": "The quintessential British refresher",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "tonic-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Pour",
+        "detail": "gin over ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with tonic water"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently once to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wedge",
+    "flavor_profile": {
+      "sweet": 15,
+      "sour": 10,
+      "bitter": 35,
+      "spirit": 45
+    },
+    "tags": [
+      "gin",
+      "built",
+      "classic",
+      "refreshing",
+      "highball",
+      "simple"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "whiskey-highball",
+    "name": "Whiskey Highball",
+    "tagline": "Japanese-style precision in a glass",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "japanese-whisky"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Chill",
+        "detail": "highball glass with ice water, discard"
+      },
+      {
+        "action": "Add",
+        "detail": "whisky to chilled glass"
+      },
+      {
+        "action": "Add ice",
+        "detail": "fill with clear ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with cold soda water"
+      },
+      {
+        "action": "Stir",
+        "detail": "exactly 13.5 times vertically"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lemon twist (optional)",
+    "flavor_profile": {
+      "sweet": 15,
+      "sour": 0,
+      "bitter": 15,
+      "spirit": 50
+    },
+    "tags": [
+      "whiskey",
+      "built",
+      "classic",
+      "refreshing",
+      "highball",
+      "japanese"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "paloma",
+    "name": "Paloma",
+    "tagline": "Mexico's beloved grapefruit refresher",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "tequila"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "grapefruit-soda"
+      },
+      {
+        "amount": "1",
+        "unit": "pinch",
+        "item": "salt"
+      }
+    ],
+    "method": [
+      {
+        "action": "Rim",
+        "detail": "highball glass with salt"
+      },
+      {
+        "action": "Fill",
+        "detail": "with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "tequila and lime juice"
+      },
+      {
+        "action": "Top",
+        "detail": "with grapefruit soda"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wheel and salt rim",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 30,
+      "bitter": 15,
+      "spirit": 40
+    },
+    "tags": [
+      "tequila",
+      "built",
+      "classic",
+      "citrus",
+      "highball",
+      "mexican",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "el-diablo",
+    "name": "El Diablo",
+    "tagline": "A devilish tequila-ginger classic",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "tequila"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "creme-de-cassis"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "ginger-beer"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "tequila, cassis, and lime to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "briefly to combine"
+      },
+      {
+        "action": "Strain",
+        "detail": "into highball glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with ginger beer"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wheel and blackberries",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 25,
+      "bitter": 10,
+      "spirit": 35
+    },
+    "tags": [
+      "tequila",
+      "shaken",
+      "classic",
+      "ginger",
+      "highball",
+      "fruity"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "dark-n-stormy",
+    "name": "Dark 'n' Stormy",
+    "tagline": "Bermuda's official cocktail",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "dark-rum"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "ginger-beer"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "lime juice and ginger beer"
+      },
+      {
+        "action": "Float",
+        "detail": "dark rum on top"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wheel",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 20,
+      "bitter": 10,
+      "spirit": 45
+    },
+    "tags": [
+      "rum",
+      "built",
+      "classic",
+      "ginger",
+      "highball",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "horses-neck",
+    "name": "Horse's Neck",
+    "tagline": "An elegant bourbon and ginger ale classic",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "ginger-ale"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Place",
+        "detail": "long lemon spiral in collins glass"
+      },
+      {
+        "action": "Fill",
+        "detail": "with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "bourbon and bitters"
+      },
+      {
+        "action": "Top",
+        "detail": "with ginger ale"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "long lemon peel spiral",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 10,
+      "bitter": 15,
+      "spirit": 45
+    },
+    "tags": [
+      "whiskey",
+      "built",
+      "classic",
+      "ginger",
+      "highball",
+      "elegant"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "presbyterian",
+    "name": "Presbyterian",
+    "tagline": "Half ginger ale, half club soda elegance",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "ginger-ale"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "bourbon"
+      },
+      {
+        "action": "Top",
+        "detail": "with equal parts ginger ale and soda"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 25,
+      "sour": 5,
+      "bitter": 10,
+      "spirit": 45
+    },
+    "tags": [
+      "whiskey",
+      "built",
+      "classic",
+      "ginger",
+      "highball",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "gin-rickey",
+    "name": "Gin Rickey",
+    "tagline": "A bone-dry, refreshing gin classic",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "gin"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Squeeze",
+        "detail": "lime half into highball glass"
+      },
+      {
+        "action": "Drop",
+        "detail": "lime shell in glass"
+      },
+      {
+        "action": "Add",
+        "detail": "gin and ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      },
+      {
+        "action": "Stir",
+        "detail": "briefly"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime half (in drink)",
+    "flavor_profile": {
+      "sweet": 5,
+      "sour": 30,
+      "bitter": 15,
+      "spirit": 50
+    },
+    "tags": [
+      "gin",
+      "built",
+      "classic",
+      "citrus",
+      "highball",
+      "dry",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
+    "id": "vodka-soda",
+    "name": "Vodka Soda",
+    "tagline": "The ultimate clean and simple refresher",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "vodka"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "soda-water"
+      },
+      {
+        "amount": "1",
+        "unit": "wedge",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "vodka"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      },
+      {
+        "action": "Squeeze",
+        "detail": "lime wedge"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wedge",
+    "flavor_profile": {
+      "sweet": 0,
+      "sour": 15,
+      "bitter": 0,
+      "spirit": 50
+    },
+    "tags": [
+      "vodka",
+      "built",
+      "classic",
+      "simple",
+      "highball",
+      "light",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 1,
+    "is_mocktail": false
+  },
+  {
+    "id": "cuba-libre",
+    "name": "Cuba Libre",
+    "tagline": "Rum and coke with a Cuban twist",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "white-rum"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "cola"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "rum and lime juice"
+      },
+      {
+        "action": "Top",
+        "detail": "with cola"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wedge",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 15,
+      "bitter": 10,
+      "spirit": 35
+    },
+    "tags": [
+      "rum",
+      "built",
+      "classic",
+      "cola",
+      "highball",
+      "cuban",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": false
+  },
+  {
     "id": "vieux-carre",
-    "name": "Vieux Carre",
-    "tagline": "New Orleans sophistication in the French Quarter",
+    "name": "Vieux Carr\u00e9",
+    "tagline": "New Orleans' split-base stirred classic",
     "ingredients": [
       {
         "amount": "0.75",
@@ -3005,14 +5777,193 @@
         "item": "sweet-vermouth"
       },
       {
-        "amount": "1",
-        "unit": "tsp",
+        "amount": "0.25",
+        "unit": "oz",
         "item": "benedictine"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "peychauds"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over large ice cube"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 0,
+      "bitter": 25,
+      "spirit": 55
+    },
+    "tags": [
+      "whiskey",
+      "brandy",
+      "stirred",
+      "classic",
+      "new-orleans",
+      "complex"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "sazerac",
+    "name": "Sazerac",
+    "tagline": "America's oldest cocktail from New Orleans",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "rye"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "dashes",
+        "item": "peychauds"
+      },
+      {
+        "amount": "1",
+        "unit": "dash",
+        "item": "absinthe"
+      }
+    ],
+    "method": [
+      {
+        "action": "Rinse",
+        "detail": "chilled rocks glass with absinthe"
+      },
+      {
+        "action": "Discard",
+        "detail": "excess absinthe"
+      },
+      {
+        "action": "Stir",
+        "detail": "rye, syrup, and bitters in mixing glass with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "into prepared glass (neat, no ice)"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "lemon twist (expressed and discarded)",
+    "flavor_profile": {
+      "sweet": 20,
+      "sour": 0,
+      "bitter": 35,
+      "spirit": 75
+    },
+    "tags": [
+      "whiskey",
+      "stirred",
+      "classic",
+      "new-orleans",
+      "anise",
+      "historic"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "toronto",
+    "name": "Toronto",
+    "tagline": "A bold whiskey-Fernet combination",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "rye"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "fernet-branca"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "simple-syrup"
       },
       {
         "amount": "2",
         "unit": "dashes",
-        "item": "peychauds"
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "orange twist",
+    "flavor_profile": {
+      "sweet": 20,
+      "sour": 0,
+      "bitter": 40,
+      "spirit": 65
+    },
+    "tags": [
+      "whiskey",
+      "fernet",
+      "stirred",
+      "classic",
+      "bitter",
+      "bold"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "monte-carlo",
+    "name": "Monte Carlo",
+    "tagline": "A warming herbal Manhattan cousin",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "rye"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "benedictine"
       },
       {
         "amount": "2",
@@ -3039,18 +5990,356 @@
     "flavor_profile": {
       "sweet": 35,
       "sour": 0,
-      "bitter": 30,
+      "bitter": 20,
       "spirit": 65
     },
     "tags": [
       "whiskey",
+      "stirred",
+      "classic",
+      "herbal",
+      "warming"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "carajillo",
+    "name": "Carajillo",
+    "tagline": "Spain and Mexico's beloved coffee cocktail",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "licor-43"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "espresso"
+      }
+    ],
+    "method": [
+      {
+        "action": "Shake",
+        "detail": "Licor 43 and espresso with ice"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass over fresh ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "coffee beans",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 5,
+      "bitter": 25,
+      "spirit": 25
+    },
+    "tags": [
+      "liqueur",
+      "shaken",
+      "modern-classic",
+      "coffee",
+      "spanish",
+      "mexican"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "espresso-martini-refined",
+    "name": "Espresso Martini",
+    "tagline": "The modern coffee cocktail done right",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "vodka"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "kahlua"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "espresso"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "simple-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 15 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "three coffee beans",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 5,
+      "bitter": 30,
+      "spirit": 45
+    },
+    "tags": [
+      "vodka",
+      "shaken",
+      "modern-classic",
+      "coffee",
+      "elegant"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": false
+  },
+  {
+    "id": "irish-coffee",
+    "name": "Irish Coffee",
+    "tagline": "The original warming coffee cocktail",
+    "ingredients": [
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "irish-whiskey"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "espresso"
+      },
+      {
+        "amount": "1",
+        "unit": "tsp",
+        "item": "brown-sugar"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "cream"
+      }
+    ],
+    "method": [
+      {
+        "action": "Warm",
+        "detail": "Irish coffee glass"
+      },
+      {
+        "action": "Add",
+        "detail": "sugar and hot coffee, stir to dissolve"
+      },
+      {
+        "action": "Add",
+        "detail": "Irish whiskey"
+      },
+      {
+        "action": "Float",
+        "detail": "lightly whipped cream on top"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "none (cream is the garnish)",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 0,
+      "bitter": 25,
+      "spirit": 35
+    },
+    "tags": [
+      "whiskey",
+      "built",
+      "classic",
+      "coffee",
+      "hot",
+      "irish",
+      "creamy"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 5,
+    "is_mocktail": false
+  },
+  {
+    "id": "hot-toddy",
+    "name": "Hot Toddy",
+    "tagline": "The classic warming remedy",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "bourbon"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "honey-syrup"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "hot-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "bourbon, honey, and lemon to warmed mug"
+      },
+      {
+        "action": "Top",
+        "detail": "with hot water"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "wine-glass",
+    "garnish": "lemon wheel, cinnamon stick, cloves",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 20,
+      "bitter": 5,
+      "spirit": 40
+    },
+    "tags": [
+      "whiskey",
+      "built",
+      "classic",
+      "hot",
+      "honey",
+      "warming",
+      "remedy"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "batida",
+    "name": "Batida de Coco",
+    "tagline": "Brazil's creamy coconut rum drink",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "cachaca"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "coconut-cream"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "condensed-milk"
+      }
+    ],
+    "method": [
+      {
+        "action": "Blend",
+        "detail": "all ingredients with ice until smooth"
+      },
+      {
+        "action": "Pour",
+        "detail": "into chilled highball glass"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "toasted coconut flakes",
+    "flavor_profile": {
+      "sweet": 65,
+      "sour": 5,
+      "bitter": 0,
+      "spirit": 35
+    },
+    "tags": [
+      "cachaca",
+      "blended",
+      "classic",
+      "creamy",
+      "brazilian",
+      "tropical",
+      "sweet"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": false
+  },
+  {
+    "id": "japanese-cocktail",
+    "name": "Japanese Cocktail",
+    "tagline": "A historic cognac and orgeat classic",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "cognac"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "orgeat"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to mixing glass with ice"
+      },
+      {
+        "action": "Stir",
+        "detail": "for 30 seconds until well-chilled"
+      },
+      {
+        "action": "Strain",
+        "detail": "into chilled coupe"
+      }
+    ],
+    "glassware": "coupe",
+    "garnish": "lemon twist",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 0,
+      "bitter": 20,
+      "spirit": 55
+    },
+    "tags": [
       "brandy",
       "stirred",
-      "complex",
-      "new-orleans"
+      "classic",
+      "nutty",
+      "historic",
+      "elegant"
     ],
-    "difficulty": "advanced",
-    "timing_minutes": 4,
+    "difficulty": "easy",
+    "timing_minutes": 3,
     "is_mocktail": false
   }
 ]

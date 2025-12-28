@@ -1,0 +1,244 @@
+# Task configurations for Cocktail Cache Crews
+# All tasks use these configurations for description, expected_output, and output_model
+
+# =============================================================================
+# ANALYSIS CREW TASKS
+# =============================================================================
+
+# Fast mode: Single unified task for drink recommendation
+unified_analysis:
+  description: |
+    Find and rank the best drinks for the user based on their cabinet and mood.
+
+    User's mood: {mood}
+    Skill level: {skill_level}
+
+    AVAILABLE DRINKS (pre-computed from cabinet, already filtered and excludes applied):
+    {available_drinks}
+
+    Instructions:
+    1. Review the available drinks listed above
+    2. Rank drinks by mood fit using the flavor profiles provided:
+       - Relaxing moods -> spirit-forward, balanced drinks (higher spirit values)
+       - Celebratory moods -> refreshing, bright drinks (higher sour, lower spirit)
+       - Contemplative moods -> complex, layered drinks (balanced profiles)
+    3. Consider skill level when ranking (beginners need simpler drinks)
+    4. Return the top 5 ranked drinks
+
+    IMPORTANT: Return the result as a valid JSON object matching the AnalysisOutput schema.
+  expected_output: |
+    A JSON object with structure:
+    {
+      "candidates": [
+        {
+          "id": "drink-id",
+          "name": "Drink Name",
+          "tagline": "Brief description",
+          "difficulty": "easy|medium|hard|advanced",
+          "timing_minutes": 5,
+          "tags": ["tag1", "tag2"],
+          "is_mocktail": false,
+          "mood_score": 85,
+          "mood_reasoning": "Why this matches the mood"
+        }
+      ],
+      "total_found": 3,
+      "mood_summary": "Summary of mood-based ranking"
+    }
+  output_model: AnalysisOutput
+
+# Full mode: First task - analyze cabinet contents
+analyze_cabinet:
+  description: |
+    Analyze the available drinks and identify the best candidates.
+
+    AVAILABLE DRINKS (pre-computed from cabinet, already filtered):
+    {available_drinks}
+
+    Review the drinks listed above and summarize their key characteristics.
+    Return all drinks with their details (name, difficulty, timing, tags,
+    flavor profiles) for the next agent to rank by mood.
+  expected_output: |
+    A JSON list of makeable drinks, each containing:
+    - id: The drink identifier
+    - name: The drink name
+    - tagline: Brief description
+    - difficulty: Skill level required (easy, medium, hard, advanced)
+    - timing_minutes: Preparation time as integer
+    - tags: Flavor and style tags as list
+    - is_mocktail: Boolean whether it's a mocktail
+    - flavor_profile: The flavor characteristics
+  output_model: null
+
+# Full mode: Second task - rank drinks by mood fit
+match_mood:
+  description: |
+    Rank the candidate drinks by how well they match the user's mood and preferences.
+
+    User's mood: {mood}
+    Skill level: {skill_level}
+
+    Use the flavor profiles provided in the previous analysis to rank the drinks. Consider:
+
+    1. Mood alignment: Match drink characteristics to the stated mood
+       - Relaxing moods pair well with spirit-forward, balanced drinks
+       - Celebratory moods pair well with refreshing, bright drinks
+       - Contemplative moods pair well with complex, layered drinks
+
+    2. Skill appropriateness: Beginners need simpler techniques;
+       adventurous users can handle complex preparations
+
+    Rank the drinks from best to worst mood fit.
+
+    IMPORTANT: Return the result as a valid JSON object matching the AnalysisOutput schema with 'candidates', 'total_found', and 'mood_summary' fields.
+  expected_output: |
+    A JSON object with structure:
+    {
+      "candidates": [
+        {
+          "id": "drink-id",
+          "name": "Drink Name",
+          "tagline": "Brief description",
+          "difficulty": "easy|medium|hard|advanced",
+          "timing_minutes": 5,
+          "tags": ["tag1", "tag2"],
+          "is_mocktail": false,
+          "mood_score": 85,
+          "mood_reasoning": "Why this matches the mood"
+        }
+      ],
+      "total_found": 3,
+      "mood_summary": "Summary of mood-based ranking"
+    }
+  output_model: AnalysisOutput
+
+# =============================================================================
+# RECIPE CREW TASKS
+# =============================================================================
+
+# Recipe Writer task - generates skill-appropriate recipes
+write_recipe:
+  description: |
+    Generate a detailed recipe for the cocktail with ID '{cocktail_id}'.
+
+    User Context:
+    - Skill Level: {skill_level}
+    - Available Ingredients: {cabinet}
+    - Drink Type Preference: {drink_type}
+
+    Complete Recipe Data (pre-loaded):
+    {recipe_data}
+
+    Available Substitutions:
+    {substitutions_data}
+
+    Instructions:
+    1. Use the recipe data provided above to create a complete recipe response
+    2. Check if any ingredients are missing from the user's cabinet
+    3. Include the substitution options listed above for any missing ingredients
+    4. Adapt the recipe complexity and technique tips to the user's skill level:
+       - beginner: Detailed explanations, safety tips, precise measurements
+       - intermediate: Standard instructions with occasional tips
+       - adventurous: Concise instructions, suggest creative variations
+    5. Generate a 'why' explanation for why this drink matches the user's context
+
+    IMPORTANT: Return the result as a valid JSON object matching the RecipeOutput schema.
+  expected_output: |
+    A JSON object with structure:
+    {
+      "id": "cocktail-id",
+      "name": "Cocktail Name",
+      "tagline": "Short catchy description",
+      "why": "Why this drink matches the users mood",
+      "flavor_profile": {"sweet": 30, "sour": 20, "bitter": 25, "spirit": 70},
+      "ingredients": [
+        {"amount": "2", "unit": "oz", "item": "bourbon"}
+      ],
+      "method": [
+        {"action": "Add", "detail": "ingredients to mixing glass"}
+      ],
+      "glassware": "rocks",
+      "garnish": "orange peel",
+      "timing": "3 minutes",
+      "difficulty": "easy",
+      "technique_tips": [
+        {"skill_level": "beginner", "tip": "Use large ice to slow dilution"}
+      ],
+      "substitutions": ["alternative ingredient suggestions"],
+      "is_mocktail": false
+    }
+  output_model: RecipeOutput
+
+# Bottle Advisor task - recommends next bottle purchase
+advise_bottles:
+  description: |
+    Based on the recipe just generated and the user's current cabinet,
+    recommend which bottle they should buy next.
+
+    User Context:
+    - Current Cabinet: {cabinet}
+    - Drink Type Preference: {drink_type}
+
+    Pre-computed Bottle Recommendations (based on unlock potential):
+    {bottle_recommendations}
+
+    Instructions:
+    1. Use the pre-computed recommendations above to create your response
+    2. Consider the drink type preference when making recommendations
+    3. Prioritize bottles that complement what the user already has
+    4. Focus on bottles that unlock NEW drinks the user cannot currently make
+    5. Select the top 2-3 recommendations and provide clear reasoning for each
+
+    IMPORTANT: Return the result as a valid JSON object matching the BottleAdvisorOutput schema.
+  expected_output: |
+    A JSON object with structure:
+    {
+      "recommendations": [
+        {
+          "ingredient": "ingredient-id",
+          "ingredient_name": "Ingredient Name",
+          "unlocks": 5,
+          "drinks": ["Drink 1", "Drink 2"],
+          "reasoning": "Why this is a good purchase"
+        }
+      ],
+      "total_new_drinks": 10
+    }
+  output_model: BottleAdvisorOutput
+
+# Standalone Bottle Advisor task (for parallel execution without recipe context)
+advise_bottles_standalone:
+  description: |
+    Recommend which bottle the user should buy next based on their
+    current cabinet and drink preferences.
+
+    User Context:
+    - Current Cabinet: {cabinet}
+    - Drink Type Preference: {drink_type}
+
+    Pre-computed Bottle Recommendations (based on unlock potential):
+    {bottle_recommendations}
+
+    Instructions:
+    1. Use the pre-computed recommendations above to create your response
+    2. Consider the drink type preference when making recommendations
+    3. Prioritize bottles that complement what the user already has
+    4. Focus on bottles that unlock NEW drinks the user cannot currently make
+    5. Select the top 2-3 recommendations and provide clear reasoning for each
+
+    IMPORTANT: Return the result as a valid JSON object matching the BottleAdvisorOutput schema.
+  expected_output: |
+    A JSON object with structure:
+    {
+      "recommendations": [
+        {
+          "ingredient": "ingredient-id",
+          "ingredient_name": "Ingredient Name",
+          "unlocks": 5,
+          "drinks": ["Drink 1", "Drink 2"],
+          "reasoning": "Why this is a good purchase"
+        }
+      ],
+      "total_new_drinks": 10
+    }
+  output_model: BottleAdvisorOutput

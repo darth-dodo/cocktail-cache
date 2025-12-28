@@ -10,6 +10,9 @@ The crew uses structured Pydantic models for inputs and outputs,
 ensuring reliable, typed data flow through the AI pipeline.
 """
 
+import logging
+import time
+
 from crewai import Crew, Process, Task
 
 from src.app.agents import (
@@ -18,7 +21,13 @@ from src.app.agents import (
     create_mood_matcher,
 )
 from src.app.models import AnalysisOutput, DrinkType, SkillLevel
-from src.app.tools import FlavorProfilerTool, RecipeDBTool
+from src.app.services.drink_data import (
+    DrinkTypeFilter,
+    format_drinks_for_prompt,
+    get_makeable_drinks,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def create_analysis_crew(fast_mode: bool = True) -> Crew:
@@ -30,66 +39,73 @@ def create_analysis_crew(fast_mode: bool = True) -> Crew:
             analysis.
 
     The crew expects the following inputs when kicked off:
-        - cabinet: List of ingredient IDs the user has available
-        - drink_type: 'cocktails', 'mocktails', or 'both'
         - mood: Description of the user's current mood/occasion
         - skill_level: 'beginner', 'intermediate', or 'adventurous'
-        - exclude: List of drink IDs to exclude (recent history)
+        - available_drinks: Pre-formatted string of makeable drinks
+            (use format_drinks_for_prompt() to generate this)
+
+    Note: Agents do not use tools. Drink data is pre-computed and injected
+    directly into the prompts via the available_drinks input. Use
+    run_analysis_crew() which handles the data pre-computation automatically.
 
     Returns:
         A configured Crew instance ready to be kicked off with inputs.
         The output will be structured as AnalysisOutput Pydantic model.
 
     Example:
+        # Preferred: use run_analysis_crew() which handles data injection
+        result = run_analysis_crew(
+            cabinet=["bourbon", "lemons", "honey"],
+            mood="relaxing",
+            skill_level="intermediate",
+        )
+
+        # Or manually inject data:
+        drinks = get_makeable_drinks(cabinet, "cocktails", exclude)
         crew = create_analysis_crew(fast_mode=True)
         result = crew.kickoff(inputs={
-            "cabinet": ["bourbon", "lemons", "honey", "simple-syrup"],
-            "drink_type": "cocktails",
             "mood": "unwinding after a long week",
             "skill_level": "intermediate",
-            "exclude": ["whiskey-sour", "old-fashioned"]
+            "available_drinks": format_drinks_for_prompt(drinks),
         })
-        # result.pydantic contains AnalysisOutput
     """
+    logger.info(f"Creating analysis crew with fast_mode={fast_mode}")
+
     if fast_mode:
-        return _create_fast_crew()
+        crew = _create_fast_crew()
+        logger.debug("Fast crew created with single Drink Recommender agent")
     else:
-        return _create_full_crew()
+        crew = _create_full_crew()
+        logger.debug("Full crew created with Cabinet Analyst and Mood Matcher agents")
+
+    return crew
 
 
 def _create_fast_crew() -> Crew:
     """Create a single-agent crew for fast analysis.
 
-    Uses one unified Drink Recommender agent with both tools,
-    completing the entire analysis in a single LLM call.
+    Uses one unified Drink Recommender agent without tools,
+    receiving pre-computed drink data directly in the prompt.
     """
-    # Create tool instances
-    recipe_db = RecipeDBTool()
-    flavor_profiler = FlavorProfilerTool()
+    # Create unified agent without tools - data is pre-computed and injected
+    drink_recommender = create_drink_recommender(tools=[])
 
-    # Create unified agent with both tools
-    drink_recommender = create_drink_recommender(tools=[recipe_db, flavor_profiler])
-
-    # Single task that does everything
+    # Single task that does everything - drink data is injected via {available_drinks}
     unified_task = Task(
         description=(
             "Find and rank the best drinks for the user based on their cabinet and mood.\n\n"
-            "Cabinet contents: {cabinet}\n"
-            "Drink type preference: {drink_type}\n"
             "User's mood: {mood}\n"
-            "Skill level: {skill_level}\n"
-            "Drinks to exclude: {exclude}\n\n"
+            "Skill level: {skill_level}\n\n"
+            "AVAILABLE DRINKS (pre-computed from cabinet, already filtered and excludes applied):\n"
+            "{available_drinks}\n\n"
             "Instructions:\n"
-            "1. Use the recipe_database tool to find drinks makeable with the cabinet ingredients\n"
-            "2. Filter to only include drinks with score=1.0 (all ingredients available)\n"
-            "3. Exclude any drinks in the exclude list\n"
-            "4. Use the flavor_profiler tool to understand drink characteristics\n"
-            "5. Rank drinks by mood fit:\n"
-            "   - Relaxing moods → spirit-forward, balanced drinks\n"
-            "   - Celebratory moods → refreshing, bright drinks\n"
-            "   - Contemplative moods → complex, layered drinks\n"
-            "6. Consider skill level when ranking (beginners need simpler drinks)\n"
-            "7. Return the top 5 ranked drinks\n\n"
+            "1. Review the available drinks listed above\n"
+            "2. Rank drinks by mood fit using the flavor profiles provided:\n"
+            "   - Relaxing moods -> spirit-forward, balanced drinks (higher spirit values)\n"
+            "   - Celebratory moods -> refreshing, bright drinks (higher sour, lower spirit)\n"
+            "   - Contemplative moods -> complex, layered drinks (balanced profiles)\n"
+            "3. Consider skill level when ranking (beginners need simpler drinks)\n"
+            "4. Return the top 5 ranked drinks\n\n"
             "IMPORTANT: Return the result as a valid JSON object matching the "
             "AnalysisOutput schema."
         ),
@@ -128,29 +144,24 @@ def _create_fast_crew() -> Crew:
 def _create_full_crew() -> Crew:
     """Create a two-agent crew for detailed analysis.
 
-    Uses Cabinet Analyst → Mood Matcher for more thorough analysis,
-    but requires two LLM calls.
+    Uses Cabinet Analyst -> Mood Matcher for more thorough analysis,
+    but requires two LLM calls. Both agents receive pre-computed data
+    instead of using tools.
     """
-    # Create tool instances
-    recipe_db = RecipeDBTool()
-    flavor_profiler = FlavorProfilerTool()
-
-    # Create agents with their respective tools
-    cabinet_analyst = create_cabinet_analyst(tools=[recipe_db])
-    mood_matcher = create_mood_matcher(tools=[flavor_profiler])
+    # Create agents without tools - data is pre-computed and injected
+    cabinet_analyst = create_cabinet_analyst(tools=[])
+    mood_matcher = create_mood_matcher(tools=[])
 
     # Task 1: Analyze cabinet contents and find makeable drinks
+    # Drink data is injected via {available_drinks}
     analyze_task = Task(
         description=(
-            "Analyze the user's bar cabinet and find all drinks that can be made.\n\n"
-            "Cabinet contents: {cabinet}\n"
-            "Drink type preference: {drink_type}\n\n"
-            "Use the recipe_database tool to search for drinks matching these "
-            "ingredients. Filter by the drink type preference (cocktails, mocktails, "
-            "or both). Return all drinks with a match score of 1.0 (complete matches) "
-            "along with their key details (name, difficulty, timing, tags).\n\n"
-            "Important: Only include drinks where ALL required ingredients are "
-            "available in the cabinet."
+            "Analyze the available drinks and identify the best candidates.\n\n"
+            "AVAILABLE DRINKS (pre-computed from cabinet, already filtered):\n"
+            "{available_drinks}\n\n"
+            "Review the drinks listed above and summarize their key characteristics. "
+            "Return all drinks with their details (name, difficulty, timing, tags, "
+            "flavor profiles) for the next agent to rank by mood."
         ),
         expected_output=(
             "A JSON list of makeable drinks, each containing:\n"
@@ -160,7 +171,8 @@ def _create_full_crew() -> Crew:
             "- difficulty: Skill level required (easy, medium, hard, advanced)\n"
             "- timing_minutes: Preparation time as integer\n"
             "- tags: Flavor and style tags as list\n"
-            "- is_mocktail: Boolean whether it's a mocktail"
+            "- is_mocktail: Boolean whether it's a mocktail\n"
+            "- flavor_profile: The flavor characteristics"
         ),
         agent=cabinet_analyst,
     )
@@ -171,19 +183,16 @@ def _create_full_crew() -> Crew:
             "Rank the candidate drinks by how well they match the user's mood "
             "and preferences.\n\n"
             "User's mood: {mood}\n"
-            "Skill level: {skill_level}\n"
-            "Drinks to exclude: {exclude}\n\n"
-            "Use the flavor_profiler tool to get detailed flavor profiles for "
-            "the candidate drinks from the previous analysis. Consider:\n\n"
+            "Skill level: {skill_level}\n\n"
+            "Use the flavor profiles provided in the previous analysis to rank "
+            "the drinks. Consider:\n\n"
             "1. Mood alignment: Match drink characteristics to the stated mood\n"
             "   - Relaxing moods pair well with spirit-forward, balanced drinks\n"
             "   - Celebratory moods pair well with refreshing, bright drinks\n"
             "   - Contemplative moods pair well with complex, layered drinks\n\n"
             "2. Skill appropriateness: Beginners need simpler techniques;\n"
             "   adventurous users can handle complex preparations\n\n"
-            "3. Variety: Exclude drinks from the exclude list (recent history)\n"
-            "   to encourage exploration\n\n"
-            "Rank the remaining drinks from best to worst mood fit.\n\n"
+            "Rank the drinks from best to worst mood fit.\n\n"
             "IMPORTANT: Return the result as a valid JSON object matching the "
             "AnalysisOutput schema with 'candidates', 'total_found', and 'mood_summary' fields."
         ),
@@ -233,6 +242,9 @@ def run_analysis_crew(
     This function provides a simple interface for running the analysis
     workflow, handling enum-to-string conversion and default values.
 
+    Pre-computes drink data and injects it directly into agent prompts,
+    eliminating tool call latency.
+
     Args:
         cabinet: List of ingredient IDs available in the user's cabinet.
         mood: Description of the user's current mood or occasion.
@@ -261,21 +273,42 @@ def run_analysis_crew(
     import json
     import re
 
+    start_time = time.perf_counter()
+    logger.info(
+        f"run_analysis_crew started: mood='{mood}', skill_level={skill_level}, "
+        f"drink_type={drink_type}, cabinet_size={len(cabinet)}, "
+        f"exclude_count={len(exclude or [])}, fast_mode={fast_mode}"
+    )
+
     # Normalize enum values to strings for template substitution
     skill_str = (
         skill_level.value if isinstance(skill_level, SkillLevel) else skill_level
     )
     drink_str = drink_type.value if isinstance(drink_type, DrinkType) else drink_type
 
-    # Map drink_type enum values to tool-expected format
-    drink_type_map = {
+    # Map drink_type enum values to data service format
+    drink_type_map: dict[str, DrinkTypeFilter] = {
         "cocktail": "cocktails",
         "mocktail": "mocktails",
         "both": "both",
     }
-    drink_filter = drink_type_map.get(drink_str, drink_str)
+    drink_filter: DrinkTypeFilter = drink_type_map.get(drink_str, "both")
+
+    # Pre-compute drink data to inject into prompts (eliminates tool calls)
+    data_start = time.perf_counter()
+    makeable_drinks = get_makeable_drinks(
+        cabinet=cabinet,
+        drink_type=drink_filter,
+        exclude=exclude,
+    )
+    available_drinks_text = format_drinks_for_prompt(makeable_drinks)
+    data_elapsed_ms = (time.perf_counter() - data_start) * 1000
+    logger.debug(f"Data pre-computation completed in {data_elapsed_ms:.2f}ms")
 
     crew = create_analysis_crew(fast_mode=fast_mode)
+
+    crew_start = time.perf_counter()
+    logger.debug("Kicking off analysis crew")
     result = crew.kickoff(
         inputs={
             "cabinet": cabinet,
@@ -283,8 +316,11 @@ def run_analysis_crew(
             "mood": mood,
             "skill_level": skill_str,
             "exclude": exclude or [],
+            "available_drinks": available_drinks_text,
         }
     )
+    crew_elapsed_ms = (time.perf_counter() - crew_start) * 1000
+    logger.debug(f"Crew execution completed in {crew_elapsed_ms:.2f}ms")
 
     # Return the structured pydantic output if available
     if (
@@ -292,16 +328,32 @@ def run_analysis_crew(
         and result.pydantic
         and isinstance(result.pydantic, AnalysisOutput)
     ):
+        total_elapsed_ms = (time.perf_counter() - start_time) * 1000
+        logger.info(
+            f"run_analysis_crew completed: {len(result.pydantic.candidates)} candidates "
+            f"found in {total_elapsed_ms:.2f}ms (data: {data_elapsed_ms:.2f}ms, crew: {crew_elapsed_ms:.2f}ms)"
+        )
         return result.pydantic
 
     # Fallback: parse from raw output if pydantic output unavailable
+    logger.warning("Pydantic output unavailable, attempting to parse from raw output")
     try:
         json_match = re.search(r"\{[\s\S]*\}", str(result))
         if json_match:
             data = json.loads(json_match.group())
-            return AnalysisOutput(**data)
-    except (json.JSONDecodeError, ValueError):
-        pass
+            parsed_output = AnalysisOutput(**data)
+            total_elapsed_ms = (time.perf_counter() - start_time) * 1000
+            logger.info(
+                f"run_analysis_crew completed (fallback parse): {len(parsed_output.candidates)} candidates "
+                f"found in {total_elapsed_ms:.2f}ms"
+            )
+            return parsed_output
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.error(f"Failed to parse analysis output: {e}")
 
     # Return empty result if parsing fails
+    total_elapsed_ms = (time.perf_counter() - start_time) * 1000
+    logger.error(
+        f"run_analysis_crew failed after {total_elapsed_ms:.2f}ms, returning empty result"
+    )
     return AnalysisOutput(candidates=[], total_found=0, mood_summary="")

@@ -2,6 +2,7 @@
 
 from src.app.models.cabinet import Cabinet
 from src.app.models.cocktail import CocktailMatch
+from src.app.models.config import AgentConfig, LLMConfig, TaskConfig
 from src.app.models.crew_io import (
     AnalysisInput,
     AnalysisOutput,
@@ -33,6 +34,10 @@ from src.app.models.user_prefs import DrinkType, SkillLevel, UserPreferences
 __all__ = [
     # Cabinet
     "Cabinet",
+    # Config Models
+    "AgentConfig",
+    "LLMConfig",
+    "TaskConfig",
     # Cocktail Matching
     "CocktailMatch",
     # Crew I/O Models

@@ -39,6 +39,16 @@ from src.app.models import (
     RecipeOutput,
     SkillLevel,
 )
+from src.app.services.drink_data import (
+    DrinkTypeFilter,
+    format_bottle_recommendations_for_prompt,
+    format_drinks_for_prompt,
+    format_recipe_for_prompt,
+    get_drink_by_id,
+    get_makeable_drinks,
+    get_substitutions_for_ingredients,
+    get_unlock_recommendations,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -264,14 +274,24 @@ class CocktailFlow(Flow[CocktailFlowState]):
         exclude_list = list(set(self.state.recent_history + self.state.rejected))
 
         # Map drink_type to RecipeDBTool format
-        drink_type_map = {
+        drink_type_map: dict[str, DrinkTypeFilter] = {
             "cocktail": "cocktails",
             "mocktail": "mocktails",
             "both": "both",
         }
-        db_drink_type = drink_type_map.get(self.state.drink_type, "cocktails")
+        db_drink_type: DrinkTypeFilter = drink_type_map.get(
+            self.state.drink_type, "cocktails"
+        )
 
         try:
+            # Pre-compute available drinks for prompt injection
+            makeable_drinks = get_makeable_drinks(
+                cabinet=self.state.cabinet,
+                drink_type=db_drink_type,
+                exclude=exclude_list,
+            )
+            available_drinks_text = format_drinks_for_prompt(makeable_drinks)
+
             # Create and run the Analysis Crew
             analysis_crew = create_analysis_crew()
             result = analysis_crew.kickoff(
@@ -281,6 +301,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
                     "mood": self.state.mood,
                     "skill_level": self.state.skill_level,
                     "exclude": exclude_list,
+                    "available_drinks": available_drinks_text,
                 }
             )
 
@@ -384,6 +405,38 @@ class CocktailFlow(Flow[CocktailFlowState]):
             - If bottle fails: Log warning, continue with recipe only
             - If timeout (30s): Set error state
         """
+        # Map drink_type to service format
+        drink_type_map: dict[str, DrinkTypeFilter] = {
+            "cocktail": "cocktails",
+            "mocktail": "mocktails",
+            "both": "both",
+        }
+
+        # Pre-compute data for prompt injection
+        drink_data = get_drink_by_id(self.state.selected or "")
+        recipe_data_text = format_recipe_for_prompt(drink_data) if drink_data else ""
+
+        # Get substitutions for missing ingredients
+        if drink_data:
+            ing_ids = [ing["item"] for ing in drink_data.get("ingredients", [])]
+            cabinet_lower = {c.lower() for c in self.state.cabinet}
+            missing = [i for i in ing_ids if i.lower() not in cabinet_lower]
+            subs = get_substitutions_for_ingredients(missing)
+            subs_text = (
+                "\n".join(f"- {k}: {', '.join(v)}" for k, v in subs.items())
+                if subs
+                else "None needed"
+            )
+        else:
+            subs_text = "Recipe not found"
+
+        # Get bottle recommendations - map drink_type to expected format
+        bottle_drink_type: DrinkTypeFilter = drink_type_map.get(
+            self.state.drink_type, "both"
+        )
+        bottle_recs = get_unlock_recommendations(self.state.cabinet, bottle_drink_type)
+        bottle_recs_text = format_bottle_recommendations_for_prompt(bottle_recs)
+
         recipe_crew = create_recipe_only_crew()
         bottle_crew = create_bottle_only_crew()
 
@@ -397,12 +450,15 @@ class CocktailFlow(Flow[CocktailFlowState]):
                             "skill_level": self.state.skill_level,
                             "cabinet": self.state.cabinet,
                             "drink_type": self.state.drink_type,
+                            "recipe_data": recipe_data_text,
+                            "substitutions_data": subs_text,
                         }
                     ),
                     bottle_crew.kickoff_async(
                         inputs={
                             "cabinet": self.state.cabinet,
                             "drink_type": self.state.drink_type,
+                            "bottle_recommendations": bottle_recs_text,
                         }
                     ),
                     return_exceptions=True,  # Don't fail fast, handle individually
@@ -440,6 +496,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
                     top_rec = bottle_output.recommendations[0]
                     self.state.next_bottle = {
                         "ingredient": top_rec.ingredient,
+                        "ingredient_name": top_rec.ingredient_name,
                         "unlocks": top_rec.unlocks,
                         "drinks": top_rec.drinks,
                     }
@@ -467,6 +524,38 @@ class CocktailFlow(Flow[CocktailFlowState]):
         This method maintains backwards compatibility by running the combined
         Recipe Crew that chains Recipe Writer -> Bottle Advisor sequentially.
         """
+        # Map drink_type to service format
+        drink_type_map: dict[str, DrinkTypeFilter] = {
+            "cocktail": "cocktails",
+            "mocktail": "mocktails",
+            "both": "both",
+        }
+
+        # Pre-compute data for prompt injection
+        drink_data = get_drink_by_id(self.state.selected or "")
+        recipe_data_text = format_recipe_for_prompt(drink_data) if drink_data else ""
+
+        # Get substitutions for missing ingredients
+        if drink_data:
+            ing_ids = [ing["item"] for ing in drink_data.get("ingredients", [])]
+            cabinet_lower = {c.lower() for c in self.state.cabinet}
+            missing = [i for i in ing_ids if i.lower() not in cabinet_lower]
+            subs = get_substitutions_for_ingredients(missing)
+            subs_text = (
+                "\n".join(f"- {k}: {', '.join(v)}" for k, v in subs.items())
+                if subs
+                else "None needed"
+            )
+        else:
+            subs_text = "Recipe not found"
+
+        # Get bottle recommendations - map drink_type to expected format
+        bottle_drink_type: DrinkTypeFilter = drink_type_map.get(
+            self.state.drink_type, "both"
+        )
+        bottle_recs = get_unlock_recommendations(self.state.cabinet, bottle_drink_type)
+        bottle_recs_text = format_bottle_recommendations_for_prompt(bottle_recs)
+
         try:
             # Create and run the Recipe Crew
             recipe_crew = create_recipe_crew(
@@ -478,6 +567,9 @@ class CocktailFlow(Flow[CocktailFlowState]):
                     "skill_level": self.state.skill_level,
                     "cabinet": self.state.cabinet,
                     "drink_type": self.state.drink_type,
+                    "recipe_data": recipe_data_text,
+                    "substitutions_data": subs_text,
+                    "bottle_recommendations": bottle_recs_text,
                 }
             )
 
@@ -520,6 +612,7 @@ class CocktailFlow(Flow[CocktailFlowState]):
                 top_rec = bottle_output.recommendations[0]
                 self.state.next_bottle = {
                     "ingredient": top_rec.ingredient,
+                    "ingredient_name": top_rec.ingredient_name,
                     "unlocks": top_rec.unlocks,
                     "drinks": top_rec.drinks,
                 }

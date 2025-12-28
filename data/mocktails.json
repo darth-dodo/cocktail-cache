@@ -360,11 +360,6 @@
         "amount": "2",
         "unit": "oz",
         "item": "coconut-cream"
-      },
-      {
-        "amount": "1",
-        "unit": "cup",
-        "item": "ice"
       }
     ],
     "method": [
@@ -1439,6 +1434,931 @@
       "unique"
     ],
     "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "seedlip-garden-tonic",
+    "name": "Seedlip Garden & Tonic",
+    "tagline": "A sophisticated herbal non-alcoholic G&T",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "seedlip-garden"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "tonic-water"
+      },
+      {
+        "amount": "3",
+        "unit": "slices",
+        "item": "cucumber"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "Seedlip Garden 108"
+      },
+      {
+        "action": "Top",
+        "detail": "with premium tonic water"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "cucumber ribbon and snap pea",
+    "flavor_profile": {
+      "sweet": 15,
+      "sour": 5,
+      "bitter": 30,
+      "spirit": 0
+    },
+    "tags": [
+      "seedlip",
+      "herbal",
+      "sophisticated",
+      "refreshing",
+      "low-sugar"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "roy-rogers",
+    "name": "Roy Rogers",
+    "tagline": "The classic kid-friendly cola mocktail",
+    "ingredients": [
+      {
+        "amount": "6",
+        "unit": "oz",
+        "item": "cola"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grenadine"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "grenadine"
+      },
+      {
+        "action": "Top",
+        "detail": "with cola"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to create sunset effect"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "maraschino cherry",
+    "flavor_profile": {
+      "sweet": 70,
+      "sour": 5,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "sweet",
+      "classic",
+      "kid-friendly",
+      "cola",
+      "simple"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "cinderella",
+    "name": "Cinderella",
+    "tagline": "A magical three-citrus princess punch",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "pineapple-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grenadine"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "juices and grenadine to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 10 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into collins glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "orange slice and cherry",
+    "flavor_profile": {
+      "sweet": 55,
+      "sour": 30,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "citrus",
+      "fruity",
+      "classic",
+      "kid-friendly",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "safe-sex-on-the-beach",
+    "name": "Safe Sex on the Beach",
+    "tagline": "All the tropical flavor, none of the alcohol",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "peach-nectar"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "cranberry-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grenadine"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 10 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into highball glass with ice"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "orange slice and cherry",
+    "flavor_profile": {
+      "sweet": 60,
+      "sour": 20,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "fruity",
+      "tropical",
+      "sweet",
+      "classic",
+      "colorful"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "italian-sunrise",
+    "name": "Italian Sunrise",
+    "tagline": "A vibrant citrus sunrise without the tequila",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "grapefruit-juice"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "orange-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "grenadine"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "grapefruit and orange juice"
+      },
+      {
+        "action": "Stir",
+        "detail": "to combine"
+      },
+      {
+        "action": "Float",
+        "detail": "grenadine slowly down side of glass"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "orange wheel and cherry",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 35,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "citrus",
+      "fruity",
+      "colorful",
+      "brunch",
+      "refreshing"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "ginger-rogers",
+    "name": "Ginger Rogers",
+    "tagline": "A sparkling ginger-mint refresher",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "ginger-beer"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "6",
+        "unit": "leaves",
+        "item": "mint"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "mint gently with lime and syrup"
+      },
+      {
+        "action": "Add",
+        "detail": "ice to highball glass"
+      },
+      {
+        "action": "Add",
+        "detail": "muddled mixture"
+      },
+      {
+        "action": "Top",
+        "detail": "with ginger beer"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "mint sprig and lime wheel",
+    "flavor_profile": {
+      "sweet": 35,
+      "sour": 30,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "ginger",
+      "herbal",
+      "refreshing",
+      "spicy",
+      "sparkling"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "pomegranate-sparkler",
+    "name": "Pomegranate Sparkler",
+    "tagline": "Ruby-red elegance with antioxidant power",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "pomegranate-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "pomegranate juice, lime, and syrup to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "briefly to combine"
+      },
+      {
+        "action": "Strain",
+        "detail": "into flute"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "flute",
+    "garnish": "pomegranate seeds",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 30,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "fruity",
+      "elegant",
+      "celebration",
+      "antioxidant",
+      "sparkling"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "blueberry-lavender-lemonade",
+    "name": "Blueberry Lavender Lemonade",
+    "tagline": "A fragrant, fruity garden refresher",
+    "ingredients": [
+      {
+        "amount": "0.25",
+        "unit": "cup",
+        "item": "blueberry"
+      },
+      {
+        "amount": "1.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lavender-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "blueberries in shaker"
+      },
+      {
+        "action": "Add",
+        "detail": "lemon juice, lavender syrup, and ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into collins glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "fresh blueberries and lavender sprig",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 40,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "fruity",
+      "floral",
+      "herbal",
+      "refreshing",
+      "summery"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "spiced-apple-cider-mocktail",
+    "name": "Spiced Apple Cider",
+    "tagline": "Autumn in a glass with warming spices",
+    "ingredients": [
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "apple-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "cinnamon-syrup"
+      },
+      {
+        "amount": "2",
+        "unit": "dashes",
+        "item": "angostura"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "all ingredients to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into rocks glass with ice"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "apple slice and cinnamon stick",
+    "flavor_profile": {
+      "sweet": 50,
+      "sour": 25,
+      "bitter": 15,
+      "spirit": 0
+    },
+    "tags": [
+      "apple",
+      "spiced",
+      "autumn",
+      "warming",
+      "cozy"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "hibiscus-cooler",
+    "name": "Hibiscus Cooler",
+    "tagline": "A stunning ruby-red floral refresher",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "hibiscus-syrup"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "hibiscus syrup and lime juice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      },
+      {
+        "action": "Stir",
+        "detail": "gently to combine"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "dried hibiscus flower and lime wheel",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 35,
+      "bitter": 10,
+      "spirit": 0
+    },
+    "tags": [
+      "floral",
+      "refreshing",
+      "colorful",
+      "mexican",
+      "unique"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 2,
+    "is_mocktail": true
+  },
+  {
+    "id": "matcha-highball",
+    "name": "Matcha Highball",
+    "tagline": "Japanese green tea meets sparkling refreshment",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "tsp",
+        "item": "matcha"
+      },
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "hot-water"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "tonic-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Whisk",
+        "detail": "matcha with hot water until smooth"
+      },
+      {
+        "action": "Add",
+        "detail": "syrup and stir"
+      },
+      {
+        "action": "Pour",
+        "detail": "into highball glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with tonic water"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "matcha powder dust on top",
+    "flavor_profile": {
+      "sweet": 30,
+      "sour": 5,
+      "bitter": 35,
+      "spirit": 0
+    },
+    "tags": [
+      "matcha",
+      "japanese",
+      "unique",
+      "refreshing",
+      "healthy"
+    ],
+    "difficulty": "medium",
+    "timing_minutes": 4,
+    "is_mocktail": true
+  },
+  {
+    "id": "coconut-lime-refresher",
+    "name": "Coconut Lime Refresher",
+    "tagline": "Tropical vacation vibes in every sip",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "coconut-milk"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lime-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "coconut milk, lime, and syrup to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Strain",
+        "detail": "into highball glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "lime wheel and toasted coconut",
+    "flavor_profile": {
+      "sweet": 40,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "tropical",
+      "coconut",
+      "citrus",
+      "refreshing",
+      "creamy"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "elderflower-collins-na",
+    "name": "Elderflower Collins",
+    "tagline": "Floral elegance without the gin",
+    "ingredients": [
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "elderflower-liqueur"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.5",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Add",
+        "detail": "elderflower syrup, lemon, and simple syrup to shaker with ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "briefly to combine"
+      },
+      {
+        "action": "Strain",
+        "detail": "into collins glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "collins",
+    "garnish": "lemon wheel and edible flowers",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "floral",
+      "elegant",
+      "citrus",
+      "refreshing",
+      "sophisticated"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "espresso-tonic",
+    "name": "Espresso Tonic",
+    "tagline": "A caffeinated twist on the classic highball",
+    "ingredients": [
+      {
+        "amount": "2",
+        "unit": "oz",
+        "item": "espresso"
+      },
+      {
+        "amount": "4",
+        "unit": "oz",
+        "item": "tonic-water"
+      },
+      {
+        "amount": "0.25",
+        "unit": "oz",
+        "item": "simple-syrup"
+      }
+    ],
+    "method": [
+      {
+        "action": "Fill",
+        "detail": "highball glass with ice"
+      },
+      {
+        "action": "Add",
+        "detail": "tonic water and syrup"
+      },
+      {
+        "action": "Float",
+        "detail": "cold espresso on top for layered effect"
+      }
+    ],
+    "glassware": "highball",
+    "garnish": "orange twist",
+    "flavor_profile": {
+      "sweet": 25,
+      "sour": 5,
+      "bitter": 50,
+      "spirit": 0
+    },
+    "tags": [
+      "coffee",
+      "bitter",
+      "refreshing",
+      "modern",
+      "unique"
+    ],
+    "difficulty": "easy",
+    "timing_minutes": 3,
+    "is_mocktail": true
+  },
+  {
+    "id": "raspberry-basil-smash-na",
+    "name": "Raspberry Basil Smash",
+    "tagline": "Fresh berries meet aromatic basil",
+    "ingredients": [
+      {
+        "amount": "5",
+        "unit": "whole",
+        "item": "raspberry"
+      },
+      {
+        "amount": "4",
+        "unit": "leaves",
+        "item": "basil"
+      },
+      {
+        "amount": "1",
+        "unit": "oz",
+        "item": "lemon-juice"
+      },
+      {
+        "amount": "0.75",
+        "unit": "oz",
+        "item": "simple-syrup"
+      },
+      {
+        "amount": "3",
+        "unit": "oz",
+        "item": "soda-water"
+      }
+    ],
+    "method": [
+      {
+        "action": "Muddle",
+        "detail": "raspberries and basil in shaker"
+      },
+      {
+        "action": "Add",
+        "detail": "lemon juice, syrup, and ice"
+      },
+      {
+        "action": "Shake",
+        "detail": "vigorously for 12 seconds"
+      },
+      {
+        "action": "Double strain",
+        "detail": "into rocks glass with ice"
+      },
+      {
+        "action": "Top",
+        "detail": "with soda water"
+      }
+    ],
+    "glassware": "rocks",
+    "garnish": "fresh raspberries and basil leaf",
+    "flavor_profile": {
+      "sweet": 45,
+      "sour": 35,
+      "bitter": 5,
+      "spirit": 0
+    },
+    "tags": [
+      "fruity",
+      "herbal",
+      "refreshing",
+      "summery",
+      "colorful"
+    ],
+    "difficulty": "easy",
     "timing_minutes": 4,
     "is_mocktail": true
   }
