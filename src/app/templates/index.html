@@ -212,47 +212,24 @@ const chatMessages = document.getElementById('chat-messages');
 const inputArea = document.getElementById('input-area');
 const resetBtn = document.getElementById('reset-btn');
 
-// Ingredient options organized by category (IDs match database exactly)
-const ingredients = {
-    'Spirits': [
-        { id: 'bourbon', name: 'Bourbon', emoji: '🥃' },
-        { id: 'rye-whiskey', name: 'Rye Whiskey', emoji: '🥃' },
-        { id: 'london-dry-gin', name: 'Gin', emoji: '🍸' },
-        { id: 'vodka', name: 'Vodka', emoji: '🍸' },
-        { id: 'white-rum', name: 'White Rum', emoji: '🥃' },
-        { id: 'aged-rum', name: 'Aged Rum', emoji: '🥃' },
-        { id: 'blanco-tequila', name: 'Tequila', emoji: '🌵' },
-        { id: 'mezcal', name: 'Mezcal', emoji: '🌵' },
-        { id: 'cognac', name: 'Cognac', emoji: '🍷' }
-    ],
-    'Liqueurs': [
-        { id: 'sweet-vermouth', name: 'Sweet Vermouth', emoji: '🍷' },
-        { id: 'dry-vermouth', name: 'Dry Vermouth', emoji: '🍸' },
-        { id: 'campari', name: 'Campari', emoji: '🔴' },
-        { id: 'cointreau', name: 'Cointreau', emoji: '🍊' },
-        { id: 'amaretto', name: 'Amaretto', emoji: '🌰' },
-        { id: 'coffee-liqueur', name: 'Coffee Liqueur', emoji: '☕' },
-        { id: 'maraschino-liqueur', name: 'Maraschino', emoji: '🍒' },
-        { id: 'green-chartreuse', name: 'Green Chartreuse', emoji: '🌿' }
-    ],
-    'Bitters & Syrups': [
-        { id: 'angostura-bitters', name: 'Angostura Bitters', emoji: '💧' },
-        { id: 'orange-bitters', name: 'Orange Bitters', emoji: '🍊' },
-        { id: 'simple-syrup', name: 'Simple Syrup', emoji: '🍯' },
-        { id: 'honey-syrup', name: 'Honey Syrup', emoji: '🍯' },
-        { id: 'grenadine', name: 'Grenadine', emoji: '🍒' }
-    ],
-    'Fresh & Mixers': [
-        { id: 'fresh-lemon-juice', name: 'Lemon Juice', emoji: '🍋' },
-        { id: 'fresh-lime-juice', name: 'Lime Juice', emoji: '🍋' },
-        { id: 'fresh-orange-juice', name: 'Orange Juice', emoji: '🍊' },
-        { id: 'fresh-mint', name: 'Fresh Mint', emoji: '🌿' },
-        { id: 'club-soda', name: 'Club Soda', emoji: '💧' },
-        { id: 'tonic-water', name: 'Tonic Water', emoji: '💧' },
-        { id: 'ginger-beer', name: 'Ginger Beer', emoji: '🍺' },
-        { id: 'egg-white', name: 'Egg White', emoji: '🥚' }
-    ]
-};
+// Ingredients will be loaded from API (single source of truth)
+let ingredients = {};
+let ingredientsLoaded = false;
+
+// Load ingredients from API
+async function loadIngredients() {
+    if (ingredientsLoaded) return;
+    try {
+        const response = await fetch('/api/ingredients');
+        const data = await response.json();
+        ingredients = data.categories;
+        ingredientsLoaded = true;
+    } catch (error) {
+        console.error('Failed to load ingredients:', error);
+        // Fallback to empty - will show error in UI
+        ingredients = {};
+    }
+}
 
 // Fun mixology facts to display during loading
 const mixologyFacts = [
@@ -281,8 +258,10 @@ const mixologyFacts = [
 let factInterval = null;
 
 // Initialize chat
-function init() {
+async function init() {
     resetBtn.addEventListener('click', resetChat);
+    // Load ingredients from API before showing UI
+    await loadIngredients();
     showWelcome();
 }
 
@@ -407,10 +386,14 @@ function showCabinetInput() {
 
     html += `</div>
         <div class="space-y-2 pt-2 border-t border-amber-900/20">
-            <div class="flex gap-2">
-                <input type="text" id="custom-ingredient-input"
-                       class="glass-input flex-1 text-sm py-2"
-                       placeholder="Type: aperol, prosecco, mint...">
+            <div class="flex gap-2 relative">
+                <div class="flex-1 relative">
+                    <input type="text" id="custom-ingredient-input"
+                           class="glass-input w-full text-sm py-2"
+                           placeholder="Type: aperol, prosecco, mint..."
+                           autocomplete="off">
+                    <div id="autocomplete-dropdown" class="autocomplete-dropdown hidden"></div>
+                </div>
                 <button id="add-custom-btn" class="btn btn-sm glass-btn-secondary px-3" title="Add">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -507,10 +490,141 @@ function showCabinetInput() {
     }
 
     addCustomBtn.addEventListener('click', addCustomIngredients);
-    customInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+
+    // Autocomplete functionality
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    let selectedIndex = -1;
+
+    function getAllIngredients() {
+        const allItems = [];
+        for (const [category, items] of Object.entries(ingredients)) {
+            for (const item of items) {
+                allItems.push({ ...item, category });
+            }
+        }
+        return allItems;
+    }
+
+    function filterIngredients(query) {
+        if (!query || query.length < 2) return [];
+        const lowerQuery = query.toLowerCase();
+        const allItems = getAllIngredients();
+        return allItems
+            .filter(item =>
+                item.name.toLowerCase().includes(lowerQuery) &&
+                !state.cabinet.includes(item.id)
+            )
+            .slice(0, 6);
+    }
+
+    function renderDropdown(matches) {
+        if (matches.length === 0) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
+            return;
+        }
+
+        dropdown.innerHTML = matches.map((item, index) => `
+            <div class="autocomplete-item ${index === selectedIndex ? 'selected' : ''}"
+                 data-id="${item.id}"
+                 data-index="${index}">
+                <span class="autocomplete-emoji">${item.emoji}</span>
+                <span class="autocomplete-name">${item.name}</span>
+                <span class="autocomplete-category">${item.category}</span>
+            </div>
+        `).join('');
+
+        dropdown.classList.remove('hidden');
+
+        // Add click handlers to dropdown items
+        dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', () => {
+                selectIngredient(item.dataset.id);
+            });
+        });
+    }
+
+    function selectIngredient(id) {
+        // Find the ingredient and add it to cabinet
+        const allItems = getAllIngredients();
+        const ingredient = allItems.find(item => item.id === id);
+
+        if (ingredient && !state.cabinet.includes(id)) {
+            state.cabinet.push(id);
+            // Update the chip UI if visible
+            const chip = document.querySelector(`.ingredient-chip[data-id="${id}"]`);
+            if (chip) {
+                chip.classList.add('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
+            }
+            updateCabinetButton();
+        }
+
+        // Clear input and hide dropdown
+        customInput.value = '';
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        selectedIndex = -1;
+        customInput.focus();
+    }
+
+    function updateSelectedItem() {
+        dropdown.querySelectorAll('.autocomplete-item').forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.classList.add('selected');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
+
+    customInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        const matches = filterIngredients(query);
+        selectedIndex = -1;
+        renderDropdown(matches);
+    });
+
+    customInput.addEventListener('keydown', (e) => {
+        const items = dropdown.querySelectorAll('.autocomplete-item');
+        const isDropdownVisible = !dropdown.classList.contains('hidden') && items.length > 0;
+
+        if (e.key === 'ArrowDown') {
             e.preventDefault();
-            addCustomIngredients();
+            if (isDropdownVisible) {
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelectedItem();
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (isDropdownVisible) {
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateSelectedItem();
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isDropdownVisible && selectedIndex >= 0) {
+                const selectedItem = items[selectedIndex];
+                if (selectedItem) {
+                    selectIngredient(selectedItem.dataset.id);
+                }
+            } else {
+                addCustomIngredients();
+            }
+        } else if (e.key === 'Escape') {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!customInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
         }
     });
 }
@@ -1001,6 +1115,84 @@ init();
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* Autocomplete dropdown */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: rgba(28, 25, 23, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 200, 150, 0.15);
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.autocomplete-dropdown.hidden {
+    display: none;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid rgba(255, 200, 150, 0.05);
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+    background: rgba(217, 119, 6, 0.2);
+}
+
+.autocomplete-item.selected {
+    background: rgba(217, 119, 6, 0.3);
+}
+
+.autocomplete-emoji {
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.autocomplete-name {
+    flex: 1;
+    color: #fef3e2;
+    font-size: 0.875rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.autocomplete-category {
+    flex-shrink: 0;
+    color: rgba(251, 191, 36, 0.6);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Scrollbar for autocomplete */
+.autocomplete-dropdown::-webkit-scrollbar {
+    width: 4px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.4);
+    border-radius: 2px;
 }
 </style>
 {% endblock %}

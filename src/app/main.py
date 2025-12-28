@@ -66,3 +66,12 @@ async def root(request: Request) -> HTMLResponse:
         request=request,
         name="index.html",
     )
+
+
+@app.get("/browse", response_class=HTMLResponse)
+async def browse(request: Request) -> HTMLResponse:
+    """Render the drink browse and search interface."""
+    return templates.TemplateResponse(
+        request=request,
+        name="browse.html",
+    )
