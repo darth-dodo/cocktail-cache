@@ -6,6 +6,7 @@ which cocktails and mocktails can be made with available ingredients.
 
 from crewai import LLM, Agent
 
+from src.app.agents.config import get_agent_config
 from src.app.agents.llm_config import get_default_llm
 
 
@@ -27,18 +28,13 @@ def create_cabinet_analyst(
     Returns:
         A configured CrewAI Agent instance.
     """
+    config = get_agent_config("cabinet_analyst")
     return Agent(
-        role="Cabinet Analyst",
-        goal="Identify all drinks makeable with available ingredients",
-        backstory=(
-            "You are an expert mixologist who has memorized every classic cocktail "
-            "and mocktail recipe. When shown a home bar cabinet, you instantly "
-            "recognize which drinks can be made. You consider close substitutions "
-            "and always respect the user's drink type preference (cocktail, mocktail, "
-            "or both). You never suggest drinks that require unavailable ingredients."
-        ),
+        role=config["role"],
+        goal=config["goal"],
+        backstory=config["backstory"],
         tools=tools or [],
         llm=llm or get_default_llm(),
-        verbose=False,
-        allow_delegation=False,
+        verbose=config.get("verbose", False),
+        allow_delegation=config.get("allow_delegation", False),
     )

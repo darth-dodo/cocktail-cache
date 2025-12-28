@@ -6,6 +6,7 @@ to buy next for maximum drink-unlocking value.
 
 from crewai import LLM, Agent
 
+from src.app.agents.config import get_agent_config
 from src.app.agents.llm_config import get_default_llm
 
 
@@ -28,18 +29,13 @@ def create_bottle_advisor(
     Returns:
         A configured CrewAI Agent instance.
     """
+    config = get_agent_config("bottle_advisor")
     return Agent(
-        role="Bottle Advisor",
-        goal="Recommend the next bottle purchase for maximum value",
-        backstory=(
-            "You analyze bar inventories and recommend strategic purchases. "
-            "You know exactly which bottles unlock the most new drink possibilities. "
-            "You consider budget-friendly options and suggest bottles that unlock "
-            "the most NEW drinks the user cannot currently make. You always respect "
-            "the user's drink type preference."
-        ),
+        role=config["role"],
+        goal=config["goal"],
+        backstory=config["backstory"],
         tools=tools or [],
         llm=llm or get_default_llm(),
-        verbose=False,
-        allow_delegation=False,
+        verbose=config.get("verbose", False),
+        allow_delegation=config.get("allow_delegation", False),
     )

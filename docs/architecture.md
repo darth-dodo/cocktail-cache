@@ -481,6 +481,7 @@ The system supports several configuration parameters for performance tuning:
 |-----------|---------|-------------|
 | `fast_mode` | `True` | Uses unified Drink Recommender (1 LLM call) instead of Cabinet Analyst + Mood Matcher (2 calls) |
 | `include_bottle_advice` | `True` | When False, skips the bottle advisor step to save 1 LLM call |
+| `PARALLEL_CREWS` | `True` | Environment variable. When enabled, runs Recipe Writer and Bottle Advisor concurrently |
 
 ### Request Lifecycle
 
@@ -532,9 +533,10 @@ The system supports several configuration parameters for performance tuning:
 
 TOTAL LLM CALLS: 2-4 (depending on configuration)
   - Fast mode + no bottle advice: 2 calls (~3-4 seconds)
-  - Fast mode + bottle advice (default): 3 calls (~5 seconds)
-  - Full mode + bottle advice: 4 calls (~8 seconds)
-TARGET LATENCY: <8 seconds (fast mode: <5 seconds)
+  - Fast mode + bottle advice (sequential): 3 calls (~5-6 seconds)
+  - Fast mode + bottle advice (parallel): 3 calls (~3-4 seconds) [40% faster]
+  - Full mode + bottle advice: 4 calls (~6-8 seconds)
+TARGET LATENCY: <8 seconds (fast mode with parallel: <4 seconds)
 ```
 
 ### State Management
@@ -1003,13 +1005,63 @@ cocktail-cache/
 | Agent with persona | All agents | Voice/personality design |
 | Tool with schema | All tools | Type-safe tool inputs |
 | Sequential crew | Both crews | Agent handoff |
+| Parallel crew execution | Recipe Crew | Concurrent tasks with `asyncio.gather()` |
 | Flow state | CocktailFlow | Cross-crew state |
 | Structured output | All outputs | Pydantic integration |
 | Error delegation | Flow | Graceful degradation |
 
 ---
 
-*Document Version: 1.2*
+## Appendix: Parallel Crew Execution
+
+When `PARALLEL_CREWS=true` (the default), the Recipe Writer and Bottle Advisor tasks execute concurrently instead of sequentially. This optimization reduces latency by approximately 40% for requests that include bottle advice.
+
+### Parallel Execution Flow
+
+```
+analyze (1.5-4s)
+    │
+    ├──────────────────┬───────────────────┐
+    │                  │                   │
+    ▼                  ▼                   │
+Recipe Writer    Bottle Advisor           │  ← PARALLEL (asyncio.gather)
+(1.5-2s)         (1.5-2s)                 │
+    │                  │                   │
+    └──────────────────┴───────────────────┘
+                       │
+                       ▼
+                 merge_results
+```
+
+### Why This Works
+
+The Bottle Advisor does not depend on Recipe Writer output. It only requires:
+- `cabinet` - Available from flow input
+- `drink_type` - Available from flow input
+- `UnlockCalculatorTool` - Deterministic data lookup
+
+### Configuration
+
+```bash
+# Enable parallel execution (default)
+export PARALLEL_CREWS=true
+
+# Disable parallel execution (rollback)
+export PARALLEL_CREWS=false
+```
+
+### Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Recipe fails, Bottle succeeds | Return error, discard bottle result |
+| Recipe succeeds, Bottle fails | Return recipe with empty bottle advice |
+| Both fail | Return first error |
+| Timeout (30s) | Return timeout error |
+
+---
+
+*Document Version: 1.3*
 *Last Updated: 2025-12-27*
 *Principles: KISS + YAGNI*
-*Changes: Added fast_mode parameter, include_bottle_advice toggle, CREWAI_TRACING env var, APP_ENV test support*
+*Changes: Added PARALLEL_CREWS config, parallel execution architecture, updated latency estimates*

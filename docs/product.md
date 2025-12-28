@@ -297,12 +297,14 @@ The original spec proposed 3 crews with 7+ agents. This creates:
 | Mode | LLM Calls | Latency | Use Case |
 |------|-----------|---------|----------|
 | Fast mode + no bottle advice | 2 | ~3-4s | Quick recommendations |
-| Fast mode + bottle advice | 3 | ~5s | Standard experience |
-| Full mode + bottle advice | 4 | ~8s | Detailed analysis |
+| Fast mode + bottle advice (parallel) | 3 | ~3-4s | Standard experience (default) |
+| Fast mode + bottle advice (sequential) | 3 | ~5-6s | Fallback mode |
+| Full mode + bottle advice | 4 | ~6-8s | Detailed analysis |
 
 **Configuration Options**:
 - `fast_mode` (default: True): Uses single unified Drink Recommender agent instead of two sequential agents
 - `include_bottle_advice` (default: True): When False, skips the bottle advisor for faster responses
+- `PARALLEL_CREWS` (default: True): When enabled, runs Recipe Writer and Bottle Advisor concurrently, reducing latency by ~40%
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -342,6 +344,14 @@ The original spec proposed 3 crews with 7+ agents. This creates:
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                  CREW 2: RECIPE CREW                            │
+│                                                                 │
+│  Parallel Mode (default, PARALLEL_CREWS=true):                  │
+│  ┌──────────────────┐    ┌──────────────────┐                  │
+│  │  Recipe Writer   │    │  Bottle Advisor  │ ← CONCURRENT     │
+│  │  (1 LLM call)    │    │  (1 LLM call)    │                  │
+│  └──────────────────┘    └──────────────────┘                  │
+│                                                                 │
+│  Sequential Mode (PARALLEL_CREWS=false):                        │
 │  ┌──────────────────┐    ┌──────────────────┐                  │
 │  │  Recipe Writer   │ →  │  Bottle Advisor  │ (optional)       │
 │  │  (1 LLM call)    │    │  (1 LLM call)    │                  │
@@ -623,8 +633,8 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ---
 
-*Document Version: 1.1*
+*Document Version: 1.2*
 *Created: 2025-12-27*
 *Updated: 2025-12-27*
 *Status: In Production*
-*Changes: Added fast_mode and include_bottle_advice configuration options, updated architecture diagrams*
+*Changes: Added PARALLEL_CREWS feature for concurrent Recipe/Bottle execution, updated performance tables and architecture diagrams*

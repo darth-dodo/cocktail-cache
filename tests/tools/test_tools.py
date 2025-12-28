@@ -59,8 +59,8 @@ class TestRecipeDBTool:
     # -------------------------------------------------------------------------
     def test_full_ingredients_for_old_fashioned(self, tool: RecipeDBTool) -> None:
         """Test that providing all ingredients for Old Fashioned returns a match."""
-        # Old Fashioned requires: bourbon, simple-syrup, angostura-bitters, orange-bitters
-        cabinet = ["bourbon", "simple-syrup", "angostura-bitters", "orange-bitters"]
+        # Old Fashioned requires: bourbon, simple-syrup, angostura, orange-bitters
+        cabinet = ["bourbon", "simple-syrup", "angostura", "orange-bitters"]
         result = json.loads(tool._run(cabinet=cabinet))
 
         assert result["total_matches"] >= 1
@@ -79,8 +79,8 @@ class TestRecipeDBTool:
 
     def test_full_ingredients_for_virgin_mojito(self, tool: RecipeDBTool) -> None:
         """Test that providing all ingredients for Virgin Mojito returns a match."""
-        # Virgin Mojito requires: fresh-mint, lime-juice, simple-syrup, club-soda
-        cabinet = ["fresh-mint", "lime-juice", "simple-syrup", "club-soda"]
+        # Virgin Mojito requires: mint, lime-juice, simple-syrup, soda-water
+        cabinet = ["mint", "lime-juice", "simple-syrup", "soda-water"]
         result = json.loads(tool._run(cabinet=cabinet))
 
         assert result["total_matches"] >= 1
@@ -859,8 +859,8 @@ class TestUnlockCalculatorTool:
         self, tool: UnlockCalculatorTool
     ) -> None:
         """Test that current status shows drinks user can already make."""
-        # Old Fashioned: bourbon, simple-syrup, angostura-bitters, orange-bitters
-        cabinet = ["bourbon", "simple-syrup", "angostura-bitters", "orange-bitters"]
+        # Old Fashioned: bourbon, simple-syrup, angostura, orange-bitters
+        cabinet = ["bourbon", "simple-syrup", "angostura", "orange-bitters"]
         result = json.loads(tool._run(cabinet=cabinet))
 
         status = result["current_status"]

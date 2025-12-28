@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     # CrewAI Settings
     CREWAI_TRACING: bool = False  # Enable CrewAI flow tracing
 
+    # Performance Settings
+    PARALLEL_CREWS: bool = True  # Enable parallel Recipe + Bottle execution
+
     @property
     def is_development(self) -> bool:
         """Check if running in development mode."""
