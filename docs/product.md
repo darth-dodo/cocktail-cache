@@ -10,6 +10,8 @@
 
 **Timeline**: 4-6 weeks to Polished MVP
 
+**Current Status**: Week 6 complete with enhanced UX features including browse/search functionality, tabbed navigation, and individual drink detail pages.
+
 ---
 
 ## Problem Statement
@@ -130,15 +132,16 @@ So that I can make informed choices.
 
 ### FR-1: Cabinet Management
 
-| ID | Requirement | Priority | Notes |
-|----|-------------|----------|-------|
-| FR-1.1 | User can select ingredients from categorized grid | P0 | Spirits, modifiers, bitters, fresh, mixers |
-| FR-1.2 | User can type free-text ingredients | P1 | AI parses "bourbon" from "Maker's Mark" |
-| FR-1.3 | Cabinet persists in local storage | P0 | No login required |
-| FR-1.4 | Quick-add for common cabinets | P2 | "Starter kit", "Whiskey lover", etc. |
-| FR-1.5 | "I have everything" for full exploration | P2 | Power user mode |
+| ID | Requirement | Priority | Status | Notes |
+|----|-------------|----------|--------|-------|
+| FR-1.1 | User can select ingredients from categorized grid | P0 | Done | Spirits, modifiers, bitters, fresh, mixers |
+| FR-1.2 | User can type free-text ingredients with autocomplete | P1 | Done | Autocomplete suggests matching ingredients as user types |
+| FR-1.3 | Cabinet persists in local storage | P0 | Done | No login required |
+| FR-1.4 | Dedicated Cabinet tab in navigation | P0 | Done | Separate tab for cabinet management |
+| FR-1.5 | Quick-add for common cabinets | P2 | Planned | "Starter kit", "Whiskey lover", etc. |
+| FR-1.6 | "I have everything" for full exploration | P2 | Planned | Power user mode |
 
-**UX Consideration**: Progressive disclosure. Start with just spirits, expand on demand.
+**UX Consideration**: Cabinet management via dedicated tab with ingredient autocomplete for faster input. Progressive disclosure with collapsible categories.
 
 ### FR-2: Mood/Occasion Input
 
@@ -202,11 +205,11 @@ So that I can make informed choices.
 
 ### FR-8: Sharing
 
-| ID | Requirement | Priority | Notes |
-|----|-------------|----------|-------|
-| FR-8.1 | Copy recipe to clipboard | P1 | Plain text format |
-| FR-8.2 | Shareable URL | P2 | /recipe/{id} |
-| FR-8.3 | Recipe card image for social | P3 | Future enhancement |
+| ID | Requirement | Priority | Status | Notes |
+|----|-------------|----------|--------|-------|
+| FR-8.1 | Copy recipe to clipboard | P1 | Planned | Plain text format |
+| FR-8.2 | Shareable URL for individual drinks | P2 | Done | /drink/{id} with full recipe details |
+| FR-8.3 | Recipe card image for social | P3 | Planned | Future enhancement |
 
 ### FR-9: Recipe History
 
@@ -232,14 +235,37 @@ So that I can make informed choices.
 
 ### FR-11: Mocktails
 
-| ID | Requirement | Priority | Notes |
-|----|-------------|----------|-------|
-| FR-11.1 | Mocktail database (20+ drinks) | P0 | Non-alcoholic recipes |
-| FR-11.2 | Mocktail toggle on main input | P0 | Cocktail / Mocktail / Both |
-| FR-11.3 | Mocktails use same cabinet ingredients | P0 | Citrus, syrups, herbs, mixers |
-| FR-11.4 | Flavor profiles for mocktails | P0 | Same visualization as cocktails |
-| FR-11.5 | "Spirit-free" badge on recipes | P0 | Clear visual indicator |
-| FR-11.6 | Mocktail-specific technique tips | P1 | Building complexity without alcohol |
+| ID | Requirement | Priority | Status | Notes |
+|----|-------------|----------|--------|-------|
+| FR-11.1 | Mocktail database (39 drinks) | P0 | Done | Non-alcoholic recipes |
+| FR-11.2 | Mocktail toggle on main input | P0 | Done | Cocktail / Mocktail / Both |
+| FR-11.3 | Mocktails use same cabinet ingredients | P0 | Done | Citrus, syrups, herbs, mixers |
+| FR-11.4 | Flavor profiles for mocktails | P0 | Done | Same visualization as cocktails |
+| FR-11.5 | "Spirit-free" badge on recipes | P0 | Done | Clear visual indicator |
+| FR-11.6 | Mocktail-specific technique tips | P1 | Planned | Building complexity without alcohol |
+
+### FR-12: Browse and Search (Week 6)
+
+| ID | Requirement | Priority | Status | Notes |
+|----|-------------|----------|--------|-------|
+| FR-12.1 | Browse page with full drink catalog | P0 | Done | 142 drinks (103 cocktails + 39 mocktails) |
+| FR-12.2 | Text search by drink name | P0 | Done | Real-time filtering as user types |
+| FR-12.3 | Filter by drink type (Cocktail/Mocktail) | P0 | Done | Toggle buttons with active state |
+| FR-12.4 | Filter by difficulty level | P0 | Done | Easy, Medium, Hard, Advanced options |
+| FR-12.5 | Individual drink detail pages | P0 | Done | /drink/{id} with full recipe, ingredients, flavor profile |
+| FR-12.6 | "Ask AI Instead" option from browse | P1 | Done | Link to chat interface for personalized recommendations |
+| FR-12.7 | Drink cards with key info preview | P0 | Done | Name, tagline, type badge, difficulty, timing |
+
+### FR-13: Tabbed Navigation (Week 6)
+
+| ID | Requirement | Priority | Status | Notes |
+|----|-------------|----------|--------|-------|
+| FR-13.1 | Three-tab navigation structure | P0 | Done | Chat, Cabinet, Browse tabs |
+| FR-13.2 | Chat tab as primary interface | P0 | Done | AI-powered recommendation flow |
+| FR-13.3 | Cabinet tab for ingredient management | P0 | Done | Dedicated ingredient selection interface |
+| FR-13.4 | Browse tab links to search page | P0 | Done | Full catalog exploration |
+| FR-13.5 | Visual indicator for active tab | P0 | Done | Highlighted border and text color |
+| FR-13.6 | Cabinet count badge | P1 | Done | Shows number of selected ingredients |
 
 ---
 
@@ -373,7 +399,14 @@ The original spec proposed 3 crews with 7+ agents. This creates:
 
 ```
 data/
-├── cocktails.json          # 100+ classic cocktails
+├── cocktails.json          # 103 classic cocktails
+│   ├── name
+│   ├── ingredients[]
+│   ├── method
+│   ├── flavor_profile{}
+│   └── tags[]
+│
+├── mocktails.json          # 39 non-alcoholic drinks
 │   ├── name
 │   ├── ingredients[]
 │   ├── method
@@ -393,6 +426,8 @@ data/
 └── unlock_scores.json      # Pre-computed at build time
     └── {bottle: {unlocks: [], score: int}}
 ```
+
+**Total Drink Database**: 142 drinks (103 cocktails + 39 mocktails)
 
 ### API Design
 
@@ -434,55 +469,67 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ### Mobile-First Design
 
+**Main Interface - Tabbed Navigation**
 ```
 ┌─────────────────────────┐
-│  COCKTAIL CACHE         │
+│  🍸 Raja                │
+│  Your AI Mixologist     │
 ├─────────────────────────┤
-│  What's the vibe?       │
-│  ┌─────┐ ┌─────┐       │
-│  │Chill│ │Party│ ...   │
-│  └─────┘ └─────┘       │
+│ [ Chat ] [ Cabinet ] [ Browse ]
 ├─────────────────────────┤
-│  Your Cabinet           │
-│  ▼ Spirits (tap to expand)
-│    ☑ Bourbon            │
-│    ☑ Gin                │
-│    ☐ Vodka              │
-│  ▼ Modifiers            │
-│  ▼ Bitters & Syrups     │
-│  ▼ Fresh                │
+│                         │
+│  Chat messages area     │
+│  or Cabinet panel       │
+│                         │
 ├─────────────────────────┤
-│  Any constraints?       │
-│  ┌─────────┐ ┌────────┐│
-│  │Not sweet│ │Quick   ││
-│  └─────────┘ └────────┘│
+│  Input controls         │
+└─────────────────────────┘
+```
+
+**Browse Page**
+```
+┌─────────────────────────┐
+│  Browse Drinks          │
 ├─────────────────────────┤
-│  [ MAKE ME SOMETHING ]  │
+│ [🔍 Search drinks...   ]│
+│ [All][Cocktails][Mocktails]
+│ Difficulty: [Any][Easy]...
+├─────────────────────────┤
+│  142 drinks found       │
+│ ┌───────────────────┐  │
+│ │ Drink Card        │  │
+│ │ Name + Tagline    │  │
+│ │ Type | Difficulty │  │
+│ └───────────────────┘  │
+├─────────────────────────┤
+│ [Ask AI Instead →]      │
 └─────────────────────────┘
 ```
 
 **Key UX Decisions:**
 
-1. **Collapsible ingredient categories** - Don't overwhelm with 50 checkboxes
-2. **Vibe buttons are large and tappable** - Primary input, make it easy
-3. **"Make Me Something" is the only CTA** - Clear single action
-4. **Loading state is informative** - "Analyzing cabinet... Matching mood..."
-5. **Recipe is scannable** - Bold actions, indented details, tips in asides
+1. **Tabbed navigation** - Chat, Cabinet, Browse as distinct modes
+2. **Cabinet as dedicated tab** - Full-screen ingredient management with autocomplete
+3. **Browse for exploration** - Full drink catalog with search and filters
+4. **Collapsible ingredient categories** - Don't overwhelm with 50 checkboxes
+5. **Vibe buttons are large and tappable** - Primary input, make it easy
+6. **Loading state is informative** - "Analyzing cabinet... Matching mood..."
+7. **Recipe is scannable** - Bold actions, indented details, tips in asides
+8. **Individual drink pages** - Deep-linkable recipes with full details
 
 ### Critical Flows
 
-**Flow 1: First-Time User**
-1. Land on page → See clear value prop
-2. Select vibes (2 taps)
-3. Expand "Spirits" → Check 2-3 boxes
-4. Optional: expand other categories
-5. Tap "Make Me Something"
-6. See recipe in <8 seconds
-7. Cabinet saved automatically
+**Flow 1: First-Time User (AI Chat)**
+1. Land on page → See chat interface with Raja (AI Mixologist)
+2. Switch to Cabinet tab → Select ingredients with autocomplete
+3. Return to Chat tab → Select mood/vibe
+4. Tap "Make Me Something"
+5. See recipe in <8 seconds
+6. Cabinet saved automatically to localStorage
 
-**Flow 2: Return User**
+**Flow 2: Return User (AI Chat)**
 1. Land on page → Cabinet pre-filled from local storage
-2. Adjust mood if needed
+2. Adjust mood if needed in Chat tab
 3. Tap "Make Me Something"
 4. Total time: <10 seconds to recommendation
 
@@ -491,6 +538,24 @@ Since this is also a learning project, the architecture should demonstrate:
 2. Tap "Show Me Something Else"
 3. New recommendation appears (excluding previous)
 4. Repeat as needed
+
+**Flow 4: Browse and Search (New in Week 6)**
+1. Navigate to Browse tab or /browse page
+2. Browse full catalog of 142 drinks
+3. Use search to filter by name
+4. Filter by type (Cocktail/Mocktail) or difficulty
+5. Tap drink card → View full recipe on /drink/{id}
+6. Option: "Ask AI Instead" to get personalized recommendation
+
+**Flow 5: Direct Drink Access**
+1. Access /drink/{drink-id} directly (shareable URL)
+2. View complete recipe with:
+   - Ingredients list with amounts
+   - Step-by-step method
+   - Flavor profile visualization
+   - Timing and difficulty
+   - Garnish instructions
+3. Navigate back to Browse or Chat as needed
 
 ---
 
@@ -525,24 +590,28 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ## MVP Scope
 
-### In Scope (4-6 weeks)
+### Completed (Weeks 1-6)
 
-| Feature | Week |
-|---------|------|
-| Project setup, CrewAI config | 1 |
-| Cocktail database (50 drinks) + Mocktail database (20 drinks) | 1 |
-| Skill level system + difficulty tagging | 1 |
-| Analysis Crew (cabinet + mood + skill + drink type) | 2 |
-| Recipe Crew (recipe + tips + skill-adapted instructions) | 2 |
-| Flow orchestration | 3 |
-| FastAPI + HTMX frontend | 3-4 |
-| "Next bottle" recommendation | 4 |
-| "Show me something else" | 4 |
-| Local storage (cabinet + skill level + recipe history) | 4 |
-| Recipe history UI + "I made this" tracking | 4-5 |
-| Mobile optimization | 5 |
-| Fly.io deployment | 5 |
-| Error handling & polish | 6 |
+| Feature | Week | Status |
+|---------|------|--------|
+| Project setup, CrewAI config | 1 | Done |
+| Cocktail database (103 drinks) | 1 | Done |
+| Mocktail database (39 drinks) | 1 | Done |
+| Skill level system + difficulty tagging | 1 | Done |
+| Analysis Crew (cabinet + mood + skill + drink type) | 2 | Done |
+| Recipe Crew (recipe + tips + skill-adapted instructions) | 2 | Done |
+| Flow orchestration with parallel execution | 3 | Done |
+| FastAPI + HTMX frontend | 3-4 | Done |
+| "Next bottle" recommendation | 4 | Done |
+| "Show me something else" | 4 | Done |
+| Local storage (cabinet + skill level) | 4 | Done |
+| Mobile optimization | 5 | Done |
+| Render deployment | 5 | Done |
+| Browse page with search and filters | 6 | Done |
+| Individual drink detail pages (/drink/{id}) | 6 | Done |
+| Tabbed navigation (Chat/Cabinet/Browse) | 6 | Done |
+| Ingredient autocomplete | 6 | Done |
+| Flavor profile visualization | 6 | Done |
 
 ### Out of Scope (Future)
 
@@ -551,6 +620,8 @@ Since this is also a learning project, the architecture should demonstrate:
 - Recipe ratings/feedback
 - Measurement unit toggle
 - Social sharing cards
+- Recipe history UI + "I made this" tracking
+- Quick-add cabinet presets ("Starter kit", "Whiskey lover")
 
 ---
 
@@ -622,19 +693,27 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ---
 
-## Next Steps
+## Development Timeline (Completed)
 
-1. **Week 1**: Project setup + cocktail database curation
-2. **Week 2**: CrewAI agents and crews
+1. **Week 1**: Project setup + cocktail database curation (103 cocktails, 39 mocktails)
+2. **Week 2**: CrewAI agents and crews with parallel execution
 3. **Week 3**: FastAPI + HTMX frontend
 4. **Week 4**: Integration + "next bottle" logic
-5. **Week 5**: Mobile optimization + deployment
-6. **Week 6**: Polish, error handling, documentation
+5. **Week 5**: Mobile optimization + Render deployment
+6. **Week 6**: UX improvements - browse/search, tabbed navigation, drink detail pages
+
+## Future Enhancements
+
+- Recipe history tracking with "I made this" feature
+- Quick-add cabinet presets
+- Recipe ratings and favorites
+- Shopping list export
+- Social sharing cards
 
 ---
 
-*Document Version: 1.2*
+*Document Version: 1.3*
 *Created: 2025-12-27*
-*Updated: 2025-12-27*
+*Updated: 2025-12-28*
 *Status: In Production*
-*Changes: Added PARALLEL_CREWS feature for concurrent Recipe/Bottle execution, updated performance tables and architecture diagrams*
+*Changes: Week 6 UX improvements - added browse/search functionality (FR-12), tabbed navigation (FR-13), individual drink detail pages, ingredient autocomplete, updated drink counts (142 total: 103 cocktails + 39 mocktails), revised user flows*

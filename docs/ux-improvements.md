@@ -1,657 +1,567 @@
 # Cocktail Cache - UX Improvements
 
-> **Analysis Date**: December 2025
-> **Current State**: Week 4 API & UI Complete
-> **Focus**: Enhancing user experience for the conversational AI mixologist interface
+> **Document Version**: 2.0
+> **Last Updated**: December 2025
+> **Current State**: Week 6 - Unified Interface Complete
+> **Focus**: Documenting completed features and prioritizing remaining enhancements
 
 ---
 
 ## Executive Summary
 
-This document outlines UX improvements for Cocktail Cache, organized by implementation effort and impact. The current chat-based interface with Raja the AI Mixologist provides a solid foundation, but several enhancements can significantly improve user retention, engagement, and satisfaction.
+This document tracks UX improvements for Cocktail Cache, the conversational AI mixologist web application. Week 6 delivered a major interface consolidation that unified the previously fragmented chat and browse experiences into a cohesive, tabbed interface.
+
+**Key Milestone**: The app now feels like a single, unified product rather than two separate applications stitched together.
 
 ---
 
-## 🚨 Critical Issue: App Fragmentation
+## Completed Features (Week 6)
 
-### The Problem
+### 1. Tabbed Navigation System
 
-The app currently feels **fragmented** - like two separate applications stitched together rather than a cohesive experience. This is the highest priority UX issue.
+**Implementation Status**: Complete
 
-### Root Causes
+The core fragmentation issue has been resolved through a unified header with tabbed navigation.
 
-| Issue | Chat Page (/) | Browse Page (/browse) |
-|-------|---------------|----------------------|
-| **Layout** | `max-w-lg` (512px) | `max-w-4xl` (896px) |
-| **Paradigm** | Conversational wizard | Traditional catalog |
-| **State** | Cabinet in memory only | No cabinet awareness |
-| **Destination** | Ephemeral recipe cards | Dead-end "View Recipe" |
-| **CSS** | 175+ lines inline | 40+ lines inline |
+| Component | Description | Location |
+|-----------|-------------|----------|
+| Tab Bar | Chat / Cabinet / Browse tabs in unified header | `index.html` lines 29-49 |
+| Active State | Visual indicators for current tab | Amber border + text color |
+| Context Preservation | State maintained across tab switches | JavaScript state object |
 
-### User Journey Fragmentation
+**Technical Details**:
+- Tabs use `switchTab()` function with CSS class toggling
+- Cabinet count badge shows ingredient count dynamically
+- Browse tab links to `/browse` route for full-page experience
 
-```
-CURRENT (Disconnected):
-
-[Chat/AI Path]              [Browse Path]
-     ↓                           ↓
-Select Cabinet              Filter/Search
-     ↓                           ↓
-Pick Mood                   Find Drink
-     ↓                           ↓
-Choose Skill                "View Recipe"
-     ↓                           ↓
-Get Recipe                   DEAD END ❌
-     ↓
-Made It/Another
-```
-
-### The Core Identity Problem
-
-**Q: What is this app?**
-- A chat bot? A recipe catalog? A bar management tool?
-- Currently: All three, badly connected.
-
-**Needed Identity:** *"Your personal bartender assistant that knows your cabinet"*
-
-Everything should flow from: **"What's in your cabinet?"**
+**Design Rationale**:
+- Users can switch contexts without losing progress
+- Cabinet is accessible from any conversation stage
+- Reduces cognitive load by showing one view at a time
 
 ---
 
-## 🎯 Cohesion Strategy
+### 2. Browse Page with Search and Filters
 
-### The Unifying Element: Persistent Cabinet
+**Implementation Status**: Complete
 
-The cabinet is the key to making the app feel unified. When cabinet state persists and is visible everywhere, the user's context travels with them.
+Full-featured drink catalog with multiple filter dimensions.
 
-### Proposed Unified Architecture
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Search Input | Real-time text search with debounce | Complete |
+| Type Filter | All / Cocktails / Mocktails toggle | Complete |
+| Difficulty Filter | Any / Easy / Medium / Hard / Advanced | Complete |
+| Results Count | Dynamic "X drinks found" display | Complete |
+| No Results State | Helpful message with AI recommendation link | Complete |
 
-```
-PROPOSED (Connected):
+**Search Behavior**:
+- 150ms debounce prevents excessive filtering
+- Searches across: drink name, tagline, and tags
+- Case-insensitive matching
 
-                    [Landing]
-                   /         \
-          [AI Path]          [Browse Path]
-              ↓                    ↓
-        Cabinet Setup         Filter/Search
-              ↓                    ↓
-         Mood/Skill           View Drinks
-              ↓                    ↓
-        AI Recipe ←──────→ Drink Detail Page
-              ↓                    ↓
-         Made It!             "Make This"
-                                   ↓
-                            [Cabinet Match Check]
-```
-
-### Key Architectural Changes
-
-| Change | Impact | Effort |
-|--------|--------|--------|
-| Persistent cabinet (localStorage) | Enables continuity | 2 hrs |
-| Cabinet indicator in nav | Shows state everywhere | 1 hr |
-| Drink detail page (`/drink/:id`) | Central destination | 4 hrs |
-| `GET /api/drinks/:id` endpoint | Enables detail page | 2 hrs |
-| Cross-navigation links | Connects the paths | 30 min |
-| Standardized layout widths | Visual consistency | 30 min |
-
----
-
-## 🔧 Immediate Cohesion Fixes
-
-### 1. Navigation Redesign
-
-**Current:** `Logo | Browse | API Docs`
-
-**Proposed:** `Logo | 🧴 Cabinet (3) | Browse | AI Mixologist`
-
-The cabinet indicator:
-- Shows current state at a glance
-- Provides access to modify from anywhere
-- Creates continuity across pages
-- Enables "What can I make?" from Browse
-
-### 2. Layout Standardization
-
-```css
-/* Before */
-.index-page { max-width: 512px; }  /* max-w-lg */
-.browse-page { max-width: 896px; } /* max-w-4xl */
-
-/* After */
-.content-pages { max-width: 672px; } /* max-w-2xl for chat */
-.grid-pages { max-width: 768px; }    /* max-w-3xl for browse */
-```
-
-### 3. Cross-Navigation Links
-
-**On Browse page:**
-> "Looking for something specific? [Ask Raja for a personalized pick →]"
-
-**On Chat page:**
-> "Or [browse all 50+ drinks →] in our collection"
-
-### 4. Fix Dead Ends
-
-**Browse "View Recipe"** currently shows a toast saying "try AI instead"
-
-**Fix:** Create `/drink/:id` route that shows full recipe with:
-- All ingredients with amounts
-- Full method/steps
-- "Can I make this?" based on cabinet
-- Missing ingredients list
-- "Ask AI for alternatives" link
-
-### 5. CSS Consolidation
-
-Move inline styles to shared `components.css`:
-
-```css
-/* Shared components to extract */
-.glass-chip { }
-.autocomplete-dropdown { }
-.line-clamp-2 { }
-.loading-dots { }
-.filter-btn { }
-```
-
----
-
-## 📊 Fragmentation Impact Assessment
-
-| Metric | Current State | With Cohesion Fixes |
-|--------|---------------|---------------------|
-| Pages feel connected | 20% | 85% |
-| User can complete journey | 50% (Browse dead ends) | 100% |
-| State persists | 0% | 100% |
-| Shareable recipes | 0% | 100% |
-| Time to understand app | High (2 UIs) | Low (1 unified) |
-
----
-
-## 🗓️ Cohesion Implementation Phases
-
-### Phase 0: Foundation (Day 1) - HIGHEST PRIORITY
-
-1. **Persistent Cabinet State** (2 hrs)
-   - localStorage for cabinet
-   - Load on any page
-   - Save on changes
-
-2. **Cabinet Nav Indicator** (1 hr)
-   - Show count in header
-   - Click to expand/edit
-   - Visible on all pages
-
-3. **Layout Consistency** (30 min)
-   - Standardize max-widths
-   - Match padding/margins
-
-4. **Cross-Links** (30 min)
-   - Add navigation between experiences
-
-### Phase 1: Central Destination (Day 2)
-
-5. **Drink Detail Page** (4 hrs)
-   - `/drink/:id` route
-   - Full recipe display
-   - Cabinet match indicator
-   - Share functionality
-
-6. **API Enhancement** (2 hrs)
-   - `GET /api/drinks/:id`
-   - Include full recipe data
-   - Accept cabinet param for match score
-
-### Phase 2: Browse Integration (Day 3)
-
-7. **"Makeable" Indicators** (3 hrs)
-   - Show match % on browse cards
-   - Filter by "Can make now"
-   - Highlight missing ingredients
-
-8. **Home Page Redesign** (4 hrs)
-   - Dual-path entry (AI vs Browse)
-   - Cabinet summary
-   - Recent drinks
-
----
-
----
-
-## Quick Wins (High Impact, Low Effort)
-
-### 1. LocalStorage Cabinet Persistence
-
-**Problem**: Users lose all selections on page refresh, creating frustration for return visitors.
-
-**Current Behavior**:
-- Page refresh resets `state.cabinet` to empty array
-- Users must re-select all ingredients
-
-**Solution**:
-- Save cabinet to localStorage on selection changes
-- On page load, detect saved cabinet and offer restoration
-- "Welcome back! Use your saved cabinet or start fresh?"
-
-**Implementation**:
+**Filter Logic** (from `browse.html`):
 ```javascript
-// Save cabinet on change
-function updateCabinetButton() {
-    localStorage.setItem('cocktail-cache-cabinet', JSON.stringify(state.cabinet));
-    // ... existing code
+filteredDrinks = allDrinks.filter(drink => {
+    // Type filter
+    if (currentFilter === 'cocktail' && drink.is_mocktail) return false;
+    if (currentFilter === 'mocktail' && !drink.is_mocktail) return false;
+    // Difficulty filter
+    if (currentDifficulty !== 'all' && drink.difficulty !== currentDifficulty) return false;
+    // Search query (name, tagline, tags)
+    // ...
+});
+```
+
+**Design Rationale**:
+- Progressive disclosure: basic search visible, difficulty filters below
+- Visual consistency with chat interface styling
+- "Ask AI Instead" link bridges to personalized recommendations
+
+---
+
+### 3. Drink Detail Pages
+
+**Implementation Status**: Complete
+
+Individual recipe pages with comprehensive drink information.
+
+| Section | Content | Display |
+|---------|---------|---------|
+| Header | Name, tagline, type badge | Full width card |
+| Meta Info | Difficulty, timing, glassware | Icon + text pairs |
+| Tags | Drink characteristics | Pill badges |
+| Ingredients | Item, amount, unit | Two-column list |
+| Method | Numbered steps with action + detail | Ordered list |
+| Flavor Profile | Sweet/Sour/Bitter/Spirit percentages | Progress bars |
+
+**Route Pattern**: `/drink/{drink_id}`
+
+**API Endpoint**: `GET /api/drinks/{drink_id}`
+
+**Error Handling**:
+- Loading state with animated dots
+- 404 handling with helpful error message
+- Connection error fallback
+
+**Design Rationale**:
+- Two-column layout on desktop (ingredients left, method right)
+- Single column on mobile for readability
+- Flavor profile visualization adds value beyond text-only recipes
+- Clear navigation back to browse and to AI recommendations
+
+---
+
+### 4. Cabinet Panel with Autocomplete
+
+**Implementation Status**: Complete
+
+Dedicated cabinet management interface accessible via tab.
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Search Input | Type-ahead ingredient search | Complete |
+| Autocomplete Dropdown | Shows matching ingredients with category | Complete |
+| Category Organization | Collapsible sections (Spirits, Mixers, etc.) | Complete |
+| Selected Display | Removable chips for selected ingredients | Complete |
+| localStorage Persistence | Cabinet survives page refresh and sessions | Complete |
+| Clear Button | One-click cabinet reset | Complete |
+| Continue Button | Transitions to chat with cabinet context | Complete |
+
+**Autocomplete Behavior**:
+- Activates after 2 characters typed
+- Shows up to 6 matching results
+- Displays ingredient emoji, name, and category
+- Keyboard navigation (arrow keys + Enter)
+- Click-to-select functionality
+
+**Persistence Architecture** (`cabinet-state.js`):
+```javascript
+const CABINET_STORAGE_KEY = 'cocktail-cache-cabinet';
+
+function saveCabinet(ingredients) {
+    localStorage.setItem(CABINET_STORAGE_KEY, JSON.stringify(ingredients));
+    window.dispatchEvent(new CustomEvent('cabinet-updated'));
 }
 
-// Restore on init
-function init() {
-    const savedCabinet = localStorage.getItem('cocktail-cache-cabinet');
-    if (savedCabinet) {
-        const parsed = JSON.parse(savedCabinet);
-        if (parsed.length > 0) {
-            showRestorePrompt(parsed);
-            return;
+function loadCabinet() {
+    const stored = localStorage.getItem(CABINET_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+}
+```
+
+**Design Rationale**:
+- Autocomplete reduces typing for known ingredients
+- Category organization helps users understand their options
+- localStorage persistence eliminates the #1 user frustration (losing cabinet on refresh)
+- Custom event system enables cross-component updates (e.g., nav badge)
+
+---
+
+### 5. Data Expansion
+
+**Implementation Status**: Complete
+
+Drink database significantly expanded to provide more variety.
+
+| Metric | Previous | Current | Change |
+|--------|----------|---------|--------|
+| Cocktails | ~55 | 103 | +87% |
+| Mocktails | ~19 | 39 | +105% |
+| **Total Drinks** | **74** | **142** | **+92%** |
+
+**Data Files**:
+- `data/cocktails.json` - 103 cocktail recipes
+- `data/mocktails.json` - 39 mocktail recipes
+- `data/ingredients.json` - Ingredient categories and metadata
+
+---
+
+## Architectural Improvements Completed
+
+### Cohesion Fixes Delivered
+
+| Issue (from Week 4) | Resolution |
+|---------------------|------------|
+| Fragmented layouts (`max-w-lg` vs `max-w-4xl`) | Standardized to `max-w-2xl` for chat |
+| Disconnected state (cabinet in memory only) | localStorage persistence + cross-page events |
+| Dead-end "View Recipe" on Browse | Full `/drink/{id}` detail pages |
+| Two separate UIs | Unified header with tabbed navigation |
+| CSS inconsistency | Consolidated in `glassmorphic.css` |
+
+### User Journey (Current)
+
+```
+                    [Landing Page]
+                         |
+            [Unified Header with Tabs]
+                    /    |    \
+            [Chat]  [Cabinet]  [Browse]
+              |         |          |
+         AI Flow    Manage     Search/Filter
+              |    Ingredients      |
+              v         |          v
+         Recipe ←-------+----→ Drink Detail
+           |                       |
+        Made It!               "Make This"
+           |                       |
+           +-------→ History ←-----+
+```
+
+---
+
+## Pending Improvements
+
+### P1: Critical User Experience (Next Sprint)
+
+#### 1.1 Error Handling System
+
+**Current Gap**: Limited error feedback for edge cases.
+
+| Scenario | Current Behavior | Required |
+|----------|------------------|----------|
+| Empty cabinet flow | Proceeds to mood selection | Show guidance message |
+| No matching drinks | Generic "Couldn't find a match" | Suggest adding ingredients |
+| API timeout | Silent failure or generic error | Retry with exponential backoff |
+| Network offline | Fetch fails with error | Detect offline + show cached data |
+| API rate limiting | Unknown behavior | Queue requests + show feedback |
+
+**Proposed Implementation**:
+```javascript
+// Offline detection
+window.addEventListener('offline', () => showOfflineToast());
+window.addEventListener('online', () => hideOfflineToast());
+
+// API error handling
+async function fetchWithRetry(url, options, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response;
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
         }
     }
-    showWelcome();
 }
 ```
 
-**Effort**: 1-2 hours | **Impact**: ⭐⭐⭐⭐⭐
+**Effort**: 4-6 hours | **Impact**: High
 
 ---
 
-### 2. Real-Time Drink Counter
+#### 1.2 Loading States and Skeleton Screens
 
-**Problem**: No feedback as ingredients are selected; users don't know how many drinks they can make.
+**Current Gap**: Inconsistent loading indicators across the app.
 
-**Current Behavior**:
-- Button shows "Continue with X ingredients"
-- No indication of drink availability
+| Page | Current | Proposed |
+|------|---------|----------|
+| Browse grid | Bouncing dots | Skeleton cards (3x2 grid) |
+| Drink detail | Bouncing dots | Skeleton layout matching content |
+| Cabinet load | Flash of empty | Skeleton category sections |
+| Recipe generation | Facts rotation | Progress steps with stages |
 
-**Solution**:
-- Display live "X drinks available" badge
-- Update count on each ingredient toggle
-- Show unlock hints: "Add sweet vermouth to unlock 4 more drinks"
-
-**Implementation**:
-- Load `unlock_scores.json` data on frontend
-- Calculate available drinks based on current cabinet
-- Display count in UI with animation on change
-
-**Effort**: 2-3 hours | **Impact**: ⭐⭐⭐⭐⭐
-
----
-
-### 3. Sticky Action Bar
-
-**Problem**: "Made it!" and "Another" buttons scroll off-screen on mobile, requiring users to scroll back up.
-
-**Current Behavior**:
-- Buttons are inside the recipe card
-- Can be below the fold on smaller screens
-
-**Solution**:
-- Fixed bottom bar with action buttons
-- Always visible regardless of scroll position
-- Add share and favorite icons
-
-**Implementation**:
+**Skeleton Pattern**:
 ```html
-<div class="fixed bottom-0 left-0 right-0 glass-nav p-3 flex gap-2 z-50">
-    <button id="made-it-btn" class="btn glass-btn-success flex-1">Made it!</button>
-    <button id="another-btn" class="btn glass-btn-secondary flex-1">Another</button>
-    <button id="share-btn" class="btn glass-btn-ghost">
-        <svg><!-- share icon --></svg>
-    </button>
-    <button id="favorite-btn" class="btn glass-btn-ghost">
-        <svg><!-- heart icon --></svg>
-    </button>
+<!-- Skeleton drink card -->
+<div class="glass-card p-4 animate-pulse">
+    <div class="h-6 bg-stone-700 rounded w-3/4 mb-2"></div>
+    <div class="h-4 bg-stone-800 rounded w-full mb-3"></div>
+    <div class="flex gap-2">
+        <div class="h-6 bg-stone-700 rounded w-16"></div>
+        <div class="h-6 bg-stone-700 rounded w-12"></div>
+    </div>
 </div>
 ```
 
-**Effort**: 1 hour | **Impact**: ⭐⭐⭐⭐
+**Effort**: 3-4 hours | **Impact**: Medium-High
 
 ---
 
-## Medium Effort Improvements
+#### 1.3 Accessibility Improvements
 
-### 4. Ingredient Search/Filter
+**Current Gap**: Limited screen reader support and keyboard navigation.
 
-**Problem**: Scrolling through 4 collapsed categories is tedious, especially when users know what they're looking for.
+| Area | Current State | Required |
+|------|---------------|----------|
+| ARIA labels | Partial (search input has label) | All interactive elements |
+| Focus management | Not implemented | Focus trap in modals, logical tab order |
+| Skip links | None | Skip to main content |
+| Announcements | None | Live regions for dynamic updates |
+| Color contrast | Generally good | Audit and document WCAG AA compliance |
+| Keyboard navigation | Partial (autocomplete works) | All components navigable |
 
-**Current Behavior**:
-- Categories collapse/expand manually
-- No way to quickly find a specific ingredient
-- Custom input exists but requires typing full names
+**Required ARIA Additions**:
+```html
+<!-- Tab navigation -->
+<div role="tablist" aria-label="Main navigation">
+    <button role="tab" aria-selected="true" aria-controls="chat-panel">Chat</button>
+    <button role="tab" aria-selected="false" aria-controls="cabinet-panel">Cabinet</button>
+</div>
 
-**Solution**:
-- Search input above categories
-- Real-time filtering as user types
-- Highlight matching ingredients across all categories
-- Auto-expand categories with matches
+<!-- Cabinet panel -->
+<div role="tabpanel" id="cabinet-panel" aria-labelledby="tab-cabinet">
+    <!-- Content with aria-live for updates -->
+    <div aria-live="polite" id="cabinet-summary">3 ingredients selected</div>
+</div>
 
-**Implementation**:
+<!-- Loading states -->
+<div role="status" aria-live="polite">Loading recipe...</div>
+```
+
+**Effort**: 6-8 hours | **Impact**: High (compliance + usability)
+
+---
+
+### P2: Engagement Features (Following Sprint)
+
+#### 2.1 Made-It History
+
+**Concept**: Track drinks the user has made for repeat access and stats.
+
+| Feature | Description |
+|---------|-------------|
+| Storage | `cocktail-cache-history` in localStorage |
+| Data Model | `{ id, name, madeAt: ISO timestamp }[]` |
+| Display | History section in Cabinet or dedicated tab |
+| Stats | "You've made 12 drinks this month" |
+| Quick Actions | "Make again" button on history items |
+
+**Proposed Data Structure**:
 ```javascript
-function filterIngredients(query) {
-    const lowerQuery = query.toLowerCase();
-    document.querySelectorAll('.ingredient-chip').forEach(chip => {
-        const name = chip.textContent.toLowerCase();
-        const matches = name.includes(lowerQuery);
-        chip.style.display = matches || !query ? '' : 'none';
-    });
-    // Auto-expand categories with visible chips
-}
-```
-
-**Effort**: 2-3 hours | **Impact**: ⭐⭐⭐⭐
-
----
-
-### 5. Cabinet Presets
-
-**Problem**: New users face decision paralysis when presented with 30+ ingredient options.
-
-**Current Behavior**:
-- All categories shown with no guidance
-- Users must know their bar inventory
-
-**Solution**:
-- Quick-start preset buttons above categories
-- Pre-populate common bar setups with one tap
-- Reduce friction for first-time users
-
-**Preset Examples**:
-| Preset | Ingredients |
-|--------|-------------|
-| 🥃 Whiskey Basics | bourbon, angostura-bitters, simple-syrup, fresh-lemon-juice |
-| 🍸 Gin Essentials | london-dry-gin, dry-vermouth, fresh-lemon-juice, simple-syrup |
-| 🌴 Tropical Vibes | white-rum, fresh-lime-juice, simple-syrup, fresh-mint |
-| 🎉 Party Starter | vodka, white-rum, cointreau, fresh-lime-juice, club-soda |
-
-**Effort**: 2 hours | **Impact**: ⭐⭐⭐⭐
-
----
-
-### 6. Progressive Loading Stages
-
-**Problem**: 5+ second wait time with only rotating mixology facts; no sense of progress.
-
-**Current Behavior**:
-- Typing indicator dots
-- Mixology facts rotate every 3 seconds
-- No indication of what's happening
-
-**Solution**:
-- Show distinct AI thinking stages
-- Progress through phases with descriptive text
-- Creates perception of intelligent processing
-
-**Stage Flow**:
-```
-1. "🔍 Finding matching drinks..."      (0-2s)
-2. "⚖️ Ranking by your mood..."         (2-4s)
-3. "📝 Crafting your recipe..."         (4-6s)
-4. "✨ Almost ready..."                  (6s+)
-```
-
-**Implementation**:
-- Cycle through stages on fixed intervals
-- Or implement backend streaming for real progress
-
-**Effort**: 2 hours | **Impact**: ⭐⭐⭐
-
----
-
-### 7. Share Recipe Feature
-
-**Problem**: No way to share or save recipes outside the app.
-
-**Current Behavior**:
-- Recipes exist only in the current session
-- No export or sharing options
-
-**Solution**:
-- Share button in action bar
-- Native Web Share API on mobile
-- Copy-to-clipboard fallback for desktop
-- Optional: Share as image
-
-**Implementation**:
-```javascript
-async function shareRecipe(recipe) {
-    const shareData = {
-        title: recipe.name,
-        text: `Check out this ${recipe.name} recipe from Cocktail Cache!`,
-        url: window.location.href
-    };
-
-    if (navigator.share) {
-        await navigator.share(shareData);
-    } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(formatRecipeText(recipe));
-        showToast('Recipe copied to clipboard!');
+{
+    "history": [
+        { "id": "gold-rush", "name": "Gold Rush", "madeAt": "2025-12-28T15:30:00Z" },
+        { "id": "negroni", "name": "Negroni", "madeAt": "2025-12-27T20:00:00Z" }
+    ],
+    "stats": {
+        "totalMade": 15,
+        "mostMade": { "id": "old-fashioned", "count": 5 }
     }
 }
 ```
 
-**Effort**: 3-4 hours | **Impact**: ⭐⭐⭐⭐
+**Effort**: 5-6 hours | **Impact**: Medium-High
 
 ---
 
-## Higher Effort Enhancements
+#### 2.2 Favorites System
 
-### 8. Favorites System
+**Concept**: Let users save drinks they want to try or love.
 
-**Problem**: Users can't save preferred recipes for quick access later.
+| Feature | Description |
+|---------|-------------|
+| UI Trigger | Heart icon on drink cards and detail pages |
+| Storage | `cocktail-cache-favorites` in localStorage |
+| Display | Favorites filter in Browse or dedicated section |
+| Cross-reference | Show if drink is favorited in all views |
 
-**Solution**:
-- Heart icon on recipe cards
-- Favorites stored in localStorage
-- Favorites section accessible from header
-- Quick "make again" functionality
-
-**Data Structure**:
-```javascript
-// localStorage: cocktail-cache-favorites
-{
-    "favorites": [
-        { "id": "gold-rush", "name": "Gold Rush", "savedAt": "2024-12-28T..." },
-        { "id": "whiskey-sour", "name": "Whiskey Sour", "savedAt": "2024-12-27T..." }
-    ]
-}
-```
-
-**Effort**: 4-5 hours | **Impact**: ⭐⭐⭐
+**Effort**: 4-5 hours | **Impact**: Medium
 
 ---
 
-### 9. Drink History
+#### 2.3 Achievements/Gamification
 
-**Problem**: No record of drinks user has made; can't track or revisit past recommendations.
+**Concept**: Encourage exploration through badges and milestones.
 
-**Solution**:
-- Track "Made it" actions in localStorage
-- Display history section (collapsible)
-- Show stats: "You've made 12 drinks this month"
-- Quick re-make from history
+| Achievement | Criteria |
+|-------------|----------|
+| First Drink | Made your first drink |
+| Explorer | Made 10 different drinks |
+| Mixologist | Made 25 different drinks |
+| Spirit Journey | Made drinks with 5 different base spirits |
+| Mocktail Maven | Made 5 mocktails |
+| Cabinet Master | Added 15+ ingredients to cabinet |
 
-**Features**:
-- Date/time stamps for each drink made
-- Repeat drink count tracking
-- "Your most made drink: Old Fashioned (5x)"
-
-**Effort**: 5-6 hours | **Impact**: ⭐⭐⭐
+**Effort**: 8-10 hours | **Impact**: Medium
 
 ---
 
-### 10. Explore Mode
+### P3: Mobile Polish (Optimization Sprint)
 
-**Problem**: Single-path recommendation flow; no way to browse available drinks.
+#### 3.1 Touch Targets
 
-**Current Behavior**:
-- Must go through full flow to see any drink
-- "Another" is the only way to explore alternatives
+**Current State**: Some elements below 44px minimum.
 
-**Solution**:
-- Alternative entry point: "Browse All Drinks"
-- Grid view of available drinks
-- Filter by spirit, difficulty, flavor profile
-- Show required ingredients for each drink
-- "What can I make?" comprehensive view
-
-**UI Concept**:
-```
-[AI Recommend] [Browse All Drinks]
-
-Filter: [All Spirits ▼] [All Difficulty ▼] [Cocktails | Mocktails | Both]
-
-┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-│ Gold Rush   │ │ Negroni     │ │ Mojito      │
-│ 🥃 Bourbon  │ │ 🍸 Gin      │ │ 🥃 Rum      │
-│ ⭐ Easy     │ │ ⭐⭐ Medium │ │ ⭐ Easy     │
-│ ✓ Can make │ │ ✗ Need 1    │ │ ✓ Can make │
-└─────────────┘ └─────────────┘ └─────────────┘
-```
-
-**Effort**: 8+ hours | **Impact**: ⭐⭐⭐⭐
+| Element | Current Size | Target |
+|---------|--------------|--------|
+| Ingredient chips | ~32px height | 44px minimum |
+| Filter buttons | ~36px | 44px minimum |
+| Tab buttons | ~40px | 48px minimum |
+| Autocomplete items | ~36px | 44px minimum |
 
 ---
 
-### 11. PWA Support
+#### 3.2 Swipe Gestures
 
-**Problem**: App requires internet; can't be installed or used offline.
+**Concept**: Native mobile interactions for tab switching.
 
-**Solution**:
-- Add manifest.json for "Add to Home Screen"
-- Service worker for asset caching
-- Offline recipe viewing (cached recipes)
-- Optional: Push notifications for new features
+| Gesture | Action |
+|---------|--------|
+| Swipe left | Next tab (Chat -> Cabinet -> Browse) |
+| Swipe right | Previous tab |
+| Swipe down on chat | Collapse keyboard / refresh |
 
-**Implementation Requirements**:
-- `manifest.json` with app metadata and icons
-- Service worker registration in base template
-- Cache strategy for static assets and API responses
-- Offline fallback page
+**Implementation**: Use Hammer.js or native touch events.
 
-**Effort**: 6-8 hours | **Impact**: ⭐⭐⭐
+**Effort**: 6-8 hours | **Impact**: Medium
 
 ---
 
-## Visual & Accessibility Polish
+#### 3.3 Pull-to-Refresh
 
-### Touch Target Sizing
+**Concept**: Mobile-native refresh pattern for Browse page.
 
-| Element | Current | Target |
-|---------|---------|--------|
-| Ingredient chips | ~32px | ≥44px |
-| Category triggers | ~36px | ≥44px |
-| Action buttons | 40px | ≥48px |
-
-### Collapsible Section Defaults
-
-| Section | Current | Recommended |
-|---------|---------|-------------|
-| Why this drink | Collapsed | **Expanded** (high value) |
-| Ingredients | Expanded | Expanded |
-| Method | Collapsed | Collapsed |
-| Details | Collapsed | Collapsed |
-
-### Accessibility Improvements
-
-- [ ] Add skip-to-content link
-- [ ] Ensure all buttons have aria-labels
-- [ ] Add focus management for chat messages
-- [ ] Announce loading states to screen readers
-- [ ] Test with VoiceOver/TalkBack
-- [ ] Ensure color contrast meets WCAG AA
-
-### Reduced Motion (Already Implemented ✓)
-
-The CSS already includes `prefers-reduced-motion` support. Verify JS animations also respect this preference.
+**Effort**: 3-4 hours | **Impact**: Low-Medium
 
 ---
 
-## Implementation Priority Matrix
+### P3: Infrastructure Improvements
 
-| Priority | Feature | Effort | Impact | Dependencies |
-|----------|---------|--------|--------|--------------|
-| 1 | Cabinet persistence | 1-2 hrs | ⭐⭐⭐⭐⭐ | None |
-| 2 | Drink counter | 2-3 hrs | ⭐⭐⭐⭐⭐ | Load unlock_scores.json |
-| 3 | Sticky action bar | 1 hr | ⭐⭐⭐⭐ | None |
-| 4 | Ingredient search | 2-3 hrs | ⭐⭐⭐⭐ | None |
-| 5 | Cabinet presets | 2 hrs | ⭐⭐⭐⭐ | None |
-| 6 | Loading stages | 2 hrs | ⭐⭐⭐ | None |
-| 7 | Share recipe | 3-4 hrs | ⭐⭐⭐⭐ | None |
-| 8 | Favorites | 4-5 hrs | ⭐⭐⭐ | #1 (localStorage pattern) |
-| 9 | Drink history | 5-6 hrs | ⭐⭐⭐ | #1, #8 |
-| 10 | Explore mode | 8+ hrs | ⭐⭐⭐⭐ | API endpoint |
-| 11 | PWA support | 6-8 hrs | ⭐⭐⭐ | None |
+#### 3.4 PWA Support
 
----
+**Concept**: Install to home screen, offline caching.
 
-## Recommended Implementation Phases
+| Component | Purpose |
+|-----------|---------|
+| `manifest.json` | App metadata for install prompt |
+| Service Worker | Asset caching, offline support |
+| Offline Page | Fallback when fully offline |
+| Cache Strategy | Stale-while-revalidate for recipes |
 
-### Phase 1: Quick Wins (Sprint 1)
-- Cabinet persistence
-- Real-time drink counter
-- Sticky action bar
-- **Estimated Time**: 1 day
-
-### Phase 2: Core Enhancements (Sprint 2)
-- Ingredient search
-- Cabinet presets
-- Progressive loading stages
-- **Estimated Time**: 1-2 days
-
-### Phase 3: Sharing & Social (Sprint 3)
-- Share recipe feature
-- Favorites system
-- Drink history
-- **Estimated Time**: 2-3 days
-
-### Phase 4: Discovery (Sprint 4)
-- Explore mode
-- PWA support
-- Accessibility audit
-- **Estimated Time**: 3-4 days
+**Effort**: 8-10 hours | **Impact**: Medium
 
 ---
 
-## Success Metrics
+#### 3.5 Share Recipe Feature
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Return user rate | Unknown | +30% |
-| Session duration | ~2 min | +50% |
-| Recipes viewed per session | 1.5 | 3+ |
-| Share actions | 0 | 10% of sessions |
-| Mobile bounce rate | Unknown | -20% |
+**Concept**: Native sharing or clipboard copy for recipes.
 
----
+| Platform | Method |
+|----------|--------|
+| Mobile | Web Share API (`navigator.share`) |
+| Desktop | Copy to clipboard with formatted text |
+| Optional | Generate shareable image |
 
-## Technical Notes
-
-### localStorage Keys
-
-| Key | Purpose | Format |
-|-----|---------|--------|
-| `cocktail-cache-cabinet` | Saved ingredients | `string[]` |
-| `cocktail-cache-favorites` | Favorited recipes | `{id, name, savedAt}[]` |
-| `cocktail-cache-history` | Made drinks | `{id, name, madeAt}[]` |
-| `cocktail-cache-settings` | User preferences | `{hasSeenTutorial, soundEnabled}` |
-
-### API Considerations
-
-- Explore mode may need new endpoint: `GET /api/drinks?cabinet=...&filters=...`
-- Or can be client-side filtered from existing data
-- Consider caching drink data in service worker
+**Effort**: 4-5 hours | **Impact**: Medium
 
 ---
 
-## References
+## Priority Matrix Summary
 
-- Current UI: `src/app/templates/index.html`
-- Styles: `src/app/static/css/glassmorphic.css`
-- API: `src/app/routers/api.py`
-- Data: `data/unlock_scores.json` (for drink counter)
+| Priority | Features | Total Effort |
+|----------|----------|--------------|
+| **P1** | Error handling, Loading states, Accessibility | 13-18 hours |
+| **P2** | History, Favorites, Achievements | 17-21 hours |
+| **P3** | Touch targets, Gestures, PWA, Share | 21-27 hours |
+
+---
+
+## Design Decisions Log
+
+### Decision 1: Tabbed Navigation vs Sidebar
+
+**Date**: Week 6
+**Decision**: Tabbed navigation in unified header
+**Rationale**:
+- Mobile-first: tabs work better on narrow screens
+- Reduces visual clutter compared to persistent sidebar
+- Familiar pattern from messaging apps
+- Allows full-width content in each view
+
+**Alternatives Considered**:
+- Hamburger menu: Hidden navigation, poor discoverability
+- Bottom tabs: Would conflict with action buttons on recipe cards
+- Sidebar: Takes valuable horizontal space on mobile
+
+---
+
+### Decision 2: Cabinet as Tab vs Modal
+
+**Date**: Week 6
+**Decision**: Cabinet as dedicated tab panel
+**Rationale**:
+- Users spend significant time managing ingredients
+- Tab allows scrolling through all categories
+- Easier to implement persistence and state
+- Modal would feel cramped for 50+ ingredients
+
+---
+
+### Decision 3: Browse as Separate Page vs Tab Content
+
+**Date**: Week 6
+**Decision**: Browse links to `/browse` route (full page)
+**Rationale**:
+- Browse needs more horizontal space for grid layout
+- Allows for URL-based deep linking to filtered views
+- Keeps chat container focused on conversation flow
+- Future: can add URL params for filters (`/browse?type=mocktail`)
+
+---
+
+### Decision 4: localStorage vs Backend Storage
+
+**Date**: Week 5-6
+**Decision**: localStorage for all user data (cabinet, history, favorites)
+**Rationale**:
+- Privacy-first: no user data leaves device
+- No authentication required
+- Instant persistence without network
+- Sufficient for MVP scope
+
+**Limitations**:
+- No cross-device sync
+- Data lost if localStorage cleared
+- Limited storage (~5MB)
+
+**Future Consideration**: Optional cloud sync with authentication for power users.
+
+---
+
+## Technical Debt Notes
+
+| Item | Description | Priority |
+|------|-------------|----------|
+| CSS Consolidation | Some inline styles remain in templates | Low |
+| Component Extraction | Drink card template repeated in browse/chat | Medium |
+| API Error Types | Standardize error response format | Medium |
+| Test Coverage | No frontend tests currently | High |
+| Type Safety | JavaScript, not TypeScript | Medium |
+
+---
+
+## Metrics and Success Criteria
+
+| Metric | Baseline (Week 4) | Target | Measurement |
+|--------|-------------------|--------|-------------|
+| Return user rate | Unknown | +30% | localStorage presence on second visit |
+| Session duration | ~2 min | +50% | Page visibility API |
+| Drinks viewed per session | 1.5 | 3+ | Custom event tracking |
+| Cabinet save rate | 0% | 80%+ | localStorage write frequency |
+| Browse to detail conversion | Unknown | 60%+ | Navigation tracking |
+
+---
+
+## File References
+
+| Feature | Primary Files |
+|---------|---------------|
+| Tabbed Navigation | `src/app/templates/index.html` (lines 11-50) |
+| Cabinet Panel | `src/app/templates/index.html` (lines 52-98) |
+| Cabinet Persistence | `src/app/static/js/cabinet-state.js` |
+| Browse Page | `src/app/templates/browse.html` |
+| Drink Detail | `src/app/templates/drink.html` |
+| Shared Styles | `src/app/static/css/glassmorphic.css` |
+| API Routes | `src/app/routers/api.py` |
+| Drink Data | `data/cocktails.json`, `data/mocktails.json` |
+
+---
+
+## Revision History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | Week 4 | Initial UX analysis and improvement proposals |
+| 2.0 | Week 6 | Updated with completed features, restructured pending items |

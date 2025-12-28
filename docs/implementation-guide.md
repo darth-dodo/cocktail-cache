@@ -160,7 +160,7 @@ uv sync  # Installs all dependencies from pyproject.toml
 }
 ```
 
-**Target: 50 cocktails** covering major spirit categories.
+**Current: 103 cocktails** covering major spirit categories (expanded from initial target of 50).
 
 #### `data/mocktails.json` - Schema
 
@@ -191,7 +191,7 @@ uv sync  # Installs all dependencies from pyproject.toml
 }
 ```
 
-**Target: 20+ mocktails** using common fresh ingredients and mixers.
+**Current: 39 mocktails** using common fresh ingredients and mixers (expanded from initial target of 20+).
 
 #### `data/ingredients.json` - Structure
 
@@ -640,20 +640,38 @@ Raja, the AI mixologist, guides users through the recommendation process.
 - Collapsible recipe sections for easy mobile viewing
 - "Try Another" and "I Made This" actions
 
-### FastAPI Endpoints
+### FastAPI API Endpoints
 
 ```python
 # src/app/routers/api.py
 
-@router.post("/api/recommend")
-async def recommend(request: RecommendRequest):
-    """Get drink recommendation based on cabinet and mood."""
-    # Uses fast_mode=True by default for ~50% faster response
+# Core Flow Endpoint
+@router.post("/api/flow", response_model=FlowResponse)
+async def flow_endpoint(request: FlowRequest):
+    """Unified endpoint for all cocktail flow operations.
+
+    Actions:
+    - START: Begin new flow with cabinet and preferences
+    - ANOTHER: Request different recommendation (requires session_id)
+    - MADE: Mark drink as made (requires session_id and drink_id)
+    """
     ...
 
-@router.post("/api/another")
-async def another(request: AnotherRequest):
-    """Get alternative recommendation, excluding previous."""
+# Browse/Search Endpoints
+@router.get("/api/drinks", response_model=DrinksResponse)
+async def get_drinks():
+    """Get all available drinks for browsing."""
+    ...
+
+@router.get("/api/drinks/{drink_id}", response_model=DrinkDetailResponse)
+async def get_drink_by_id(drink_id: str):
+    """Get a single drink by ID with full details."""
+    ...
+
+# Ingredients Endpoint
+@router.get("/api/ingredients", response_model=IngredientsResponse)
+async def get_ingredients():
+    """Get all available ingredients organized by category."""
     ...
 ```
 
@@ -705,32 +723,198 @@ class RecipeCrewOutput(BaseModel):
 
 ---
 
-## Week 5-6: Polish & Documentation
+## Week 5-6: Frontend Implementation (COMPLETE)
 
-### Remaining Tasks
-- [ ] Error handling for edge cases
-- [ ] Performance optimization profiling
-- [ ] User guide documentation
-- [ ] Demo video/screenshots
+### Template Architecture
 
-**Local Storage Schema:**
+The frontend uses Jinja2 templates with a base layout and page-specific templates:
+
+```
+src/app/templates/
+|-- base.html           # Base layout with nav, footer, shared styles
+|-- index.html          # Chat page (/) - AI-powered recommendations
+|-- browse.html         # Browse page (/browse) - Full catalog with search
+|-- drink.html          # Drink detail page (/drink/:id) - Individual recipe
+|-- components/         # Reusable template partials
+```
+
+**Base Template (`base.html`):**
+- Navigation bar with Cabinet indicator badge, Browse link, and API Docs link
+- DaisyUI + Tailwind CSS for styling
+- Custom glassmorphic CSS theme (`static/css/glassmorphic.css`)
+- Animated background orbs for visual polish
+- Cabinet indicator that syncs across tabs via localStorage events
+
+### JavaScript Architecture
+
+The frontend uses **vanilla JavaScript** with no frameworks. This keeps the bundle minimal and Lighthouse scores high.
+
+**State Management:**
+- Cabinet state persisted in localStorage (`cocktail-cache-cabinet`)
+- Session state managed in-memory per page
+- Cross-tab synchronization via `storage` events and custom `cabinet-updated` events
+
+**JavaScript Files:**
+
+```
+src/app/static/js/
+|-- cabinet-state.js    # Cabinet localStorage utilities
+    - saveCabinet(ingredients)  # Save to localStorage
+    - loadCabinet()             # Load from localStorage
+    - clearCabinet()            # Clear cabinet
+    - hasSavedCabinet()         # Check if cabinet has items
+```
+
+**Inline Scripts per Page:**
+- `index.html`: Chat flow logic, tab switching, ingredient autocomplete
+- `browse.html`: Search/filter logic, drink card rendering
+- `drink.html`: Drink detail loading and rendering
+
+### Page Implementations
+
+#### Chat Page (`/` - index.html)
+
+The main AI-powered recommendation interface with tabbed navigation:
+
+**Tabs:**
+1. **Chat Tab** - Conversational flow with Raja
+2. **Cabinet Tab** - Visual ingredient picker
+3. **Browse Tab** - Link to browse page
+
+**Chat Flow Steps:**
+1. `welcome` - Initial greeting, check for saved cabinet
+2. `quickstart` - If cabinet exists, offer to continue or edit
+3. `cabinet` - Ingredient selection with categories and search
+4. `mood` - Mood selection with quick picks
+5. `skill` - Skill level and drink type selection
+6. `loading` - Rotating mixology facts while AI processes
+7. `recipe` - Display recommendation with actions
+
+**Cabinet Panel Features:**
+- Categorized ingredient grid (Spirits, Liqueurs, Fresh, etc.)
+- Real-time search with autocomplete dropdown
+- Selected ingredients display with remove buttons
+- Clear cabinet button
+- Continue button with ingredient count
+
+**API Calls:**
+```javascript
+// Start new recommendation flow
+POST /api/flow { action: 'START', cabinet: [...], mood, skill_level, drink_type }
+
+// Request another recommendation
+POST /api/flow { action: 'ANOTHER', session_id }
+
+// Mark drink as made
+POST /api/flow { action: 'MADE', session_id, drink_id }
+```
+
+#### Browse Page (`/browse` - browse.html)
+
+Full catalog view with search and filtering:
+
+**Features:**
+- Text search (name, tagline, tags)
+- Type filter (All/Cocktails/Mocktails)
+- Difficulty filter (Any/Easy/Medium/Hard/Advanced)
+- Responsive grid layout (1-3 columns)
+- Drink cards with metadata and "View Recipe" link
+- "Ask AI Instead" link for personalized recommendations
+
+**API Calls:**
+```javascript
+// Load all drinks on page init
+GET /api/drinks
+```
+
+#### Drink Detail Page (`/drink/:id` - drink.html)
+
+Individual recipe view with full details:
+
+**Features:**
+- Full recipe display (ingredients, method, garnish)
+- Flavor profile visualization with progress bars
+- Difficulty and timing badges
+- Tags display
+- Links to Browse and AI recommendation
+
+**API Calls:**
+```javascript
+// Load specific drink
+GET /api/drinks/{drink_id}
+```
+
+### State Management Patterns
+
+**localStorage Keys:**
 
 ```javascript
-// cocktail-cache-prefs
-{
+// Cabinet ingredients (array of ingredient IDs)
+'cocktail-cache-cabinet': ["bourbon", "lemons", "honey-syrup"]
+
+// User preferences (planned for future)
+'cocktail-cache-prefs': {
   "skill_level": "intermediate",
-  "drink_type": "cocktail",
-  "exclude_count": 5
+  "drink_type": "cocktail"
 }
 
-// cocktail-cache-history
-[
-  {"recipe_id": "gold-rush", "name": "Gold Rush", "made_at": "2025-12-27T18:30:00Z", "is_mocktail": false},
-  {"recipe_id": "negroni", "name": "Negroni", "made_at": "2025-12-25T20:00:00Z", "is_mocktail": false}
+// History (planned for future)
+'cocktail-cache-history': [
+  {"recipe_id": "gold-rush", "name": "Gold Rush", "made_at": "2025-12-27T18:30:00Z"}
 ]
 ```
 
-### Deployment (Render)
+**Cross-Tab Synchronization:**
+
+```javascript
+// In base.html - Cabinet indicator listens for changes
+window.addEventListener('storage', function(e) {
+    if (e.key === CABINET_STORAGE_KEY) {
+        updateCabinetIndicator();
+    }
+});
+
+// Same-tab updates via custom event
+window.dispatchEvent(new CustomEvent('cabinet-updated'));
+```
+
+### CSS Architecture
+
+Custom glassmorphic design system in `static/css/glassmorphic.css`:
+
+**Key Classes:**
+- `.glass-card` - Frosted glass container with backdrop blur
+- `.glass-nav` - Navigation bar with glass effect
+- `.glass-input` - Styled form inputs
+- `.glass-btn-primary/secondary/ghost` - Button variants
+- `.glass-chip` - Pill-shaped toggle buttons
+- `.glass-message-bot/user` - Chat message bubbles
+- `.collapsible-section/trigger/content` - Expandable sections
+
+**Color Palette:**
+- `cocktail-*` - Orange/amber tones for primary accents
+- `whiskey-*` - Brown/amber for warm highlights
+- `burgundy-*` - Rose/red for special accents
+- Stone grays for backgrounds and text
+
+### Responsive Design
+
+Mobile-first approach with Tailwind breakpoints:
+
+- **Mobile (<640px)**: Single column, compact spacing, abbreviated labels
+- **Tablet (640-1024px)**: Two columns where appropriate
+- **Desktop (>1024px)**: Full layout, expanded navigation
+
+**Touch Targets:**
+- Minimum 44px height for interactive elements
+- Adequate spacing between tappable items
+- Clear visual feedback on interaction
+
+---
+
+## Deployment
+
+### Render.com (Production)
 
 **1. Create `render.yaml` in project root:**
 
@@ -869,8 +1053,9 @@ This reduces latency by approximately 40% for requests with bottle advice.
 - [x] Project structure (`src/` layout)
 - [x] `pyproject.toml` configured
 - [x] `uv sync` installs all dependencies
-- [x] 50 cocktails in DB
-- [x] 24 mocktails in DB (exceeded target of 20+)
+- [x] 103 cocktails in DB (expanded from 50)
+- [x] 39 mocktails in DB (expanded from 20+)
+- [x] **142 total drinks** in catalog
 - [x] Difficulty tags on all recipes (easy/medium/hard/advanced)
 - [x] 134 ingredients categorized (6 categories)
 - [x] Unlock scores computed (110 entries covering cocktails + mocktails)
@@ -917,15 +1102,23 @@ This reduces latency by approximately 40% for requests with bottle advice.
 - [x] GitHub Actions CI/CD workflow
 - [x] Deployed to Render
 
-### Week 6 (IN PROGRESS)
-- [ ] Error handling for edge cases
-- [ ] Performance optimization profiling
-- [ ] User documentation
-- [ ] Demo video/screenshots
+### Week 6 (COMPLETE)
+- [x] Tabbed navigation (Chat/Cabinet/Browse) in main interface
+- [x] Cabinet panel with categorized ingredient picker
+- [x] Ingredient autocomplete with search functionality
+- [x] Cabinet state persistence in localStorage
+- [x] Cabinet indicator badge in navigation
+- [x] Browse page with full catalog search and filters
+- [x] Drink detail page with flavor profile visualization
+- [x] API endpoints for drinks browsing (`/api/drinks`, `/api/drinks/:id`)
+- [x] API endpoint for ingredients (`/api/ingredients`)
+- [x] Cross-tab cabinet synchronization
+- [x] Responsive design for all new pages
+- [x] Glassmorphic CSS design system
 
 ---
 
-*Implementation Guide v1.5*
+*Implementation Guide v2.0*
 *Applies BLUEPRINT.md patterns to Cocktail Cache*
-*Updated: Added PARALLEL_CREWS feature, parallel crew functions, updated performance tables*
-*Last Updated: 2025-12-27*
+*Updated: Week 6 UX improvements - tabbed navigation, browse page, drink detail page, cabinet management*
+*Last Updated: 2025-12-28*

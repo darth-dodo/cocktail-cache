@@ -1,12 +1,21 @@
 # Cocktail Cache - Implementation Tasks
 
-> **Status**: Week 4 API & UI Complete
+> **Status**: Week 6 UX Improvements In Progress
 >
-> **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI
+> **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI -> UX Polish
 >
 > **Test Coverage**: 339 tests passing, 87% coverage
 
-## Recent Changes (Week 4)
+## Recent Changes (Week 6 - UX Improvements)
+
+- **Tabbed Navigation**: Consolidated Chat/Cabinet/Browse into unified header with tab switching
+- **Browse Page**: Full drink catalog with search, type filters (Cocktail/Mocktail), and difficulty filters
+- **Drink Detail Page**: Individual recipe pages with ingredients, method, flavor profile visualization
+- **Ingredient Autocomplete**: Type-ahead search in cabinet panel with category grouping
+- **Expanded Dataset**: 142 drinks (up from 74) with better coverage across categories
+- **Cabinet Panel**: Dedicated tab for managing ingredients with persistent localStorage
+
+## Previous Changes (Week 4)
 
 - **Fast Mode for Analysis Crew**: `fast_mode=True` (default) uses unified Drink Recommender agent for ~50% faster response
 - **Optional Bottle Advice**: `include_bottle_advice=False` to skip bottle recommendations
@@ -486,31 +495,111 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Week 6: Polish (IN PROGRESS)
+## Week 6: UX Improvements (IN PROGRESS)
 
-### Phase 6.1: Error Handling
+### Phase 6.1: Navigation & Discovery ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Tabbed navigation header (Chat/Cabinet/Browse)
+- [x] Browse page with full drink catalog
+- [x] Search functionality with debounced input
+- [x] Type filter (All/Cocktails/Mocktails)
+- [x] Difficulty filter (Any/Easy/Medium/Hard/Advanced)
+- [x] Individual drink detail pages (`/drink/:id`)
+- [x] "Ask AI Instead" link from browse to chat
+- [x] Back navigation from drink detail to browse
+
+### Phase 6.2: Cabinet Management ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Dedicated Cabinet tab in main navigation
+- [x] Ingredient autocomplete with type-ahead search
+- [x] Category-based ingredient organization
+- [x] Visual selection state for ingredients
+- [x] Persistent cabinet via localStorage
+- [x] Cabinet count badge in navigation
+- [x] Clear cabinet functionality
+- [x] "Continue with X ingredients" flow
+
+### Phase 6.3: Data Expansion ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Expanded drinks from 74 to 142 recipes
+- [x] Better coverage across spirit categories
+- [x] More mocktail options
+- [x] Improved difficulty distribution
+
+### Phase 6.4: Error Handling & Empty States
 
 **Status**: PENDING
 
-- [ ] Graceful fallbacks for LLM failures
-- [ ] Empty cabinet scenario handling
-- [ ] No matches for mood/preferences handling
+- [ ] Empty cabinet scenario with helpful prompts
+- [ ] No matches found state with suggestions
+- [ ] API/LLM failure graceful fallbacks
 - [ ] Retry logic for transient failures
-- [ ] User-friendly error messages
+- [ ] User-friendly error messages with recovery actions
+- [ ] Offline state detection and messaging
 
-### Phase 6.2: Performance Optimization
+### Phase 6.5: Loading & Feedback
 
-**Status**: PARTIAL (fast mode implemented)
+**Status**: PENDING
+
+- [ ] Skeleton loading states for browse grid
+- [ ] Skeleton loading for drink detail page
+- [ ] Haptic feedback indicators (mobile)
+- [ ] Toast notifications for actions
+- [ ] Progress indicators for multi-step flows
+
+### Phase 6.6: Gamification & History
+
+**Status**: PENDING
+
+- [ ] "Made it" counter with localStorage persistence
+- [ ] Recently viewed drinks
+- [ ] Favorite drinks functionality
+- [ ] Share drink recipe (native share API)
+- [ ] Achievement badges (first drink, 10 drinks, etc.)
+
+### Phase 6.7: Accessibility & Polish
+
+**Status**: PENDING
+
+- [ ] ARIA labels audit and fixes
+- [ ] Keyboard navigation improvements
+- [ ] Focus management for modals/panels
+- [ ] Screen reader testing
+- [ ] Color contrast verification
+- [ ] Reduced motion preferences
+
+### Phase 6.8: Mobile Experience
+
+**Status**: PARTIAL
+
+- [x] Mobile-first responsive design
+- [x] Touch-friendly ingredient chips
+- [ ] Swipe gestures for tab navigation
+- [ ] Pull-to-refresh on browse page
+- [ ] Better touch targets (48px minimum)
+- [ ] Viewport height fixes for mobile browsers
+
+### Phase 6.9: Performance Optimization
+
+**Status**: PARTIAL
 
 - [x] Fast mode (~50% faster with single-agent analysis)
 - [x] Optional bottle advice to skip unnecessary LLM calls
 - [ ] Profile recommendation latency
 - [ ] Optimize JSON loading (caching)
 - [ ] Measure Lighthouse scores
+- [ ] Image optimization (if images added)
+- [ ] Service worker for offline support
 
-### Phase 6.3: Documentation
+### Phase 6.10: Documentation
 
-**Status**: COMPLETE
+**Status**: PARTIAL
 
 - [x] README.md updated with fast mode and Raja
 - [x] Architecture.md updated with crew diagrams
@@ -559,7 +648,23 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Week 3 | Crews Complete | Flow orchestration working (339 tests, 87% coverage) | PASSED |
 | Week 4 | API Complete | Fast mode, chat UI, structured outputs | PASSED |
 | Week 5 | UI Complete | Mobile responsive, deployed to Render | PASSED |
-| Week 6 | Ready | Error handling, optimization, docs | IN PROGRESS |
+| Week 6 | UX Polish | Navigation, discovery, error handling, accessibility | IN PROGRESS |
+
+### Week 6 UX Progress
+
+| Feature | Status | Priority |
+|---------|--------|----------|
+| Tabbed Navigation | ✅ Complete | P0 |
+| Browse & Search | ✅ Complete | P0 |
+| Drink Detail Pages | ✅ Complete | P0 |
+| Cabinet Panel | ✅ Complete | P0 |
+| Ingredient Autocomplete | ✅ Complete | P1 |
+| Data Expansion (142 drinks) | ✅ Complete | P1 |
+| Error States & Fallbacks | ⏳ Pending | P1 |
+| Loading Skeletons | ⏳ Pending | P2 |
+| Made-it History | ⏳ Pending | P2 |
+| Accessibility Audit | ⏳ Pending | P2 |
+| Mobile Polish | ⏳ Pending | P2 |
 
 ---
 
@@ -572,3 +677,23 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Mobile Lighthouse | 90+ | TBD | Vanilla JS, minimal deps |
 | Test coverage | 70%+ | 87% | 339 tests passing |
 | LLM calls per request | 4 | 2-3 | Fast mode default |
+| Drinks in catalog | 100+ | 142 | Expanded dataset |
+| Browse page load | <1s | TBD | JSON API response |
+
+---
+
+## Next Priority Tasks
+
+### High Priority (P1)
+1. **Error States**: Add user-friendly error handling for empty cabinet, no matches, API failures
+2. **Loading Skeletons**: Replace bounce animations with skeleton screens for perceived performance
+
+### Medium Priority (P2)
+3. **Made-it History**: Track drinks made with localStorage, show count badge
+4. **Favorites**: Allow saving favorite drinks for quick access
+5. **Accessibility**: ARIA labels, keyboard navigation, focus management
+
+### Low Priority (P3)
+6. **Share Functionality**: Native share API for drink recipes
+7. **Offline Support**: Service worker for basic offline functionality
+8. **Achievements**: Gamification badges for engagement
