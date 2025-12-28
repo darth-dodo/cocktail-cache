@@ -873,8 +873,8 @@ def _get_ingredient_display_name(ingredient_id: str) -> str:
 async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesResponse:
     """Get bottle purchase recommendations based on your cabinet.
 
-    Returns ranked recommendations of which bottles would unlock the most
-    new drinks based on your current cabinet ingredients.
+    Returns ranked recommendations of which bottles appear in the most drinks
+    that you don't already have ingredients for.
 
     Args:
         request: Request with cabinet ingredients and filters.
@@ -882,46 +882,93 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
     Returns:
         SuggestBottlesResponse with ranked bottle recommendations.
     """
-    import json
+    from collections import defaultdict
 
-    from src.app.tools.unlock_calculator import UnlockCalculatorTool
+    from src.app.services.data_loader import load_all_drinks
 
     logger.info(
         f"Suggest bottles request: cabinet_size={len(request.cabinet)}, "
         f"drink_type={request.drink_type}, limit={request.limit}"
     )
 
-    # Use the existing UnlockCalculatorTool
-    tool = UnlockCalculatorTool()
-    result_json = tool._run(
-        cabinet=request.cabinet,
-        drink_type=request.drink_type,  # type: ignore
-        limit=request.limit,
-    )
-    result = json.loads(result_json)
+    # Normalize cabinet to lowercase
+    cabinet_set = {ing.lower().strip() for ing in request.cabinet}
 
-    # Transform to response format
-    recommendations = [
-        BottleRecommendation(
-            ingredient_id=rec["ingredient_id"],
-            ingredient_name=_get_ingredient_display_name(rec["ingredient_id"]),
-            new_drinks_unlocked=rec["new_drinks_unlocked"],
-            drinks=[
-                UnlockedDrink(
-                    id=drink["id"],
-                    name=drink["name"],
-                    is_mocktail=drink["is_mocktail"],
-                    difficulty=drink["difficulty"],
-                )
-                for drink in rec["drinks"]
-            ],
+    # Load all drinks
+    all_drinks = load_all_drinks()
+
+    # Filter by drink type
+    filtered_drinks = []
+    for drink in all_drinks:
+        if request.drink_type == "cocktails" and drink.is_mocktail:
+            continue
+        if request.drink_type == "mocktails" and not drink.is_mocktail:
+            continue
+        filtered_drinks.append(drink)
+
+    # Find drinks we can already make
+    drinks_makeable = 0
+    for drink in filtered_drinks:
+        required = {ing.item.lower() for ing in drink.ingredients}
+        if required.issubset(cabinet_set):
+            drinks_makeable += 1
+
+    # Count how many drinks each missing ingredient appears in
+    ingredient_drinks: dict[str, list[dict]] = defaultdict(list)
+
+    for drink in filtered_drinks:
+        required = {ing.item.lower() for ing in drink.ingredients}
+
+        # Skip if we can already make this drink
+        if required.issubset(cabinet_set):
+            continue
+
+        # Find missing ingredients for this drink
+        missing = required - cabinet_set
+
+        for ing_id in missing:
+            ingredient_drinks[ing_id].append(
+                {
+                    "id": drink.id,
+                    "name": drink.name,
+                    "is_mocktail": drink.is_mocktail,
+                    "difficulty": drink.difficulty,
+                }
+            )
+
+    # Build recommendations sorted by drink count
+    all_recommendations = []
+    for ing_id, drinks_list in ingredient_drinks.items():
+        # Skip ingredients already in cabinet
+        if ing_id in cabinet_set:
+            continue
+
+        all_recommendations.append(
+            BottleRecommendation(
+                ingredient_id=ing_id,
+                ingredient_name=_get_ingredient_display_name(ing_id),
+                new_drinks_unlocked=len(drinks_list),
+                drinks=[
+                    UnlockedDrink(
+                        id=d["id"],
+                        name=d["name"],
+                        is_mocktail=d["is_mocktail"],
+                        difficulty=d["difficulty"],
+                    )
+                    for d in drinks_list[:10]  # Limit drinks per recommendation
+                ],
+            )
         )
-        for rec in result.get("recommendations", [])
-    ]
+
+    # Sort by number of drinks (highest first)
+    all_recommendations.sort(key=lambda x: x.new_drinks_unlocked, reverse=True)
+
+    # Apply limit
+    top_recommendations = all_recommendations[: request.limit]
 
     return SuggestBottlesResponse(
-        cabinet_size=result["query"]["cabinet_size"],
-        drinks_makeable_now=result["current_status"]["drinks_you_can_make"],
-        recommendations=recommendations,
-        total_available_recommendations=result["total_recommendations"],
+        cabinet_size=len(cabinet_set),
+        drinks_makeable_now=drinks_makeable,
+        recommendations=top_recommendations,
+        total_available_recommendations=len(all_recommendations),
     )
