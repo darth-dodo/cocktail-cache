@@ -12,9 +12,10 @@
 2. [Frontend Architecture](#frontend-architecture)
 3. [Agentic Architecture](#agentic-architecture)
 4. [Data Flow](#data-flow)
-5. [BDD Specifications](#bdd-specifications)
-6. [Blueprint](#blueprint)
-7. [Key Decisions](#key-decisions)
+5. [API Rate Limiting](#api-rate-limiting)
+6. [BDD Specifications](#bdd-specifications)
+7. [Blueprint](#blueprint)
+8. [Key Decisions](#key-decisions)
 
 ---
 
@@ -36,6 +37,7 @@
 | CrewAI Crews | ✅ Complete | Analysis Crew (fast/full modes) + Recipe Crew (optional bottle advice) |
 | CrewAI Flow | ✅ Complete | CocktailFlow with state management and rejection workflow |
 | API Routes | ✅ Complete | FastAPI endpoints for recommendations |
+| Rate Limiting | ✅ Complete | SlowAPI with tiered limits (LLM/compute/static) |
 | Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
 | Tabbed Navigation | ✅ Complete | Chat/Cabinet/Browse tabs in unified header |
 | Browse Page | ✅ Complete | Search, filter by type/difficulty, drink detail pages |
@@ -702,6 +704,8 @@ TOTAL LLM CALLS: 2-4 (depending on configuration)
   - Fast mode + bottle advice (parallel): 3 calls (~3-4 seconds) [40% faster]
   - Full mode + bottle advice: 4 calls (~6-8 seconds)
 TARGET LATENCY: <8 seconds (fast mode with parallel: <4 seconds)
+
+RATE LIMITS: Applied per IP address (see API Rate Limiting section)
 ```
 
 ### State Management
@@ -737,6 +741,113 @@ class CocktailFlowState(BaseModel):
 ```
 
 **Note**: History, skill level, and drink type are stored in browser local storage and passed with each request.
+
+---
+
+## API Rate Limiting
+
+Rate limiting protects the API from abuse and manages resource consumption, especially for expensive LLM calls. Implementation uses [SlowAPI](https://slowapi.readthedocs.io/) with in-memory storage.
+
+### Rate Limit Tiers
+
+| Tier | Limit | Endpoints | Rationale |
+|------|-------|-----------|-----------|
+| **LLM** | 10/minute | `/api/flow` | AI calls are expensive (~$0.001-0.01 per request) |
+| **COMPUTE** | 30/minute | `/api/suggest-bottles` | CPU-intensive recommendation algorithms |
+| **STATIC** | 120/minute | `/api/drinks`, `/api/drinks/{id}`, `/api/ingredients` | Fast JSON lookups, cacheable |
+| **HEALTH** | Exempt | `/health` | Monitoring/orchestration must always work |
+
+### Response Headers
+
+All rate-limited endpoints include these headers:
+
+| Header | Description | Example |
+|--------|-------------|---------|
+| `X-RateLimit-Limit` | Maximum requests allowed in window | `10` |
+| `X-RateLimit-Remaining` | Requests remaining in current window | `7` |
+| `X-RateLimit-Reset` | Unix timestamp when window resets | `1735500000` |
+| `Retry-After` | Seconds until retry (only on 429) | `45` |
+
+### Rate Limit Exceeded Response
+
+When rate limit is exceeded, the API returns:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Content-Type: application/json
+Retry-After: 45
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1735500000
+
+{
+  "error": "Rate limit exceeded",
+  "detail": "10 per 1 minute"
+}
+```
+
+### Implementation
+
+```python
+# src/app/rate_limit.py
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(
+    key_func=get_remote_address,  # IP-based tracking
+    storage_uri="memory://",       # In-memory for MVP
+)
+
+class RateLimits:
+    LLM = "10/minute"
+    COMPUTE = "30/minute"
+    STATIC = "120/minute"
+    HEALTH = None  # Exempt
+```
+
+### Endpoint Decorators
+
+```python
+# Apply rate limits in routers/api.py
+@router.post("/flow")
+@limiter.limit(RateLimits.LLM)
+async def flow_endpoint(request: Request, ...): ...
+
+@router.post("/suggest-bottles")
+@limiter.limit(RateLimits.COMPUTE)
+async def suggest_bottles(request: Request, ...): ...
+
+@router.get("/drinks")
+@limiter.limit(RateLimits.STATIC)
+async def get_drinks(request: Request): ...
+```
+
+### Client-Side Handling
+
+Recommended approach for handling rate limits:
+
+```javascript
+async function callApi(url, options) {
+  const response = await fetch(url, options);
+
+  if (response.status === 429) {
+    const retryAfter = response.headers.get('Retry-After');
+    // Show user-friendly message with retry time
+    throw new Error(`Too many requests. Try again in ${retryAfter}s`);
+  }
+
+  return response;
+}
+```
+
+### Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| In-memory storage | Simple for MVP; Redis for production multi-instance |
+| IP-based tracking | No auth system; reasonable for single-user sessions |
+| Per-minute windows | Matches typical user interaction patterns |
+| Tiered limits | Protects expensive resources while allowing browsing |
 
 ---
 
@@ -1224,7 +1335,7 @@ export PARALLEL_CREWS=false
 
 ---
 
-*Document Version: 1.4*
-*Last Updated: 2025-12-28*
+*Document Version: 1.5*
+*Last Updated: 2025-12-29*
 *Principles: KISS + YAGNI*
-*Changes: Added Frontend Architecture section (tabbed navigation, browse page, drink details), updated data counts (142 drinks, 180 ingredients)*
+*Changes: Added API Rate Limiting section with tiered limits (LLM/compute/static), response headers, and 429 handling*
