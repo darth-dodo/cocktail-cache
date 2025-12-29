@@ -402,6 +402,9 @@ class DrinkSummary(BaseModel):
     is_mocktail: bool = Field(..., description="Whether this is a mocktail")
     timing_minutes: int = Field(..., description="Preparation time in minutes")
     tags: list[str] = Field(default_factory=list, description="Drink tags")
+    ingredient_ids: list[str] = Field(
+        default_factory=list, description="List of ingredient IDs for cabinet matching"
+    )
 
 
 class DrinksResponse(BaseModel):
@@ -566,6 +569,7 @@ async def get_drinks() -> DrinksResponse:
             is_mocktail=drink.is_mocktail,
             timing_minutes=drink.timing_minutes,
             tags=drink.tags,
+            ingredient_ids=[ing.item for ing in drink.ingredients],
         )
         for drink in all_drinks
     ]
@@ -957,7 +961,7 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
         if required.issubset(cabinet_set):
             drinks_makeable += 1
 
-    # Count how many drinks each missing ingredient appears in
+    # Count how many drinks each bottle would UNLOCK (where it's the only missing ingredient)
     ingredient_drinks: dict[str, list[dict]] = defaultdict(list)
 
     for drink in filtered_drinks:
@@ -970,8 +974,14 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
         # Find missing ingredients for this drink
         missing = required - cabinet_set
 
-        for ing_id in missing:
-            ingredient_drinks[ing_id].append(
+        # Only count drinks where exactly ONE bottle is missing
+        # (adding that bottle would unlock the drink)
+        missing_bottles = {m for m in missing if _is_bottle_ingredient(m)}
+
+        if len(missing_bottles) == 1:
+            # This drink is unlockable by adding one bottle
+            bottle_id = next(iter(missing_bottles))
+            ingredient_drinks[bottle_id].append(
                 {
                     "id": drink.id,
                     "name": drink.name,

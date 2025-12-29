@@ -2,7 +2,8 @@
  * Browse Panel for Cocktail Cache
  *
  * Loads and renders the browse drinks content when the Browse tab is selected.
- * Features search filtering, type filtering, and drink card selection.
+ * Features search filtering, type filtering, difficulty filtering, sorting,
+ * cabinet match calculation, and drink card selection.
  */
 (function() {
     'use strict';
@@ -10,11 +11,16 @@
     // State
     let drinksCache = null;
     let contentLoaded = false;
-    let currentFilter = 'all';
+    let currentTypeFilter = 'all';
+    let currentDifficultyFilters = new Set(); // Multi-select: 'easy', 'medium', 'hard'
+    let currentSort = 'name-asc'; // 'name-asc', 'name-desc', 'difficulty-asc', 'difficulty-desc'
     let searchQuery = '';
     let searchTimeout = null;
+    let cabinetIngredients = new Set(); // Ingredient IDs from cabinet
 
     const SEARCH_DEBOUNCE_MS = 150;
+    const CABINET_STORAGE_KEY = 'cocktail-cache-cabinet';
+    const DIFFICULTY_ORDER = { 'easy': 1, 'medium': 2, 'hard': 3 };
 
     /**
      * Initialize the browse panel
@@ -22,6 +28,9 @@
     function init() {
         // Listen for tab changes
         window.addEventListener('tab-changed', handleTabChange);
+
+        // Listen for cabinet updates to recalculate matches
+        window.addEventListener('cabinet-updated', handleCabinetUpdate);
 
         // Check if browse tab is already active on load
         if (window.TabManager && window.TabManager.getCurrentTab() === 'browse') {
@@ -40,6 +49,41 @@
     }
 
     /**
+     * Handle cabinet update events
+     */
+    function handleCabinetUpdate() {
+        loadCabinetIngredients();
+        if (contentLoaded) {
+            renderDrinks();
+        }
+    }
+
+    /**
+     * Load cabinet ingredients from localStorage
+     */
+    function loadCabinetIngredients() {
+        cabinetIngredients.clear();
+        try {
+            const stored = localStorage.getItem(CABINET_STORAGE_KEY);
+            if (stored) {
+                const cabinet = JSON.parse(stored);
+                // Cabinet can be an array of ingredient IDs or objects with id property
+                if (Array.isArray(cabinet)) {
+                    cabinet.forEach(item => {
+                        if (typeof item === 'string') {
+                            cabinetIngredients.add(item);
+                        } else if (item && item.id) {
+                            cabinetIngredients.add(item.id);
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            console.warn('BrowsePanel: Failed to load cabinet from localStorage', e);
+        }
+    }
+
+    /**
      * Load content into the browse panel
      */
     async function loadContent() {
@@ -48,6 +92,9 @@
             console.warn('BrowsePanel: #panel-browse element not found');
             return;
         }
+
+        // Load cabinet ingredients
+        loadCabinetIngredients();
 
         // Only load once unless refresh is called
         if (contentLoaded && drinksCache) {
@@ -137,10 +184,29 @@
                     </div>
 
                     <!-- Type filters -->
-                    <div class="flex gap-2">
-                        <button class="browse-filter glass-chip px-3 py-1.5 text-xs active" data-filter="all">All</button>
-                        <button class="browse-filter glass-chip px-3 py-1.5 text-xs" data-filter="cocktail">Cocktails</button>
-                        <button class="browse-filter glass-chip px-3 py-1.5 text-xs" data-filter="mocktail">Mocktails</button>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="browse-type-filter glass-chip px-3 py-1.5 text-xs rounded-full active" data-filter="all">All</button>
+                        <button class="browse-type-filter glass-chip px-3 py-1.5 text-xs rounded-full" data-filter="cocktail">Cocktails</button>
+                        <button class="browse-type-filter glass-chip px-3 py-1.5 text-xs rounded-full" data-filter="mocktail">Mocktails</button>
+                    </div>
+
+                    <!-- Difficulty filters (multi-select) -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-stone-500 text-xs">Difficulty:</span>
+                        <button class="browse-difficulty-filter glass-chip px-3 py-1.5 text-xs rounded-full" data-difficulty="easy">Easy</button>
+                        <button class="browse-difficulty-filter glass-chip px-3 py-1.5 text-xs rounded-full" data-difficulty="medium">Medium</button>
+                        <button class="browse-difficulty-filter glass-chip px-3 py-1.5 text-xs rounded-full" data-difficulty="hard">Hard</button>
+                    </div>
+
+                    <!-- Sort options -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-stone-500 text-xs">Sort:</span>
+                        <select id="browse-sort" class="glass-select text-xs py-1.5 px-2 rounded">
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="difficulty-asc">Difficulty (Easy first)</option>
+                            <option value="difficulty-desc">Difficulty (Hard first)</option>
+                        </select>
                     </div>
                 </div>
 
@@ -156,7 +222,7 @@
     }
 
     /**
-     * Setup event listeners for search and filters
+     * Setup event listeners for search, filters, and sorting
      */
     function setupEventListeners() {
         // Search input with debounce
@@ -177,7 +243,7 @@
                 }, SEARCH_DEBOUNCE_MS);
             });
 
-            // Handle Enter key
+            // Handle Escape key
             searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     searchInput.value = '';
@@ -187,24 +253,75 @@
             });
         }
 
-        // Filter buttons
-        document.querySelectorAll('.browse-filter').forEach(btn => {
+        // Type filter buttons (single select)
+        document.querySelectorAll('.browse-type-filter').forEach(btn => {
             btn.addEventListener('click', () => {
                 // Update active state
-                document.querySelectorAll('.browse-filter').forEach(b => {
+                document.querySelectorAll('.browse-type-filter').forEach(b => {
                     b.classList.remove('active');
                 });
                 btn.classList.add('active');
 
                 // Update filter and re-render
-                currentFilter = btn.dataset.filter;
+                currentTypeFilter = btn.dataset.filter;
                 renderDrinks();
             });
         });
+
+        // Difficulty filter buttons (multi-select)
+        document.querySelectorAll('.browse-difficulty-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const difficulty = btn.dataset.difficulty;
+
+                // Toggle selection
+                if (currentDifficultyFilters.has(difficulty)) {
+                    currentDifficultyFilters.delete(difficulty);
+                    btn.classList.remove('active');
+                } else {
+                    currentDifficultyFilters.add(difficulty);
+                    btn.classList.add('active');
+                }
+
+                renderDrinks();
+            });
+        });
+
+        // Sort dropdown
+        const sortSelect = document.getElementById('browse-sort');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                renderDrinks();
+            });
+        }
     }
 
     /**
-     * Filter drinks based on current search query and type filter
+     * Calculate cabinet match for a drink
+     * @param {Object} drink - Drink data with ingredient_ids array
+     * @returns {Object} { matched: number, total: number, percentage: number }
+     */
+    function calculateCabinetMatch(drink) {
+        const ingredientIds = drink.ingredient_ids || [];
+        const total = ingredientIds.length;
+
+        if (total === 0) {
+            return { matched: 0, total: 0, percentage: 0 };
+        }
+
+        let matched = 0;
+        ingredientIds.forEach(id => {
+            if (id && cabinetIngredients.has(id)) {
+                matched++;
+            }
+        });
+
+        const percentage = Math.round((matched / total) * 100);
+        return { matched, total, percentage };
+    }
+
+    /**
+     * Filter drinks based on current search query, type filter, and difficulty filters
      * @returns {Array} Filtered drinks
      */
     function getFilteredDrinks() {
@@ -213,10 +330,18 @@
         let filtered = [...drinksCache];
 
         // Apply type filter
-        if (currentFilter !== 'all') {
+        if (currentTypeFilter !== 'all') {
             filtered = filtered.filter(drink => {
                 const drinkType = (drink.drink_type || '').toLowerCase();
-                return drinkType === currentFilter;
+                return drinkType === currentTypeFilter;
+            });
+        }
+
+        // Apply difficulty filters (if any selected, show only those difficulties)
+        if (currentDifficultyFilters.size > 0) {
+            filtered = filtered.filter(drink => {
+                const difficulty = (drink.difficulty || 'easy').toLowerCase();
+                return currentDifficultyFilters.has(difficulty);
             });
         }
 
@@ -238,6 +363,42 @@
     }
 
     /**
+     * Sort drinks based on current sort option
+     * @param {Array} drinks - Array of drinks to sort
+     * @returns {Array} Sorted drinks
+     */
+    function sortDrinks(drinks) {
+        const sorted = [...drinks];
+
+        switch (currentSort) {
+            case 'name-asc':
+                sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                break;
+            case 'name-desc':
+                sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+                break;
+            case 'difficulty-asc':
+                sorted.sort((a, b) => {
+                    const diffA = DIFFICULTY_ORDER[(a.difficulty || 'easy').toLowerCase()] || 1;
+                    const diffB = DIFFICULTY_ORDER[(b.difficulty || 'easy').toLowerCase()] || 1;
+                    if (diffA !== diffB) return diffA - diffB;
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+                break;
+            case 'difficulty-desc':
+                sorted.sort((a, b) => {
+                    const diffA = DIFFICULTY_ORDER[(a.difficulty || 'easy').toLowerCase()] || 1;
+                    const diffB = DIFFICULTY_ORDER[(b.difficulty || 'easy').toLowerCase()] || 1;
+                    if (diffA !== diffB) return diffB - diffA;
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+                break;
+        }
+
+        return sorted;
+    }
+
+    /**
      * Render the drinks grid
      */
     function renderDrinks() {
@@ -246,7 +407,8 @@
 
         if (!grid) return;
 
-        const filtered = getFilteredDrinks();
+        let filtered = getFilteredDrinks();
+        filtered = sortDrinks(filtered);
 
         // Update count
         if (countEl) {
@@ -263,7 +425,7 @@
             grid.innerHTML = `
                 <div class="col-span-full text-center py-8">
                     <p class="text-stone-500 text-sm">No drinks found</p>
-                    <button onclick="window.BrowsePanel.setFilter('all'); document.getElementById('browse-search').value = '';"
+                    <button onclick="window.BrowsePanel.clearFilters();"
                             class="text-amber-400 text-xs mt-2 hover:underline">
                         Clear filters
                     </button>
@@ -295,6 +457,19 @@
         const tags = drink.tags || [];
         const displayTags = tags.slice(0, 3);
         const difficulty = drink.difficulty || 'Easy';
+        const match = calculateCabinetMatch(drink);
+
+        // Determine match badge color based on percentage
+        let matchBadgeClass = 'bg-stone-800/50 text-stone-400';
+        if (match.total > 0) {
+            if (match.percentage >= 80) {
+                matchBadgeClass = 'bg-green-900/50 text-green-400';
+            } else if (match.percentage >= 50) {
+                matchBadgeClass = 'bg-amber-900/50 text-amber-400';
+            } else if (match.percentage > 0) {
+                matchBadgeClass = 'bg-orange-900/50 text-orange-400';
+            }
+        }
 
         return `
             <div class="glass-card p-3 hover:border-amber-500/30 cursor-pointer transition-all" data-drink-id="${escapeHtml(drink.id)}">
@@ -307,13 +482,20 @@
                         ${escapeHtml(difficulty)}
                     </span>
                 </div>
-                ${displayTags.length > 0 ? `
-                    <div class="flex flex-wrap gap-1 mt-2">
-                        ${displayTags.map(tag => `
-                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/30 text-amber-300/70">${escapeHtml(tag)}</span>
-                        `).join('')}
-                    </div>
-                ` : ''}
+                <div class="flex items-center justify-between mt-2">
+                    ${displayTags.length > 0 ? `
+                        <div class="flex flex-wrap gap-1">
+                            ${displayTags.map(tag => `
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/30 text-amber-300/70">${escapeHtml(tag)}</span>
+                            `).join('')}
+                        </div>
+                    ` : '<div></div>'}
+                    ${match.total > 0 ? `
+                        <span class="text-[10px] px-1.5 py-0.5 rounded ${matchBadgeClass} flex-shrink-0 ml-2" title="Ingredients you have">
+                            ${match.matched}/${match.total}
+                        </span>
+                    ` : ''}
+                </div>
             </div>
         `;
     }
@@ -348,9 +530,43 @@
     function refresh() {
         drinksCache = null;
         contentLoaded = false;
-        currentFilter = 'all';
+        currentTypeFilter = 'all';
+        currentDifficultyFilters.clear();
+        currentSort = 'name-asc';
         searchQuery = '';
         loadContent();
+    }
+
+    /**
+     * Clear all filters and search
+     */
+    function clearFilters() {
+        // Reset state
+        currentTypeFilter = 'all';
+        currentDifficultyFilters.clear();
+        searchQuery = '';
+
+        // Reset UI
+        const searchInput = document.getElementById('browse-search');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        // Reset type filter buttons
+        document.querySelectorAll('.browse-type-filter').forEach(btn => {
+            if (btn.dataset.filter === 'all') {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Reset difficulty filter buttons
+        document.querySelectorAll('.browse-difficulty-filter').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        renderDrinks();
     }
 
     /**
@@ -363,10 +579,10 @@
             return;
         }
 
-        currentFilter = type;
+        currentTypeFilter = type;
 
         // Update button states
-        document.querySelectorAll('.browse-filter').forEach(btn => {
+        document.querySelectorAll('.browse-type-filter').forEach(btn => {
             if (btn.dataset.filter === type) {
                 btn.classList.add('active');
             } else {
@@ -381,7 +597,8 @@
     window.BrowsePanel = {
         init: init,
         refresh: refresh,
-        setFilter: setFilter
+        setFilter: setFilter,
+        clearFilters: clearFilters
     };
 
     // Auto-initialize on DOMContentLoaded
