@@ -184,3 +184,41 @@ class RecipeCrewOutput(BaseModel):
         default_factory=BottleAdvisorOutput,
         description="Bottle purchase recommendations",
     )
+
+
+# ============================================================================
+# Bar Growth Advisor Crew Models
+# ============================================================================
+
+
+class BarGrowthRecommendation(BaseModel):
+    """A single bottle recommendation with AI-generated reasoning."""
+
+    ingredient_id: str = Field(..., description="Ingredient ID to purchase")
+    name: str = Field(..., description="Human-readable ingredient name")
+    unlocks: int = Field(..., ge=0, description="Number of new drinks this unlocks")
+    reasoning: str = Field(
+        ..., description="AI-generated explanation of why to buy this bottle"
+    )
+    signature_drinks: list[str] = Field(
+        default_factory=list, description="Notable drinks this unlocks"
+    )
+
+
+class BarGrowthOutput(BaseModel):
+    """Output from the Bar Growth Advisor agent."""
+
+    summary: str = Field(..., description="Personalized summary of bar growth advice")
+    top_recommendation: BarGrowthRecommendation = Field(
+        ..., description="The #1 recommended bottle to purchase"
+    )
+    additional_recommendations: list[BarGrowthRecommendation] = Field(
+        default_factory=list, description="Other good options (2-3 more)"
+    )
+    essentials_note: str | None = Field(
+        default=None,
+        description="Note about missing essentials like bitters or specialty syrups",
+    )
+    next_milestone: str = Field(
+        ..., description="Encouragement about what they're building toward"
+    )

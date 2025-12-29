@@ -18,6 +18,7 @@
     let initialized = false;
     let isLoading = false;
     let lastCabinetHash = '';
+    let currentRecommendations = []; // Store recommendations for modal access
 
     /**
      * Escape HTML to prevent XSS
@@ -291,9 +292,10 @@
      * Render the progress indicator
      * @param {number} makeableNow - Number of drinks currently makeable
      * @param {Object} topRecommendation - Top recommendation with potential unlocks
+     * @param {Object[]} allRecommendations - All recommendations for total potential calculation
      * @returns {string} HTML for progress indicator
      */
-    function renderProgressIndicator(makeableNow, topRecommendation) {
+    function renderProgressIndicator(makeableNow, topRecommendation, allRecommendations = []) {
         if (!topRecommendation) {
             return `
                 <div class="glass-card p-4">
@@ -308,8 +310,12 @@
             `;
         }
 
-        const potentialTotal = makeableNow + topRecommendation.new_drinks_unlocked;
-        const currentPercent = potentialTotal > 0 ? Math.round((makeableNow / potentialTotal) * 100) : 0;
+        // Calculate total potential from all recommendations
+        const totalPotentialUnlocks = allRecommendations.reduce((sum, rec) => {
+            return sum + (rec.new_drinks_unlocked || rec.unlocks_count || 0);
+        }, 0);
+        const maxPossible = makeableNow + totalPotentialUnlocks;
+        const currentPercent = maxPossible > 0 ? Math.round((makeableNow / maxPossible) * 100) : 0;
         const ingredientName = escapeHtml(topRecommendation.ingredient_name || formatIngredientName(topRecommendation.ingredient_id));
 
         return `
@@ -317,17 +323,16 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-amber-200 font-medium">Your Progress</p>
-                        <p class="text-stone-400 text-xs">Add bottles to unlock more drinks</p>
+                        <p class="text-stone-400 text-xs">${makeableNow} of ${maxPossible} potential drinks</p>
                     </div>
                     <div class="text-right">
-                        <span class="text-2xl font-bold text-amber-300">${makeableNow}</span>
-                        <span class="text-stone-500 text-sm">drinks</span>
+                        <span class="text-2xl font-bold text-amber-300">${currentPercent}%</span>
                     </div>
                 </div>
 
                 <!-- Progress Bar -->
                 <div class="relative">
-                    <div class="h-2 bg-stone-800 rounded-full overflow-hidden">
+                    <div class="h-3 bg-stone-800 rounded-full overflow-hidden">
                         <div class="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full transition-all duration-500"
                              style="width: ${currentPercent}%"></div>
                     </div>
@@ -479,6 +484,256 @@
         });
     }
 
+    // ==================== MODAL FUNCTIONS ====================
+
+    /**
+     * Get difficulty badge HTML
+     * @param {string} difficulty - Difficulty level
+     * @returns {string} Badge HTML
+     */
+    function getDifficultyBadge(difficulty) {
+        const colors = {
+            'easy': 'bg-green-900/50 text-green-300',
+            'medium': 'bg-amber-900/50 text-amber-300',
+            'hard': 'bg-red-900/50 text-red-300'
+        };
+        const color = colors[difficulty] || colors['easy'];
+        return `<span class="text-[10px] px-1.5 py-0.5 rounded ${color}">${escapeHtml(difficulty || 'easy')}</span>`;
+    }
+
+    /**
+     * Format ingredient item name for display
+     * @param {string} item - Raw ingredient item name
+     * @returns {string} Formatted name
+     */
+    function formatItemName(item) {
+        if (!item) return '';
+        return item
+            .replace(/-/g, ' ')
+            .replace(/_/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
+
+    /**
+     * Render a single drink card for the modal
+     * @param {Object} drink - Drink object with full details
+     * @param {boolean} isLoading - Whether drink is still loading
+     * @returns {string} HTML for drink card
+     */
+    function renderModalDrinkCard(drink, isLoading = false) {
+        if (isLoading) {
+            return `
+                <div class="glass-card p-3 animate-pulse">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-stone-700 rounded-full"></div>
+                        <div class="flex-1">
+                            <div class="h-4 bg-stone-700 rounded w-24 mb-2"></div>
+                            <div class="h-3 bg-stone-700 rounded w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const isMocktail = drink.is_mocktail;
+        const typeIcon = isMocktail ? '🍹' : '🍸';
+        const typeColor = isMocktail ? 'text-green-400' : 'text-amber-400';
+
+        // Format ingredients list
+        let ingredientsHtml = '';
+        if (drink.ingredients && drink.ingredients.length > 0) {
+            const ingredientsList = drink.ingredients.slice(0, 5).map(ing => {
+                return `<span class="text-stone-400">${escapeHtml(ing.amount || '')} ${escapeHtml(ing.unit || '')} ${escapeHtml(formatItemName(ing.item))}</span>`;
+            }).join(' · ');
+            ingredientsHtml = `<p class="text-xs mt-1 line-clamp-2">${ingredientsList}</p>`;
+        }
+
+        // Tags
+        let tagsHtml = '';
+        if (drink.tags && drink.tags.length > 0) {
+            const tagsList = drink.tags.slice(0, 3).map(tag =>
+                `<span class="text-[10px] px-1.5 py-0.5 rounded bg-stone-800 text-stone-400">${escapeHtml(tag)}</span>`
+            ).join('');
+            tagsHtml = `<div class="flex flex-wrap gap-1 mt-2">${tagsList}</div>`;
+        }
+
+        return `
+            <div class="glass-card p-3 hover:border-amber-500/30 transition-all cursor-pointer drink-detail-card" data-drink-id="${escapeHtml(drink.id)}">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center flex-shrink-0">
+                        <span class="${typeColor}">${typeIcon}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="text-amber-200 font-medium text-sm">${escapeHtml(drink.name)}</h4>
+                            ${getDifficultyBadge(drink.difficulty)}
+                        </div>
+                        ${drink.tagline ? `<p class="text-stone-500 text-xs mt-0.5 italic">${escapeHtml(drink.tagline)}</p>` : ''}
+                        ${ingredientsHtml}
+                        ${tagsHtml}
+                        ${drink.timing_minutes ? `<p class="text-stone-600 text-[10px] mt-1">⏱ ${drink.timing_minutes} min</p>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Open the drinks modal with recommendation data
+     * @param {Object} recommendation - Recommendation object
+     */
+    async function openDrinksModal(recommendation) {
+        const modal = document.getElementById('drinks-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalSubtitle = document.getElementById('modal-subtitle');
+        const modalIcon = document.getElementById('modal-ingredient-icon');
+        const drinksList = document.getElementById('modal-drinks-list');
+        const addBtn = document.getElementById('modal-add-btn');
+        const addBtnText = document.getElementById('modal-add-text');
+
+        if (!modal || !recommendation) return;
+
+        const ingredientId = recommendation.ingredient_id || recommendation.ingredient;
+        const ingredientName = recommendation.ingredient_name || formatIngredientName(ingredientId);
+        const drinks = recommendation.drinks || [];
+        const unlockCount = recommendation.new_drinks_unlocked || drinks.length;
+
+        // Update modal header
+        modalTitle.textContent = `Unlock ${unlockCount} Drinks`;
+        modalSubtitle.textContent = `Add ${ingredientName} to your cabinet`;
+        modalIcon.innerHTML = `<span class="text-lg">${getIngredientEmoji(ingredientId)}</span>`;
+
+        // Set up add button
+        addBtn.dataset.ingredientId = ingredientId;
+        addBtnText.textContent = `Add ${ingredientName} to Cabinet`;
+
+        // Show loading state
+        drinksList.innerHTML = drinks.map(() => renderModalDrinkCard({}, true)).join('');
+
+        // Show modal
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Fetch full drink details in parallel
+        const drinkDetails = await Promise.all(
+            drinks.map(async (drink) => {
+                try {
+                    const response = await fetch(`/api/drinks/${drink.id}`);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    // Fallback to basic drink info if API fails
+                    return drink;
+                } catch (error) {
+                    console.error(`Failed to fetch drink ${drink.id}:`, error);
+                    return drink;
+                }
+            })
+        );
+
+        // Render full drink details
+        drinksList.innerHTML = drinkDetails.map(drink => renderModalDrinkCard(drink)).join('');
+    }
+
+    /**
+     * Close the drinks modal
+     */
+    function closeDrinksModal() {
+        const modal = document.getElementById('drinks-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+
+    /**
+     * Handle modal add to cabinet button click
+     */
+    function handleModalAddToCabinet() {
+        const addBtn = document.getElementById('modal-add-btn');
+        const addBtnText = document.getElementById('modal-add-text');
+        const ingredientId = addBtn?.dataset.ingredientId;
+
+        if (!ingredientId) return;
+
+        const added = addToCabinet(ingredientId);
+
+        if (added) {
+            // Visual feedback
+            addBtnText.textContent = 'Added!';
+            addBtn.classList.remove('glass-btn-primary');
+            addBtn.classList.add('glass-btn-success');
+            addBtn.disabled = true;
+
+            // Close modal and refresh after delay
+            setTimeout(() => {
+                closeDrinksModal();
+                addBtnText.textContent = 'Add to Cabinet';
+                addBtn.classList.remove('glass-btn-success');
+                addBtn.classList.add('glass-btn-primary');
+                addBtn.disabled = false;
+                refresh();
+            }, 800);
+        }
+    }
+
+    /**
+     * Initialize modal event listeners
+     */
+    function initModal() {
+        const modal = document.getElementById('drinks-modal');
+        const closeBtn = document.getElementById('modal-close-btn');
+        const backdrop = modal?.querySelector('.drinks-modal-backdrop');
+        const addBtn = document.getElementById('modal-add-btn');
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeDrinksModal);
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', closeDrinksModal);
+        }
+
+        if (addBtn) {
+            addBtn.addEventListener('click', handleModalAddToCabinet);
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                closeDrinksModal();
+            }
+        });
+    }
+
+    /**
+     * Initialize suggestion card click handlers to open modal
+     */
+    function initSuggestionCardClicks() {
+        const cards = document.querySelectorAll('.suggestion-card');
+        cards.forEach(card => {
+            // Make card clickable (but not the add button)
+            card.addEventListener('click', (e) => {
+                // Don't trigger if clicking the add button
+                if (e.target.closest('.add-to-cabinet-btn')) return;
+
+                const ingredientId = card.dataset.ingredientId;
+                const recommendation = currentRecommendations.find(
+                    rec => (rec.ingredient_id || rec.ingredient) === ingredientId
+                );
+
+                if (recommendation) {
+                    openDrinksModal(recommendation);
+                }
+            });
+
+            // Add cursor pointer
+            card.style.cursor = 'pointer';
+        });
+    }
+
     /**
      * Render the recommendations
      * @param {Object} data - Response data from API
@@ -490,6 +745,9 @@
 
         const recommendations = data.recommendations || [];
         const makeableCount = data.drinks_makeable_now || 0;
+
+        // Store recommendations for modal access
+        currentRecommendations = recommendations;
 
         // If no recommendations, show completion message
         if (recommendations.length === 0) {
@@ -538,7 +796,7 @@
 
         // Build category sections HTML
         const topRecommendation = recommendations[0];
-        const progressHtml = renderProgressIndicator(makeableCount, topRecommendation);
+        const progressHtml = renderProgressIndicator(makeableCount, topRecommendation, recommendations);
 
         let categoriesHtml = '';
         categoriesHtml += renderCategorySection('spirits', 'Spirits', '&#129371;', spirits, true);
@@ -574,6 +832,7 @@
         // Initialize interactive elements
         initCategoryToggles();
         initAddToCabinetButtons();
+        initSuggestionCardClicks();
     }
 
     /**
@@ -683,6 +942,9 @@
 
         // Listen for cabinet updates
         window.addEventListener('cabinet-updated', handleCabinetUpdated);
+
+        // Initialize modal
+        initModal();
 
         initialized = true;
 

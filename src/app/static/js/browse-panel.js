@@ -17,6 +17,7 @@
     let searchQuery = '';
     let searchTimeout = null;
     let cabinetIngredients = new Set(); // Ingredient IDs from cabinet
+    let showCanMakeOnly = false; // Filter to show only drinks user can make
 
     const SEARCH_DEBOUNCE_MS = 150;
     const CABINET_STORAGE_KEY = 'cocktail-cache-cabinet';
@@ -54,6 +55,7 @@
     function handleCabinetUpdate() {
         loadCabinetIngredients();
         if (contentLoaded) {
+            updateCanMakeSection();
             renderDrinks();
         }
     }
@@ -165,12 +167,45 @@
     }
 
     /**
+     * Get drinks that user can make (100% ingredient match)
+     * @returns {Array} Drinks user can make
+     */
+    function getCanMakeDrinks() {
+        if (!drinksCache) return [];
+
+        return drinksCache.filter(drink => {
+            const match = calculateCabinetMatch(drink);
+            return match.total > 0 && match.percentage === 100;
+        });
+    }
+
+    /**
      * Render the main panel content structure
      * @returns {string} HTML string
      */
     function renderPanelContent() {
+        const canMakeDrinks = getCanMakeDrinks();
+        const canMakeCount = canMakeDrinks.length;
+
         return `
             <div class="p-4 space-y-4">
+                <!-- I Can Make Section -->
+                <div id="can-make-section" class="glass-card p-3 ${canMakeCount === 0 ? 'hidden' : ''}">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">✨</span>
+                            <h3 class="text-amber-200 font-medium text-sm">I Can Make</h3>
+                            <span class="bg-green-900/50 text-green-400 text-xs px-2 py-0.5 rounded-full" id="can-make-count">${canMakeCount}</span>
+                        </div>
+                        <button id="toggle-can-make" class="text-xs text-amber-400 hover:text-amber-300 transition-colors">
+                            ${showCanMakeOnly ? 'Show All' : 'Show Only'}
+                        </button>
+                    </div>
+                    <div id="can-make-preview" class="flex flex-wrap gap-2 ${showCanMakeOnly ? 'hidden' : ''}">
+                        <!-- Preview chips rendered dynamically -->
+                    </div>
+                </div>
+
                 <!-- Search and Filters -->
                 <div class="space-y-3">
                     <div class="relative">
@@ -294,6 +329,85 @@
                 renderDrinks();
             });
         }
+
+        // Toggle "I Can Make" filter
+        const toggleCanMake = document.getElementById('toggle-can-make');
+        if (toggleCanMake) {
+            toggleCanMake.addEventListener('click', () => {
+                showCanMakeOnly = !showCanMakeOnly;
+                toggleCanMake.textContent = showCanMakeOnly ? 'Show All' : 'Show Only';
+
+                // Toggle preview visibility
+                const preview = document.getElementById('can-make-preview');
+                if (preview) {
+                    preview.classList.toggle('hidden', showCanMakeOnly);
+                }
+
+                renderDrinks();
+            });
+        }
+
+        // Render the "I Can Make" preview chips
+        renderCanMakePreview();
+    }
+
+    /**
+     * Render the "I Can Make" preview chips
+     */
+    function renderCanMakePreview() {
+        const preview = document.getElementById('can-make-preview');
+        if (!preview) return;
+
+        const canMakeDrinks = getCanMakeDrinks();
+
+        if (canMakeDrinks.length === 0) {
+            preview.innerHTML = '<p class="text-stone-500 text-xs">Add ingredients to your cabinet to see drinks you can make</p>';
+            return;
+        }
+
+        // Show up to 6 drink chips
+        const displayDrinks = canMakeDrinks.slice(0, 6);
+        const remaining = canMakeDrinks.length - displayDrinks.length;
+
+        preview.innerHTML = displayDrinks.map(drink => `
+            <button class="can-make-chip glass-chip px-2.5 py-1 text-xs rounded-full hover:bg-amber-900/40 transition-colors flex items-center gap-1.5"
+                    data-drink-id="${escapeHtml(drink.id)}">
+                <span class="text-green-400">✓</span>
+                <span class="text-stone-200">${escapeHtml(drink.name)}</span>
+            </button>
+        `).join('') + (remaining > 0 ? `<span class="text-stone-500 text-xs self-center">+${remaining} more</span>` : '');
+
+        // Add click handlers to chips
+        preview.querySelectorAll('.can-make-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const drinkId = chip.dataset.drinkId;
+                const drink = drinksCache.find(d => d.id === drinkId);
+                if (drink) {
+                    navigateToDrink(drink);
+                }
+            });
+        });
+    }
+
+    /**
+     * Update the "I Can Make" section when cabinet changes
+     */
+    function updateCanMakeSection() {
+        const section = document.getElementById('can-make-section');
+        const countEl = document.getElementById('can-make-count');
+
+        const canMakeDrinks = getCanMakeDrinks();
+        const count = canMakeDrinks.length;
+
+        if (section) {
+            section.classList.toggle('hidden', count === 0);
+        }
+
+        if (countEl) {
+            countEl.textContent = count;
+        }
+
+        renderCanMakePreview();
     }
 
     /**
@@ -329,11 +443,24 @@
 
         let filtered = [...drinksCache];
 
-        // Apply type filter
+        // Apply "I Can Make" filter
+        if (showCanMakeOnly) {
+            filtered = filtered.filter(drink => {
+                const match = calculateCabinetMatch(drink);
+                return match.total > 0 && match.percentage === 100;
+            });
+        }
+
+        // Apply type filter (cocktail/mocktail based on is_mocktail boolean)
         if (currentTypeFilter !== 'all') {
             filtered = filtered.filter(drink => {
-                const drinkType = (drink.drink_type || '').toLowerCase();
-                return drinkType === currentTypeFilter;
+                const isMocktail = drink.is_mocktail === true;
+                if (currentTypeFilter === 'mocktail') {
+                    return isMocktail;
+                } else if (currentTypeFilter === 'cocktail') {
+                    return !isMocktail;
+                }
+                return true;
             });
         }
 
@@ -442,7 +569,7 @@
                 const drinkId = card.dataset.drinkId;
                 const drink = drinksCache.find(d => d.id === drinkId);
                 if (drink) {
-                    emitDrinkSelected(drink);
+                    navigateToDrink(drink);
                 }
             });
         });
@@ -501,15 +628,13 @@
     }
 
     /**
-     * Emit drink-selected custom event
+     * Navigate to drink detail page
      * @param {Object} drink - The selected drink data
      */
-    function emitDrinkSelected(drink) {
-        const event = new CustomEvent('drink-selected', {
-            bubbles: true,
-            detail: { drink }
-        });
-        window.dispatchEvent(event);
+    function navigateToDrink(drink) {
+        if (drink && drink.id) {
+            window.location.href = `/drink/${encodeURIComponent(drink.id)}`;
+        }
     }
 
     /**
@@ -545,6 +670,7 @@
         currentTypeFilter = 'all';
         currentDifficultyFilters.clear();
         searchQuery = '';
+        showCanMakeOnly = false;
 
         // Reset UI
         const searchInput = document.getElementById('browse-search');
@@ -565,6 +691,16 @@
         document.querySelectorAll('.browse-difficulty-filter').forEach(btn => {
             btn.classList.remove('active');
         });
+
+        // Reset "I Can Make" toggle
+        const toggleCanMake = document.getElementById('toggle-can-make');
+        if (toggleCanMake) {
+            toggleCanMake.textContent = 'Show Only';
+        }
+        const preview = document.getElementById('can-make-preview');
+        if (preview) {
+            preview.classList.remove('hidden');
+        }
 
         renderDrinks();
     }
