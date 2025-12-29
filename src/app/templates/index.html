@@ -760,7 +760,7 @@ function showWelcome() {
                 addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up?`);
                 showQuickStartInput();
             } else {
-                addBotMessage("First, let's see what you're working with. Tap the Cabinet tab above to add your ingredients, or use the quick-add below:");
+                addBotMessage("First, let's see what you're working with. Tap the Cabinet tab above to add your ingredients!");
                 showCabinetInput();
             }
         }, 600);
@@ -811,322 +811,26 @@ function showQuickStartInput() {
 function showCabinetInput() {
     state.step = 'cabinet';
 
-    let html = `<div class="space-y-3 max-h-[50vh] overflow-y-auto pr-1">`;
+    // Simple input area - just a button to go to Cabinet tab
+    inputArea.innerHTML = `
+        <div class="space-y-2">
+            <button id="go-to-cabinet-btn" class="btn glass-btn-primary w-full gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                Open Cabinet
+            </button>
+        </div>
+    `;
 
-    // Collapsible category sections
-    for (const [category, items] of Object.entries(ingredients)) {
-        const isFirst = category === 'Spirits';
-        html += `
-            <div class="ingredient-category ${isFirst ? 'open' : ''}">
-                <button type="button" class="category-trigger w-full text-left flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-amber-900/20 transition-colors">
-                    <span class="text-stone-300 text-xs uppercase tracking-wider font-medium">${category}</span>
-                    <svg class="w-4 h-4 text-stone-500 transform transition-transform ${isFirst ? 'rotate-180' : ''} category-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div class="category-content ${isFirst ? 'open' : ''}">
-                    <div class="flex flex-wrap gap-1.5 pt-2 pb-1">
-                        ${items.map(item => `
-                            <button type="button"
-                                    data-id="${item.id}"
-                                    class="ingredient-chip glass-chip px-2.5 py-1 rounded-full text-xs transition-all
-                                           hover:bg-amber-600/20 hover:border-amber-500/40
-                                           ${state.cabinet.includes(item.id) ? 'active bg-amber-600/30 border-amber-500/50 text-amber-200' : 'text-stone-300'}">
-                                <span class="mr-0.5">${item.emoji}</span>${item.name}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    html += `</div>
-        <div class="space-y-2 pt-2 border-t border-amber-900/20">
-            <div class="flex gap-2 relative">
-                <div class="flex-1 relative">
-                    <input type="text" id="custom-ingredient-input"
-                           class="glass-input w-full text-sm py-2"
-                           placeholder="Type: aperol, prosecco, mint..."
-                           autocomplete="off">
-                    <div id="autocomplete-dropdown" class="autocomplete-dropdown hidden"></div>
-                </div>
-                <button id="add-custom-btn" class="btn btn-sm glass-btn-secondary px-3" title="Add">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                </button>
-            </div>
-            <div id="custom-ingredients-display" class="flex flex-wrap gap-1.5 hidden"></div>
-            <div class="flex gap-2">
-                <button id="cabinet-done-btn" class="btn btn-sm glass-btn-primary flex-1" ${state.cabinet.length === 0 ? 'disabled' : ''}>
-                    Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}
-                </button>
-                <button id="clear-cabinet-btn" class="btn btn-sm glass-btn-ghost px-3 ${state.cabinet.length === 0 ? 'hidden' : ''}" title="Clear Cabinet">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>`;
-
-    inputArea.innerHTML = html;
-
-    // Category toggle handlers
-    document.querySelectorAll('.category-trigger').forEach(trigger => {
-        trigger.addEventListener('click', () => {
-            const category = trigger.closest('.ingredient-category');
-            const content = category.querySelector('.category-content');
-            const icon = trigger.querySelector('.category-icon');
-
-            category.classList.toggle('open');
-            content.classList.toggle('open');
-            icon.classList.toggle('rotate-180');
-        });
-    });
-
-    // Ingredient chip handlers
-    document.querySelectorAll('.ingredient-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            const id = chip.dataset.id;
-            if (state.cabinet.includes(id)) {
-                state.cabinet = state.cabinet.filter(i => i !== id);
-                chip.classList.remove('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
-            } else {
-                state.cabinet.push(id);
-                chip.classList.add('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
-            }
-            saveCabinet(state.cabinet);
-            updateCabinetButton();
-        });
-    });
-
-    document.getElementById('cabinet-done-btn').addEventListener('click', onCabinetDone);
-
-    // Clear cabinet button handler
-    document.getElementById('clear-cabinet-btn').addEventListener('click', () => {
-        state.cabinet = [];
-        clearCabinet();
-        // Reset all chip states
-        document.querySelectorAll('.ingredient-chip').forEach(chip => {
-            chip.classList.remove('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
-        });
-        // Clear custom ingredients display
-        const customDisplay = document.getElementById('custom-ingredients-display');
-        if (customDisplay) {
-            customDisplay.classList.add('hidden');
-            customDisplay.innerHTML = '';
-        }
-        updateCabinetButton();
-    });
-
-    // Custom ingredient input
-    const customInput = document.getElementById('custom-ingredient-input');
-    const addCustomBtn = document.getElementById('add-custom-btn');
-    const customDisplay = document.getElementById('custom-ingredients-display');
-
-    function addCustomIngredients() {
-        const input = customInput.value.trim();
-        if (!input) return;
-
-        const newIngredients = input.split(/[,]+/)
-            .map(i => i.trim().toLowerCase())
-            .filter(i => i.length > 0 && !state.cabinet.includes(i));
-
-        if (newIngredients.length > 0) {
-            state.cabinet.push(...newIngredients);
-            customInput.value = '';
-            saveCabinet(state.cabinet);
-            updateCustomDisplay();
-            updateCabinetButton();
-        }
-    }
-
-    function updateCustomDisplay() {
-        const predefinedIds = Object.values(ingredients).flatMap(items => items.map(i => i.id));
-        const customIngredients = state.cabinet.filter(id => !predefinedIds.includes(id));
-
-        if (customIngredients.length > 0) {
-            customDisplay.classList.remove('hidden');
-            customDisplay.innerHTML = customIngredients.map(ing => `
-                <span class="glass-chip active bg-amber-600/30 border-amber-500/50 text-amber-200 px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5">
-                    ${ing}
-                    <button type="button" data-remove="${ing}" class="hover:text-white transition-colors">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </span>
-            `).join('');
-
-            customDisplay.querySelectorAll('[data-remove]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    state.cabinet = state.cabinet.filter(i => i !== btn.dataset.remove);
-                    saveCabinet(state.cabinet);
-                    updateCustomDisplay();
-                    updateCabinetButton();
-                });
-            });
-        } else {
-            customDisplay.classList.add('hidden');
-        }
-    }
-
-    addCustomBtn.addEventListener('click', addCustomIngredients);
-
-    // Autocomplete functionality
-    const dropdown = document.getElementById('autocomplete-dropdown');
-    let selectedIndex = -1;
-
-    function getAllIngredients() {
-        const allItems = [];
-        for (const [category, items] of Object.entries(ingredients)) {
-            for (const item of items) {
-                allItems.push({ ...item, category });
-            }
-        }
-        return allItems;
-    }
-
-    function filterIngredients(query) {
-        if (!query || query.length < 2) return [];
-        const lowerQuery = query.toLowerCase();
-        const allItems = getAllIngredients();
-        return allItems
-            .filter(item =>
-                item.name.toLowerCase().includes(lowerQuery) &&
-                !state.cabinet.includes(item.id)
-            )
-            .slice(0, 6);
-    }
-
-    function renderDropdown(matches) {
-        if (matches.length === 0) {
-            dropdown.classList.add('hidden');
-            dropdown.innerHTML = '';
-            selectedIndex = -1;
-            return;
-        }
-
-        dropdown.innerHTML = matches.map((item, index) => `
-            <div class="autocomplete-item ${index === selectedIndex ? 'selected' : ''}"
-                 data-id="${item.id}"
-                 data-index="${index}">
-                <span class="autocomplete-emoji">${item.emoji}</span>
-                <span class="autocomplete-name">${item.name}</span>
-                <span class="autocomplete-category">${item.category}</span>
-            </div>
-        `).join('');
-
-        dropdown.classList.remove('hidden');
-
-        // Add click handlers to dropdown items
-        dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
-            item.addEventListener('click', () => {
-                selectIngredient(item.dataset.id);
-            });
-        });
-    }
-
-    function selectIngredient(id) {
-        // Find the ingredient and add it to cabinet
-        const allItems = getAllIngredients();
-        const ingredient = allItems.find(item => item.id === id);
-
-        if (ingredient && !state.cabinet.includes(id)) {
-            state.cabinet.push(id);
-            // Update the chip UI if visible
-            const chip = document.querySelector(`.ingredient-chip[data-id="${id}"]`);
-            if (chip) {
-                chip.classList.add('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
-            }
-            saveCabinet(state.cabinet);
-            updateCabinetButton();
-        }
-
-        // Clear input and hide dropdown
-        customInput.value = '';
-        dropdown.classList.add('hidden');
-        dropdown.innerHTML = '';
-        selectedIndex = -1;
-        customInput.focus();
-    }
-
-    function updateSelectedItem() {
-        dropdown.querySelectorAll('.autocomplete-item').forEach((item, index) => {
-            if (index === selectedIndex) {
-                item.classList.add('selected');
-                item.scrollIntoView({ block: 'nearest' });
-            } else {
-                item.classList.remove('selected');
-            }
-        });
-    }
-
-    customInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        const matches = filterIngredients(query);
-        selectedIndex = -1;
-        renderDropdown(matches);
-    });
-
-    customInput.addEventListener('keydown', (e) => {
-        const items = dropdown.querySelectorAll('.autocomplete-item');
-        const isDropdownVisible = !dropdown.classList.contains('hidden') && items.length > 0;
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            if (isDropdownVisible) {
-                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                updateSelectedItem();
-            }
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            if (isDropdownVisible) {
-                selectedIndex = Math.max(selectedIndex - 1, 0);
-                updateSelectedItem();
-            }
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            if (isDropdownVisible && selectedIndex >= 0) {
-                const selectedItem = items[selectedIndex];
-                if (selectedItem) {
-                    selectIngredient(selectedItem.dataset.id);
-                }
-            } else {
-                addCustomIngredients();
-            }
-        } else if (e.key === 'Escape') {
-            dropdown.classList.add('hidden');
-            dropdown.innerHTML = '';
-            selectedIndex = -1;
-        }
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!customInput.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.add('hidden');
-            dropdown.innerHTML = '';
-            selectedIndex = -1;
+    document.getElementById('go-to-cabinet-btn').addEventListener('click', () => {
+        if (window.TabManager) {
+            window.TabManager.switchTo('cabinet');
         }
     });
 }
 
 function updateCabinetButton() {
-    const btn = document.getElementById('cabinet-done-btn');
-    const clearBtn = document.getElementById('clear-cabinet-btn');
-    btn.disabled = state.cabinet.length === 0;
-    btn.textContent = `Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}`;
-    // Show/hide clear button based on cabinet contents
-    if (clearBtn) {
-        if (state.cabinet.length === 0) {
-            clearBtn.classList.add('hidden');
-        } else {
-            clearBtn.classList.remove('hidden');
-        }
-    }
     // Update cabinet count badge
     updateCabinetCount();
 }
