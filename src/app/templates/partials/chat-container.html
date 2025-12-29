@@ -24,8 +24,8 @@
     - Include tab-manager.js before any scripts that need tab switching
 #}
 
-<!-- Chat Container - Full height like Claude.ai -->
-<div class="h-full max-w-2xl mx-auto px-4 py-2 flex flex-col">
+<!-- Chat Container - Full height like Claude.ai, mobile-first -->
+<div class="h-full w-full max-w-2xl mx-auto px-2 sm:px-4 py-1 sm:py-2 flex flex-col overflow-x-hidden">
     <div class="glass-card p-0 overflow-hidden flex flex-col flex-1 min-h-0">
 
         <!-- Header: Cocktail Cache branding with Raja identity + Reset button -->
@@ -105,31 +105,31 @@
              role="tabpanel"
              aria-labelledby="tab-chat">
             <!-- Chat messages area - scrollable -->
-            <div id="chat-messages" class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 scroll-smooth">
+            <div id="chat-messages" class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 sm:p-4 space-y-2 sm:space-y-3 scroll-smooth">
                 <!-- Messages populated via JavaScript -->
             </div>
             <!-- Input area - fixed at bottom -->
-            <div id="input-area" class="flex-shrink-0 border-t border-amber-900/20 p-3 sm:p-4 bg-stone-950/50">
+            <div id="input-area" class="flex-shrink-0 border-t border-amber-900/20 p-2 sm:p-4 bg-stone-950/50">
                 <!-- Input controls populated via JavaScript -->
             </div>
         </div>
 
         <div id="panel-cabinet"
-             class="tab-panel hidden flex-1 min-h-0 overflow-y-auto bg-stone-950/30"
+             class="tab-panel hidden flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-stone-950/30"
              role="tabpanel"
              aria-labelledby="tab-cabinet">
             {{ cabinet_content|safe if cabinet_content is defined else '' }}
         </div>
 
         <div id="panel-browse"
-             class="tab-panel hidden flex-1 min-h-0 overflow-y-auto bg-stone-950/30"
+             class="tab-panel hidden flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-stone-950/30"
              role="tabpanel"
              aria-labelledby="tab-browse">
             {{ browse_content|safe if browse_content is defined else '' }}
         </div>
 
         <div id="panel-suggest"
-             class="tab-panel hidden flex-1 min-h-0 overflow-y-auto bg-stone-950/30"
+             class="tab-panel hidden flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-stone-950/30"
              role="tabpanel"
              aria-labelledby="tab-suggest">
             {{ suggest_content|safe if suggest_content is defined else '' }}
