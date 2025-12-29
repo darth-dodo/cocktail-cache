@@ -242,3 +242,67 @@ advise_bottles_standalone:
       "total_new_drinks": 10
     }
   output_model: BottleAdvisorOutput
+
+# =============================================================================
+# BAR GROWTH ADVISOR CREW TASKS
+# =============================================================================
+
+advise_bar_growth:
+  description: |
+    Provide strategic bar growth advice based on the user's current cabinet
+    and what bottles would unlock the most new drink possibilities.
+
+    CURRENT BAR STATUS:
+    {cabinet_contents}
+
+    DRINKS YOU CAN MAKE (Core Bottles Only - Kitchen items assumed available):
+    {makeable_drinks}
+
+    BOTTLE RANKINGS (by unlock potential):
+    {ranked_bottles}
+
+    ESSENTIALS STATUS (Bitters & Specialty Syrups):
+    {essentials_status}
+
+    IMPORTANT PHILOSOPHY:
+    - We track CORE BOTTLES: spirits, modifiers, non-alcoholic spirits
+    - We ASSUME kitchen items (fresh produce, mixers) are available
+    - Essentials (bitters, specialty syrups) are nice-to-haves, not requirements
+    - Focus recommendations on bottles that unlock the MOST new drinks
+
+    Instructions:
+    1. Analyze the user's current bar and identify their strongest categories
+    2. Look at the ranked bottles and identify the #1 best purchase
+    3. Provide 2-3 additional recommendations as alternatives
+    4. If they're missing key essentials (like Angostura bitters), mention it
+    5. Give encouraging advice about what milestone they're building toward
+       (e.g., "You're 2 bottles away from mastering the classics!")
+
+    Be conversational, encouraging, and specific. Reference actual drink names
+    they'll be able to make. Make building a home bar feel achievable!
+
+    IMPORTANT: Return the result as a valid JSON object matching the BarGrowthOutput schema.
+  expected_output: |
+    A JSON object with structure:
+    {
+      "summary": "Personalized overview of their bar and growth path",
+      "top_recommendation": {
+        "ingredient_id": "ingredient-id",
+        "name": "Ingredient Name",
+        "unlocks": 5,
+        "reasoning": "Why this is THE bottle to buy next",
+        "signature_drinks": ["Classic Drink 1", "Classic Drink 2"]
+      },
+      "additional_recommendations": [
+        {
+          "ingredient_id": "ingredient-id-2",
+          "name": "Alternative Ingredient",
+          "unlocks": 3,
+          "reasoning": "Why this is also a good choice",
+          "signature_drinks": ["Other Drink"]
+        }
+      ],
+      "essentials_note": "Optional note about missing bitters/syrups",
+      "next_milestone": "Encouraging message about their progress"
+    }
+  output_model: BarGrowthOutput

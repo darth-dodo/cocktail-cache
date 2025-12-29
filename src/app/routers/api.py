@@ -402,6 +402,9 @@ class DrinkSummary(BaseModel):
     is_mocktail: bool = Field(..., description="Whether this is a mocktail")
     timing_minutes: int = Field(..., description="Preparation time in minutes")
     tags: list[str] = Field(default_factory=list, description="Drink tags")
+    ingredient_ids: list[str] = Field(
+        default_factory=list, description="List of ingredient IDs for cabinet matching"
+    )
 
 
 class DrinksResponse(BaseModel):
@@ -566,6 +569,7 @@ async def get_drinks() -> DrinksResponse:
             is_mocktail=drink.is_mocktail,
             timing_minutes=drink.timing_minutes,
             tags=drink.tags,
+            ingredient_ids=[ing.item for ing in drink.ingredients],
         )
         for drink in all_drinks
     ]
@@ -876,16 +880,49 @@ class BottleRecommendation(BaseModel):
     )
 
 
+class EssentialStatus(BaseModel):
+    """Status of a missing essential item (bitters, specialty syrups)."""
+
+    ingredient_id: str = Field(..., description="Ingredient ID")
+    ingredient_name: str = Field(..., description="Human-readable name")
+    used_in_drinks: int = Field(
+        ..., description="Number of makeable drinks that use this"
+    )
+
+
 class SuggestBottlesResponse(BaseModel):
     """Response model for bottle suggestions."""
 
-    cabinet_size: int = Field(..., description="Number of ingredients in cabinet")
-    drinks_makeable_now: int = Field(..., description="Drinks currently makeable")
+    cabinet_size: int = Field(..., description="Number of Core Bottles in cabinet")
+    drinks_makeable_now: int = Field(
+        ..., description="Drinks makeable with Core Bottles (kitchen items assumed)"
+    )
     recommendations: list[BottleRecommendation] = Field(
         ..., description="Ranked list of bottle recommendations"
     )
     total_available_recommendations: int = Field(
         ..., description="Total recommendations before limit applied"
+    )
+    # AI-enhanced fields (optional, may be None if AI is disabled)
+    ai_summary: str | None = Field(
+        default=None,
+        description="AI-generated personalized summary of bar growth advice",
+    )
+    ai_top_reasoning: str | None = Field(
+        default=None,
+        description="AI-generated reasoning for the top recommendation",
+    )
+    essentials_note: str | None = Field(
+        default=None,
+        description="Note about missing essential items like bitters",
+    )
+    next_milestone: str | None = Field(
+        default=None,
+        description="AI-generated encouragement about progress",
+    )
+    missing_essentials: list[EssentialStatus] = Field(
+        default_factory=list,
+        description="List of missing essential items (bitters, specialty syrups)",
     )
 
 
@@ -896,29 +933,99 @@ def _get_ingredient_display_name(ingredient_id: str) -> str:
 
 
 def _is_bottle_ingredient(ingredient_id: str) -> bool:
-    """Check if an ingredient is a bottle (spirit or liqueur/modifier).
+    """Check if an ingredient is a bottle (spirit, liqueur/modifier, or non-alcoholic spirit).
 
-    Returns True for spirits and liqueurs/modifiers.
+    Returns True for spirits, liqueurs/modifiers, and non-alcoholic spirits.
     Returns False for accessories like juices, syrups, bitters, mixers, fresh produce.
     """
     from src.app.services.data_loader import load_ingredients
 
     ingredients_db = load_ingredients()
 
-    # Check if ingredient is in spirits or modifiers categories
+    # Check if ingredient is in spirits, modifiers, or non-alcoholic categories
     spirits_ids = {ing.id for ing in ingredients_db.spirits}
     modifiers_ids = {ing.id for ing in ingredients_db.modifiers}
+    non_alcoholic_ids = {ing.id for ing in ingredients_db.non_alcoholic}
 
-    return ingredient_id in spirits_ids or ingredient_id in modifiers_ids
+    return (
+        ingredient_id in spirits_ids
+        or ingredient_id in modifiers_ids
+        or ingredient_id in non_alcoholic_ids
+    )
+
+
+def _is_core_bottle(ingredient_id: str) -> bool:
+    """Check if an ingredient is a Core Bottle (requires tracking in cabinet).
+
+    Core Bottles include:
+    - Spirits (bourbon, gin, vodka, rum, tequila, etc.)
+    - Modifiers (liqueurs like Cointreau, Campari, vermouth, etc.)
+    - Non-Alcoholic spirits (Seedlip, etc.)
+
+    These are bottles users invest in and should track.
+    """
+    from src.app.services.data_loader import load_ingredients
+
+    ingredients_db = load_ingredients()
+
+    spirits_ids = {ing.id for ing in ingredients_db.spirits}
+    modifiers_ids = {ing.id for ing in ingredients_db.modifiers}
+    non_alcoholic_ids = {ing.id for ing in ingredients_db.non_alcoholic}
+
+    return (
+        ingredient_id in spirits_ids
+        or ingredient_id in modifiers_ids
+        or ingredient_id in non_alcoholic_ids
+    )
+
+
+def _is_essential_item(ingredient_id: str) -> bool:
+    """Check if an ingredient is an Essential item (optional tracking).
+
+    Essentials include:
+    - Bitters (Angostura, orange bitters, etc.)
+    - Specialty syrups (orgeat, falernum, etc.)
+
+    These are shown in a separate "Don't forget" section.
+    """
+    from src.app.services.data_loader import load_ingredients
+
+    ingredients_db = load_ingredients()
+    bitters_syrups_ids = {ing.id for ing in ingredients_db.bitters_syrups}
+
+    return ingredient_id in bitters_syrups_ids
+
+
+def _is_kitchen_item(ingredient_id: str) -> bool:
+    """Check if an ingredient is a Kitchen item (assume available).
+
+    Kitchen items include:
+    - Fresh produce (lemons, limes, herbs, etc.)
+    - Mixers (soda water, tonic, ginger beer, etc.)
+
+    These are assumed available from any grocery store.
+    """
+    from src.app.services.data_loader import load_ingredients
+
+    ingredients_db = load_ingredients()
+
+    fresh_ids = {ing.id for ing in ingredients_db.fresh}
+    mixers_ids = {ing.id for ing in ingredients_db.mixers}
+
+    return ingredient_id in fresh_ids or ingredient_id in mixers_ids
 
 
 @router.post("/suggest-bottles", response_model=SuggestBottlesResponse)
 async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesResponse:
     """Get bottle purchase recommendations based on your cabinet.
 
-    Returns ranked recommendations of which bottles (spirits and liqueurs)
-    appear in the most drinks that you don't already have ingredients for.
-    Excludes accessories like juices, syrups, bitters, and fresh produce.
+    Uses the "Track your BAR, assume your KITCHEN" philosophy:
+    - Core Bottles (spirits, modifiers, non-alcoholic spirits): Must have
+    - Essentials (bitters, specialty syrups): Nice-to-have, tracked separately
+    - Kitchen items (fresh produce, mixers): Assumed available
+
+    Returns ranked recommendations of Core Bottles to purchase,
+    with optional AI-generated personalized advice.
 
     Args:
         request: Request with cabinet ingredients and filters.
@@ -950,28 +1057,46 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
             continue
         filtered_drinks.append(drink)
 
-    # Find drinks we can already make
-    drinks_makeable = 0
+    # ==========================================================================
+    # LENIENT MAKEABILITY: Only require Core Bottles, assume kitchen items
+    # ==========================================================================
+    drinks_makeable_list: list[str] = []
     for drink in filtered_drinks:
-        required = {ing.item.lower() for ing in drink.ingredients}
-        if required.issubset(cabinet_set):
-            drinks_makeable += 1
+        # Get all ingredients for this drink
+        drink_ingredients = {ing.item.lower() for ing in drink.ingredients}
 
-    # Count how many drinks each missing ingredient appears in
+        # Separate into Core Bottles vs Kitchen/Essentials
+        core_bottles_needed = {ing for ing in drink_ingredients if _is_core_bottle(ing)}
+
+        # Check if user has all required Core Bottles
+        # (Kitchen items are assumed available, essentials are nice-to-have)
+        if core_bottles_needed.issubset(cabinet_set):
+            drinks_makeable_list.append(drink.name)
+
+    drinks_makeable = len(drinks_makeable_list)
+
+    # ==========================================================================
+    # Count which Core Bottles would unlock the most NEW drinks
+    # ==========================================================================
     ingredient_drinks: dict[str, list[dict]] = defaultdict(list)
 
     for drink in filtered_drinks:
-        required = {ing.item.lower() for ing in drink.ingredients}
+        drink_ingredients = {ing.item.lower() for ing in drink.ingredients}
 
-        # Skip if we can already make this drink
-        if required.issubset(cabinet_set):
+        # Only consider Core Bottles as "required"
+        core_bottles_needed = {ing for ing in drink_ingredients if _is_core_bottle(ing)}
+
+        # Skip if we can already make this drink (have all Core Bottles)
+        if core_bottles_needed.issubset(cabinet_set):
             continue
 
-        # Find missing ingredients for this drink
-        missing = required - cabinet_set
+        # Find missing Core Bottles
+        missing_core = core_bottles_needed - cabinet_set
 
-        for ing_id in missing:
-            ingredient_drinks[ing_id].append(
+        # Only count drinks where exactly ONE Core Bottle is missing
+        if len(missing_core) == 1:
+            bottle_id = next(iter(missing_core))
+            ingredient_drinks[bottle_id].append(
                 {
                     "id": drink.id,
                     "name": drink.name,
@@ -980,16 +1105,17 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
                 }
             )
 
-    # Build recommendations sorted by drink count
-    # Only include bottles (spirits and modifiers), not accessories
+    # ==========================================================================
+    # Build recommendations (Core Bottles only)
+    # ==========================================================================
     all_recommendations = []
     for ing_id, drinks_list in ingredient_drinks.items():
         # Skip ingredients already in cabinet
         if ing_id in cabinet_set:
             continue
 
-        # Only include bottles (spirits and liqueurs/modifiers)
-        if not _is_bottle_ingredient(ing_id):
+        # Only recommend Core Bottles (not essentials or kitchen items)
+        if not _is_core_bottle(ing_id):
             continue
 
         all_recommendations.append(
@@ -1015,9 +1141,119 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
     # Apply limit
     top_recommendations = all_recommendations[: request.limit]
 
+    # ==========================================================================
+    # Track missing essentials (bitters, specialty syrups)
+    # ==========================================================================
+    missing_essentials: list[EssentialStatus] = []
+    essential_usage: dict[str, int] = defaultdict(int)
+
+    # Count how many makeable drinks use each essential
+    for drink in filtered_drinks:
+        drink_ingredients = {ing.item.lower() for ing in drink.ingredients}
+        core_bottles_needed = {ing for ing in drink_ingredients if _is_core_bottle(ing)}
+
+        # Only count for drinks we can make (have all Core Bottles)
+        if core_bottles_needed.issubset(cabinet_set):
+            for ing in drink_ingredients:
+                if _is_essential_item(ing) and ing not in cabinet_set:
+                    essential_usage[ing] += 1
+
+    # Build essentials list sorted by usage
+    for essential_id, usage_count in sorted(
+        essential_usage.items(), key=lambda x: x[1], reverse=True
+    ):
+        if usage_count > 0:
+            missing_essentials.append(
+                EssentialStatus(
+                    ingredient_id=essential_id,
+                    ingredient_name=_get_ingredient_display_name(essential_id),
+                    used_in_drinks=usage_count,
+                )
+            )
+
+    # Count Core Bottles in cabinet
+    core_bottles_in_cabinet = sum(1 for ing in cabinet_set if _is_core_bottle(ing))
+    core_bottles_list = [ing for ing in cabinet_set if _is_core_bottle(ing)]
+
+    # ==========================================================================
+    # AI ENHANCEMENT: Run Bar Growth Crew for personalized recommendations
+    # ==========================================================================
+    ai_summary: str | None = None
+    ai_top_reasoning: str | None = None
+    essentials_note: str | None = None
+    next_milestone: str | None = None
+
+    # Only run AI if we have recommendations and some cabinet items
+    if top_recommendations and core_bottles_in_cabinet > 0:
+        try:
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+
+            from src.app.crews.bar_growth_crew import run_bar_growth_crew
+
+            # Format data for the AI crew
+            cabinet_formatted = ", ".join(
+                _get_ingredient_display_name(b) for b in sorted(core_bottles_list)
+            )
+            cabinet_formatted += f" ({core_bottles_in_cabinet} bottles)"
+
+            makeable_formatted = (
+                f"You can make {drinks_makeable} drinks"
+                + (
+                    f": {', '.join(drinks_makeable_list[:10])}"
+                    if drinks_makeable_list
+                    else ""
+                )
+                + ("..." if len(drinks_makeable_list) > 10 else "")
+            )
+
+            ranked_bottles_formatted = "\n".join(
+                f"{i + 1}. {rec.ingredient_name}: +{rec.new_drinks_unlocked} drinks "
+                f"({', '.join(d.name for d in rec.drinks[:3])}{'...' if len(rec.drinks) > 3 else ''})"
+                for i, rec in enumerate(top_recommendations[:5])
+            )
+
+            essentials_formatted = (
+                "Missing: "
+                + ", ".join(
+                    f"{e.ingredient_name} (in {e.used_in_drinks} drinks)"
+                    for e in missing_essentials[:5]
+                )
+                if missing_essentials
+                else "No essential items missing."
+            )
+
+            # Run the crew in a thread pool to not block the event loop
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor() as executor:
+                ai_result = await loop.run_in_executor(
+                    executor,
+                    run_bar_growth_crew,
+                    cabinet_formatted,
+                    makeable_formatted,
+                    ranked_bottles_formatted,
+                    essentials_formatted,
+                )
+
+            ai_summary = ai_result.summary
+            ai_top_reasoning = ai_result.top_recommendation.reasoning
+            essentials_note = ai_result.essentials_note
+            next_milestone = ai_result.next_milestone
+
+            logger.info("AI bar growth advice generated successfully")
+
+        except Exception as e:
+            logger.warning(f"AI bar growth crew failed, returning without AI: {e}")
+            # Continue without AI - the basic recommendations are still useful
+
     return SuggestBottlesResponse(
-        cabinet_size=len(cabinet_set),
+        cabinet_size=core_bottles_in_cabinet,
         drinks_makeable_now=drinks_makeable,
         recommendations=top_recommendations,
         total_available_recommendations=len(all_recommendations),
+        ai_summary=ai_summary,
+        ai_top_reasoning=ai_top_reasoning,
+        essentials_note=essentials_note,
+        next_milestone=next_milestone,
+        missing_essentials=missing_essentials[:5],  # Top 5 missing essentials
     )

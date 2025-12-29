@@ -8,9 +8,13 @@ multiple agents to deliver complete recommendation workflows:
 
 - Recipe Crew: Recipe Writer -> Bottle Advisor
   Generates recipes with technique tips and purchase advice
+
+- Bar Growth Crew: Bar Growth Advisor
+  Provides strategic bottle purchase recommendations
 """
 
 from src.app.crews.analysis_crew import create_analysis_crew, run_analysis_crew
+from src.app.crews.bar_growth_crew import create_bar_growth_crew, run_bar_growth_crew
 from src.app.crews.recipe_crew import create_recipe_crew, run_recipe_crew
 
 __all__ = [
@@ -20,4 +24,7 @@ __all__ = [
     # Recipe generation workflow
     "create_recipe_crew",
     "run_recipe_crew",
+    # Bar growth workflow
+    "create_bar_growth_crew",
+    "run_bar_growth_crew",
 ]

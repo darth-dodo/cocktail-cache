@@ -411,6 +411,30 @@ body {
 }
 
 /* ================================
+   Mobile Touch Scrolling
+   ================================ */
+/* Ensure smooth momentum scrolling on iOS */
+.tab-panel {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+}
+
+/* Scrollable containers within panels */
+#chat-messages,
+#panel-cabinet,
+#panel-browse,
+#panel-suggest {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+}
+
+/* Prevent horizontal scroll issues */
+.overflow-x-hidden {
+    touch-action: pan-y !important;
+}
+
+/* ================================
    Responsive Adjustments
    ================================ */
 @media (max-width: 640px) {
@@ -426,6 +450,19 @@ body {
 
     .glass-radio-label {
         padding: 0.625rem 1rem;
+    }
+
+    /* Ensure panels fill available height on mobile */
+    .tab-panel {
+        min-height: 0;
+        flex: 1;
+    }
+
+    /* Improve touch targets on mobile */
+    .glass-chip,
+    .ingredient-chip,
+    .chat-tab {
+        min-height: 44px;
     }
 }
 

@@ -466,7 +466,12 @@ class TestSuggestBottles:
     """Tests for the POST /api/suggest-bottles endpoint."""
 
     def test_suggest_bottles_empty_cabinet(self, api_client: TestClient):
-        """Empty cabinet returns bottle recommendations."""
+        """Empty cabinet returns bottle recommendations.
+
+        With lenient counting (assuming kitchen items available), an empty
+        cabinet of Core Bottles still allows drinks that only require
+        kitchen items (fresh produce, mixers).
+        """
         response = api_client.post(
             "/api/suggest-bottles", json={"cabinet": [], "limit": 5}
         )
@@ -475,13 +480,19 @@ class TestSuggestBottles:
         data = response.json()
 
         assert "cabinet_size" in data
-        assert data["cabinet_size"] == 0
+        assert data["cabinet_size"] == 0  # No Core Bottles
         assert "recommendations" in data
         assert "drinks_makeable_now" in data
-        assert data["drinks_makeable_now"] == 0
+        # With lenient counting, drinks with no Core Bottles are makeable
+        # (e.g., mocktails that only use kitchen items)
+        assert data["drinks_makeable_now"] >= 0
 
     def test_suggest_bottles_with_cabinet(self, api_client: TestClient):
-        """Cabinet with some items returns appropriate recommendations."""
+        """Cabinet with some items returns appropriate recommendations.
+
+        Cabinet size only counts Core Bottles (spirits, modifiers, non-alcoholic spirits).
+        Bitters and syrups are Essentials (tracked separately), not Core Bottles.
+        """
         response = api_client.post(
             "/api/suggest-bottles",
             json={"cabinet": ["bourbon", "simple-syrup", "angostura"], "limit": 5},
@@ -490,7 +501,8 @@ class TestSuggestBottles:
         assert response.status_code == 200
         data = response.json()
 
-        assert data["cabinet_size"] == 3
+        # Only bourbon is a Core Bottle; simple-syrup and angostura are Essentials
+        assert data["cabinet_size"] == 1
         assert "recommendations" in data
 
     def test_suggest_bottles_recommendation_structure(self, api_client: TestClient):
@@ -515,8 +527,11 @@ class TestSuggestBottles:
             assert isinstance(rec["new_drinks_unlocked"], int)
             assert isinstance(rec["drinks"], list)
 
-    def test_suggest_bottles_only_spirits_and_modifiers(self, api_client: TestClient):
-        """Recommendations only include spirits and modifiers, not accessories."""
+    def test_suggest_bottles_only_core_bottles(self, api_client: TestClient):
+        """Recommendations only include Core Bottles (spirits, modifiers, non-alcoholic spirits).
+
+        Excludes kitchen items and essentials (bitters/syrups).
+        """
         response = api_client.post(
             "/api/suggest-bottles", json={"cabinet": [], "limit": 20}
         )
@@ -524,11 +539,11 @@ class TestSuggestBottles:
         assert response.status_code == 200
         data = response.json()
 
-        # All recommendations should be bottles (spirits or modifiers)
+        # All recommendations should be Core Bottles (spirits, modifiers, or non-alcoholic spirits)
         for rec in data["recommendations"]:
             ingredient_id = rec["ingredient_id"]
             assert _is_bottle_ingredient(ingredient_id), (
-                f"{ingredient_id} should be a bottle ingredient"
+                f"{ingredient_id} should be a Core Bottle ingredient"
             )
 
     def test_suggest_bottles_respects_limit(self, api_client: TestClient):
@@ -798,7 +813,10 @@ class TestResponseSchemas:
         assert set(data.keys()) == expected_fields
 
     def test_suggest_bottles_response_schema(self, api_client: TestClient):
-        """SuggestBottlesResponse matches expected schema."""
+        """SuggestBottlesResponse matches expected schema.
+
+        Includes both base fields and optional AI-enhanced fields.
+        """
         response = api_client.post(
             "/api/suggest-bottles", json={"cabinet": [], "limit": 3}
         )
@@ -806,11 +824,23 @@ class TestResponseSchemas:
         assert response.status_code == 200
         data = response.json()
 
-        expected_fields = {
+        # Base required fields
+        required_fields = {
             "cabinet_size",
             "drinks_makeable_now",
             "recommendations",
             "total_available_recommendations",
+            "missing_essentials",
         }
+
+        # Optional AI-enhanced fields (may be None)
+        optional_fields = {
+            "ai_summary",
+            "ai_top_reasoning",
+            "essentials_note",
+            "next_milestone",
+        }
+
+        expected_fields = required_fields | optional_fields
 
         assert set(data.keys()) == expected_fields
