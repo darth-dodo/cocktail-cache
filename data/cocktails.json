@@ -2285,7 +2285,7 @@
       },
       {
         "action": "Add",
-        "detail": "cacha\u00e7a and crushed ice"
+        "detail": "cachaça and crushed ice"
       },
       {
         "action": "Stir",
@@ -2426,7 +2426,7 @@
       },
       {
         "action": "Drizzle",
-        "detail": "cr\u00e8me de m\u00fbre over top"
+        "detail": "crème de mûre over top"
       }
     ],
     "glassware": "rocks",
@@ -5758,7 +5758,7 @@
   },
   {
     "id": "vieux-carre",
-    "name": "Vieux Carr\u00e9",
+    "name": "Vieux Carré",
     "tagline": "New Orleans' split-base stirred classic",
     "ingredients": [
       {

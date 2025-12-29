@@ -382,6 +382,279 @@ def _state_to_response(
     )
 
 
+class IngredientItem(BaseModel):
+    """An ingredient for the frontend."""
+
+    id: str = Field(..., description="Unique ingredient identifier")
+    name: str = Field(..., description="Display name for the ingredient")
+    emoji: str = Field(default="🍹", description="Emoji icon for the ingredient")
+
+
+class DrinkSummary(BaseModel):
+    """Summary of a drink for browsing/search."""
+
+    id: str = Field(..., description="Unique drink identifier")
+    name: str = Field(..., description="Display name of the drink")
+    tagline: str = Field(..., description="Short description")
+    difficulty: str = Field(
+        ..., description="Difficulty level (easy/medium/hard/advanced)"
+    )
+    is_mocktail: bool = Field(..., description="Whether this is a mocktail")
+    timing_minutes: int = Field(..., description="Preparation time in minutes")
+    tags: list[str] = Field(default_factory=list, description="Drink tags")
+
+
+class DrinksResponse(BaseModel):
+    """Response model for the drinks browse endpoint."""
+
+    drinks: list[DrinkSummary] = Field(..., description="List of all available drinks")
+    total: int = Field(..., description="Total number of drinks")
+
+
+class IngredientsResponse(BaseModel):
+    """Response model for the ingredients endpoint."""
+
+    categories: dict[str, list[IngredientItem]] = Field(
+        ..., description="Ingredients organized by category"
+    )
+
+
+# Category display names and emoji mappings
+CATEGORY_CONFIG = {
+    "spirits": {"display": "Spirits", "default_emoji": "🥃"},
+    "modifiers": {"display": "Liqueurs & Modifiers", "default_emoji": "🍷"},
+    "bitters_syrups": {"display": "Bitters & Syrups", "default_emoji": "💧"},
+    "fresh": {"display": "Fresh & Produce", "default_emoji": "🍋"},
+    "mixers": {"display": "Mixers", "default_emoji": "🧊"},
+    "non_alcoholic": {"display": "Non-Alcoholic", "default_emoji": "🧃"},
+}
+
+# Specific emoji overrides for common ingredients
+INGREDIENT_EMOJIS = {
+    "bourbon": "🥃",
+    "rye": "🥃",
+    "scotch": "🥃",
+    "irish-whiskey": "🥃",
+    "gin": "🍸",
+    "vodka": "🍸",
+    "white-rum": "🥃",
+    "dark-rum": "🥃",
+    "tequila": "🌵",
+    "mezcal": "🌵",
+    "cognac": "🍷",
+    "brandy": "🍷",
+    "campari": "🔴",
+    "aperol": "🍊",
+    "sweet-vermouth": "🍷",
+    "dry-vermouth": "🍸",
+    "cointreau": "🍊",
+    "amaretto": "🌰",
+    "kahlua": "☕",
+    "chartreuse": "🌿",
+    "maraschino": "🍒",
+    "angostura": "💧",
+    "orange-bitters": "🍊",
+    "simple-syrup": "🍯",
+    "honey-syrup": "🍯",
+    "grenadine": "🍒",
+    "lemon-juice": "🍋",
+    "lime-juice": "🍋",
+    "orange-juice": "🍊",
+    "grapefruit-juice": "🍊",
+    "pineapple-juice": "🍍",
+    "cranberry-juice": "🍒",
+    "mint": "🌿",
+    "ginger": "🫚",
+    "cucumber": "🥒",
+    "egg-white": "🥚",
+    "cream": "🥛",
+    "soda-water": "💧",
+    "tonic-water": "💧",
+    "ginger-beer": "🍺",
+    "cola": "🥤",
+    "champagne": "🥂",
+    "prosecco": "🥂",
+}
+
+
+def _get_ingredient_emoji(ingredient_id: str, category: str) -> str:
+    """Get emoji for an ingredient, with fallback to category default."""
+    if ingredient_id in INGREDIENT_EMOJIS:
+        return INGREDIENT_EMOJIS[ingredient_id]
+    return CATEGORY_CONFIG.get(category, {}).get("default_emoji", "🍹")
+
+
+def _smart_title_case(text: str) -> str:
+    """Convert text to title case, handling apostrophes and special cases properly.
+
+    Unlike str.title(), this handles:
+    - Apostrophes: "lyre's" -> "Lyre's" (not "Lyre'S")
+    - Common abbreviations preserved
+    """
+    if not text:
+        return text
+
+    words = text.split()
+    result = []
+
+    for word in words:
+        if "'" in word:
+            # Handle apostrophes: capitalize first letter, keep rest of word structure
+            parts = word.split("'")
+            # Capitalize first part, keep second part lowercase
+            titled = parts[0].capitalize() + "'" + "'".join(parts[1:]).lower()
+            result.append(titled)
+        else:
+            result.append(word.capitalize())
+
+    return " ".join(result)
+
+
+def _format_ingredient_name(names: list[str]) -> str:
+    """Get the best display name from the names list."""
+    if not names:
+        return "Unknown"
+    # Use the first name with smart title casing
+    return _smart_title_case(names[0])
+
+
+class DrinkDetailResponse(BaseModel):
+    """Full drink details for the drink detail page."""
+
+    id: str = Field(..., description="Unique drink identifier")
+    name: str = Field(..., description="Display name of the drink")
+    tagline: str = Field(..., description="Short description")
+    difficulty: str = Field(
+        ..., description="Difficulty level (easy/medium/hard/advanced)"
+    )
+    is_mocktail: bool = Field(..., description="Whether this is a mocktail")
+    timing_minutes: int = Field(..., description="Preparation time in minutes")
+    tags: list[str] = Field(default_factory=list, description="Drink tags")
+    ingredients: list[dict[str, str]] = Field(
+        ..., description="List of ingredients with amount, unit, item"
+    )
+    method: list[dict[str, str]] = Field(
+        ..., description="List of method steps with action and detail"
+    )
+    glassware: str = Field(..., description="Type of glass to serve in")
+    garnish: str = Field(..., description="Garnish description")
+    flavor_profile: dict[str, int] = Field(
+        ..., description="Flavor profile with sweet, sour, bitter, spirit levels"
+    )
+
+
+@router.get("/drinks", response_model=DrinksResponse)
+async def get_drinks() -> DrinksResponse:
+    """Get all available drinks for browsing.
+
+    Returns a summary of all cocktails and mocktails with basic info
+    suitable for search and browse functionality.
+
+    Returns:
+        DrinksResponse with list of drink summaries.
+    """
+    from src.app.services.data_loader import load_all_drinks
+
+    all_drinks = load_all_drinks()
+
+    drinks = [
+        DrinkSummary(
+            id=drink.id,
+            name=drink.name,
+            tagline=drink.tagline,
+            difficulty=drink.difficulty,
+            is_mocktail=drink.is_mocktail,
+            timing_minutes=drink.timing_minutes,
+            tags=drink.tags,
+        )
+        for drink in all_drinks
+    ]
+
+    return DrinksResponse(drinks=drinks, total=len(drinks))
+
+
+@router.get("/drinks/{drink_id}", response_model=DrinkDetailResponse)
+async def get_drink_by_id(drink_id: str) -> DrinkDetailResponse:
+    """Get a single drink by ID with full details.
+
+    Args:
+        drink_id: The unique identifier of the drink.
+
+    Returns:
+        DrinkDetailResponse with full drink data.
+
+    Raises:
+        HTTPException: If drink is not found.
+    """
+    from src.app.services.data_loader import load_all_drinks
+
+    all_drinks = load_all_drinks()
+
+    # Find the drink by ID
+    drink = next((d for d in all_drinks if d.id == drink_id), None)
+
+    if not drink:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Drink not found: {drink_id}",
+        )
+
+    return DrinkDetailResponse(
+        id=drink.id,
+        name=drink.name,
+        tagline=drink.tagline,
+        difficulty=drink.difficulty,
+        is_mocktail=drink.is_mocktail,
+        timing_minutes=drink.timing_minutes,
+        tags=drink.tags,
+        ingredients=[
+            {"amount": ing.amount, "unit": ing.unit, "item": ing.item}
+            for ing in drink.ingredients
+        ],
+        method=[
+            {"action": step.action, "detail": step.detail} for step in drink.method
+        ],
+        glassware=drink.glassware,
+        garnish=drink.garnish,
+        flavor_profile=drink.flavor_profile.model_dump(),
+    )
+
+
+@router.get("/ingredients", response_model=IngredientsResponse)
+async def get_ingredients() -> IngredientsResponse:
+    """Get all available ingredients organized by category.
+
+    Returns ingredients from the canonical ingredients.json database,
+    formatted for frontend display with emojis and display names.
+
+    Returns:
+        IngredientsResponse with categorized ingredients.
+    """
+    from src.app.services.data_loader import load_ingredients
+
+    ingredients_db = load_ingredients()
+
+    categories: dict[str, list[IngredientItem]] = {}
+
+    for category_key in CATEGORY_CONFIG:
+        category_ingredients = getattr(ingredients_db, category_key, [])
+        display_name = CATEGORY_CONFIG[category_key]["display"]
+
+        items = [
+            IngredientItem(
+                id=ing.id,
+                name=_format_ingredient_name(ing.names),
+                emoji=_get_ingredient_emoji(ing.id, category_key),
+            )
+            for ing in category_ingredients
+        ]
+
+        if items:  # Only include non-empty categories
+            categories[display_name] = items
+
+    return IngredientsResponse(categories=categories)
+
+
 @router.post("/flow", response_model=FlowResponse)
 async def flow_endpoint(request: FlowRequest) -> FlowResponse:
     """Unified endpoint for all cocktail flow operations.
@@ -554,4 +827,197 @@ async def _handle_made(request: FlowRequest) -> FlowResponse:
         next_bottle=None,
         alternatives=None,
         error=None,
+    )
+
+
+# =============================================================================
+# Suggest Bottles Endpoint
+# =============================================================================
+
+
+class SuggestBottlesRequest(BaseModel):
+    """Request model for bottle suggestions."""
+
+    cabinet: list[str] = Field(
+        default_factory=list,
+        description="List of ingredient IDs the user already has",
+    )
+    drink_type: str = Field(
+        default="both",
+        description="Filter by drink type: 'cocktails', 'mocktails', or 'both'",
+    )
+    limit: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum number of recommendations to return",
+    )
+
+
+class UnlockedDrink(BaseModel):
+    """A drink that would be unlocked by purchasing a bottle."""
+
+    id: str = Field(..., description="Drink identifier")
+    name: str = Field(..., description="Display name")
+    is_mocktail: bool = Field(..., description="Whether it's a mocktail")
+    difficulty: str = Field(..., description="Difficulty level")
+
+
+class BottleRecommendation(BaseModel):
+    """A single bottle recommendation."""
+
+    ingredient_id: str = Field(..., description="Ingredient ID to purchase")
+    ingredient_name: str = Field(..., description="Human-readable ingredient name")
+    new_drinks_unlocked: int = Field(
+        ..., description="Number of new drinks this unlocks"
+    )
+    drinks: list[UnlockedDrink] = Field(
+        ..., description="List of drinks this would unlock"
+    )
+
+
+class SuggestBottlesResponse(BaseModel):
+    """Response model for bottle suggestions."""
+
+    cabinet_size: int = Field(..., description="Number of ingredients in cabinet")
+    drinks_makeable_now: int = Field(..., description="Drinks currently makeable")
+    recommendations: list[BottleRecommendation] = Field(
+        ..., description="Ranked list of bottle recommendations"
+    )
+    total_available_recommendations: int = Field(
+        ..., description="Total recommendations before limit applied"
+    )
+
+
+def _get_ingredient_display_name(ingredient_id: str) -> str:
+    """Convert ingredient ID to human-readable name."""
+    # Convert kebab-case to title case with proper apostrophe handling
+    return _smart_title_case(ingredient_id.replace("-", " "))
+
+
+def _is_bottle_ingredient(ingredient_id: str) -> bool:
+    """Check if an ingredient is a bottle (spirit or liqueur/modifier).
+
+    Returns True for spirits and liqueurs/modifiers.
+    Returns False for accessories like juices, syrups, bitters, mixers, fresh produce.
+    """
+    from src.app.services.data_loader import load_ingredients
+
+    ingredients_db = load_ingredients()
+
+    # Check if ingredient is in spirits or modifiers categories
+    spirits_ids = {ing.id for ing in ingredients_db.spirits}
+    modifiers_ids = {ing.id for ing in ingredients_db.modifiers}
+
+    return ingredient_id in spirits_ids or ingredient_id in modifiers_ids
+
+
+@router.post("/suggest-bottles", response_model=SuggestBottlesResponse)
+async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesResponse:
+    """Get bottle purchase recommendations based on your cabinet.
+
+    Returns ranked recommendations of which bottles (spirits and liqueurs)
+    appear in the most drinks that you don't already have ingredients for.
+    Excludes accessories like juices, syrups, bitters, and fresh produce.
+
+    Args:
+        request: Request with cabinet ingredients and filters.
+
+    Returns:
+        SuggestBottlesResponse with ranked bottle recommendations.
+    """
+    from collections import defaultdict
+
+    from src.app.services.data_loader import load_all_drinks
+
+    logger.info(
+        f"Suggest bottles request: cabinet_size={len(request.cabinet)}, "
+        f"drink_type={request.drink_type}, limit={request.limit}"
+    )
+
+    # Normalize cabinet to lowercase
+    cabinet_set = {ing.lower().strip() for ing in request.cabinet}
+
+    # Load all drinks
+    all_drinks = load_all_drinks()
+
+    # Filter by drink type
+    filtered_drinks = []
+    for drink in all_drinks:
+        if request.drink_type == "cocktails" and drink.is_mocktail:
+            continue
+        if request.drink_type == "mocktails" and not drink.is_mocktail:
+            continue
+        filtered_drinks.append(drink)
+
+    # Find drinks we can already make
+    drinks_makeable = 0
+    for drink in filtered_drinks:
+        required = {ing.item.lower() for ing in drink.ingredients}
+        if required.issubset(cabinet_set):
+            drinks_makeable += 1
+
+    # Count how many drinks each missing ingredient appears in
+    ingredient_drinks: dict[str, list[dict]] = defaultdict(list)
+
+    for drink in filtered_drinks:
+        required = {ing.item.lower() for ing in drink.ingredients}
+
+        # Skip if we can already make this drink
+        if required.issubset(cabinet_set):
+            continue
+
+        # Find missing ingredients for this drink
+        missing = required - cabinet_set
+
+        for ing_id in missing:
+            ingredient_drinks[ing_id].append(
+                {
+                    "id": drink.id,
+                    "name": drink.name,
+                    "is_mocktail": drink.is_mocktail,
+                    "difficulty": drink.difficulty,
+                }
+            )
+
+    # Build recommendations sorted by drink count
+    # Only include bottles (spirits and modifiers), not accessories
+    all_recommendations = []
+    for ing_id, drinks_list in ingredient_drinks.items():
+        # Skip ingredients already in cabinet
+        if ing_id in cabinet_set:
+            continue
+
+        # Only include bottles (spirits and liqueurs/modifiers)
+        if not _is_bottle_ingredient(ing_id):
+            continue
+
+        all_recommendations.append(
+            BottleRecommendation(
+                ingredient_id=ing_id,
+                ingredient_name=_get_ingredient_display_name(ing_id),
+                new_drinks_unlocked=len(drinks_list),
+                drinks=[
+                    UnlockedDrink(
+                        id=d["id"],
+                        name=d["name"],
+                        is_mocktail=d["is_mocktail"],
+                        difficulty=d["difficulty"],
+                    )
+                    for d in drinks_list[:10]  # Limit drinks per recommendation
+                ],
+            )
+        )
+
+    # Sort by number of drinks (highest first)
+    all_recommendations.sort(key=lambda x: x.new_drinks_unlocked, reverse=True)
+
+    # Apply limit
+    top_recommendations = all_recommendations[: request.limit]
+
+    return SuggestBottlesResponse(
+        cabinet_size=len(cabinet_set),
+        drinks_makeable_now=drinks_makeable,
+        recommendations=top_recommendations,
+        total_available_recommendations=len(all_recommendations),
     )

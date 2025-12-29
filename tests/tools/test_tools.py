@@ -8,9 +8,11 @@ Tests cover all four tools in src/app/tools/:
 """
 
 import json
+from unittest.mock import MagicMock
 
 import pytest
 
+from src.app.models.drinks import FlavorProfile
 from src.app.tools.flavor_profiler import FlavorProfilerTool
 from src.app.tools.recipe_db import RecipeDBTool
 from src.app.tools.substitution_finder import SubstitutionFinderTool
@@ -287,6 +289,105 @@ class TestRecipeDBTool:
             }
             assert expected_keys.issubset(set(match.keys()))
 
+    # -------------------------------------------------------------------------
+    # Additional Edge Cases (NEW TESTS)
+    # -------------------------------------------------------------------------
+    def test_duplicate_ingredients_in_cabinet(self, tool: RecipeDBTool) -> None:
+        """Test that duplicate ingredients in cabinet are handled correctly."""
+        # Same ingredient repeated should not affect results
+        cabinet_single = ["bourbon", "simple-syrup"]
+        cabinet_duplicates = ["bourbon", "bourbon", "simple-syrup", "simple-syrup"]
+
+        result_single = json.loads(tool._run(cabinet=cabinet_single))
+        result_duplicates = json.loads(tool._run(cabinet=cabinet_duplicates))
+
+        # Should produce the same results
+        assert result_single["total_matches"] == result_duplicates["total_matches"]
+
+    def test_single_ingredient_cabinet(self, tool: RecipeDBTool) -> None:
+        """Test with a single ingredient in cabinet."""
+        cabinet = ["vodka"]
+        result = json.loads(tool._run(cabinet=cabinet))
+
+        # Should find partial matches for drinks containing vodka
+        assert result["total_matches"] >= 0
+        for match in result["matches"]:
+            assert "vodka" in match["ingredients_have"]
+
+    def test_very_large_cabinet(self, tool: RecipeDBTool) -> None:
+        """Test with a large number of ingredients in cabinet."""
+        # Create a large cabinet with many ingredients
+        cabinet = [
+            "bourbon",
+            "rye-whiskey",
+            "gin",
+            "vodka",
+            "white-rum",
+            "dark-rum",
+            "tequila",
+            "mezcal",
+            "cognac",
+            "brandy",
+            "simple-syrup",
+            "lime-juice",
+            "lemon-juice",
+            "orange-juice",
+            "grapefruit-juice",
+            "pineapple-juice",
+            "cranberry-juice",
+            "grenadine",
+            "angostura-bitters",
+            "orange-bitters",
+            "peychauds-bitters",
+            "sweet-vermouth",
+            "dry-vermouth",
+            "triple-sec",
+            "cointreau",
+            "campari",
+            "aperol",
+            "fresh-mint",
+            "club-soda",
+            "ginger-ale",
+        ]
+        result = json.loads(tool._run(cabinet=cabinet))
+
+        # Should find many matches with high scores
+        assert result["total_matches"] > 0
+        # Should have some perfect matches (score = 1.0)
+        perfect_matches = [m for m in result["matches"] if m["score"] == 1.0]
+        assert len(perfect_matches) >= 1
+
+    def test_nonexistent_ingredient_in_cabinet(self, tool: RecipeDBTool) -> None:
+        """Test with an ingredient that does not exist in any drink."""
+        cabinet = ["xyz-nonexistent-ingredient-123"]
+        result = json.loads(tool._run(cabinet=cabinet))
+
+        # Should return zero matches since no drink uses this ingredient
+        assert result["total_matches"] == 0
+
+    def test_calculate_match_returns_zero_for_empty_ingredients(
+        self, tool: RecipeDBTool
+    ) -> None:
+        """Test that _calculate_match returns score 0 for drinks with no ingredients."""
+        # Create a mock drink object with empty ingredients list
+        # Using MagicMock since Drink model requires at least 1 ingredient
+        mock_drink = MagicMock()
+        mock_drink.id = "empty-drink"
+        mock_drink.name = "Empty Drink"
+        mock_drink.tagline = "A drink with no ingredients"
+        mock_drink.ingredients = []  # Empty ingredients list
+        mock_drink.glassware = "rocks"
+        mock_drink.tags = []
+        mock_drink.difficulty = "easy"
+        mock_drink.timing_minutes = 1
+        mock_drink.is_mocktail = True
+
+        cabinet_set = {"bourbon", "lime-juice"}
+        result = tool._calculate_match(mock_drink, cabinet_set)
+
+        # Should return score 0 for empty ingredients
+        assert result["score"] == 0
+
 
 # =============================================================================
 # FlavorProfilerTool Tests
@@ -523,6 +624,92 @@ class TestFlavorProfilerTool:
 
         assert result_clean["found"] == result_whitespace["found"]
 
+    # -------------------------------------------------------------------------
+    # Additional Edge Cases (NEW TESTS)
+    # -------------------------------------------------------------------------
+    def test_empty_cocktail_ids_list(self, tool: FlavorProfilerTool) -> None:
+        """Test with an empty list of cocktail IDs."""
+        result = json.loads(tool._run(cocktail_ids=[]))
+
+        assert result["found"] == 0
+        assert result["profiles"] == []
+        # Comparison should not be present for empty input
+        assert "comparison" not in result or result.get("comparison") is None
+
+    def test_balance_score_single_nonzero_flavor(
+        self, tool: FlavorProfilerTool
+    ) -> None:
+        """Test balance score calculation for drink with only one non-zero flavor."""
+        # This tests the edge case in _calculate_balance_score where len(non_zero) < 2
+        # We need to find or simulate a drink with only one flavor dimension
+
+        # Use the internal method directly for more control
+        score = tool._calculate_balance_score(sweet=50, sour=0, bitter=0)
+        assert score == 0.0  # Single-note drinks should have 0 balance
+
+    def test_balance_score_two_equal_flavors(self, tool: FlavorProfilerTool) -> None:
+        """Test balance score for drink with two equal flavors."""
+        # Two equal flavors should have high balance
+        score = tool._calculate_balance_score(sweet=50, sour=50, bitter=0)
+        assert score == 100.0  # Perfect balance when std_dev is 0
+
+    def test_balance_score_all_zero_flavors(self, tool: FlavorProfilerTool) -> None:
+        """Test balance score when all flavor values are zero."""
+        score = tool._calculate_balance_score(sweet=0, sour=0, bitter=0)
+        assert score == 0.0  # No flavors means no balance
+
+    def test_categorize_style_sour_drink(self, tool: FlavorProfilerTool) -> None:
+        """Test style categorization for sour-style drinks."""
+        # Create a flavor profile for a sour cocktail (sour >= 40, sweet >= 30)
+        fp = FlavorProfile(sweet=35, sour=45, bitter=10, spirit=50)
+        style = tool._categorize_style(fp)
+        assert style == "sour"
+
+    def test_categorize_style_bitter_drink(self, tool: FlavorProfilerTool) -> None:
+        """Test style categorization for bitter/aperitivo drinks."""
+        # Create a flavor profile for a bitter drink (bitter >= 40)
+        fp = FlavorProfile(sweet=20, sour=15, bitter=50, spirit=60)
+        style = tool._categorize_style(fp)
+        assert style == "bitter/aperitivo"
+
+    def test_categorize_style_sweet_drink(self, tool: FlavorProfilerTool) -> None:
+        """Test style categorization for sweet/dessert drinks."""
+        # Create a flavor profile for a sweet drink (sweet >= 50)
+        fp = FlavorProfile(sweet=60, sour=10, bitter=5, spirit=40)
+        style = tool._categorize_style(fp)
+        assert style == "sweet/dessert"
+
+    def test_categorize_style_balanced_drink(self, tool: FlavorProfilerTool) -> None:
+        """Test style categorization for balanced drinks."""
+        # Create a flavor profile that doesn't fit other categories
+        fp = FlavorProfile(sweet=30, sour=25, bitter=20, spirit=50)
+        style = tool._categorize_style(fp)
+        assert style == "balanced"
+
+    def test_duplicate_drink_ids(self, tool: FlavorProfilerTool) -> None:
+        """Test with duplicate drink IDs in the input list."""
+        result = json.loads(
+            tool._run(cocktail_ids=["old-fashioned", "old-fashioned", "manhattan"])
+        )
+
+        # Should return profiles for each request, including duplicates
+        assert result["found"] == 3
+        assert len(result["profiles"]) == 3
+
+    def test_spirit_forward_flag_threshold(self, tool: FlavorProfilerTool) -> None:
+        """Test that spirit_forward flag is set correctly based on threshold."""
+        result = json.loads(tool._run(cocktail_ids=["old-fashioned", "virgin-mojito"]))
+
+        for profile in result["profiles"]:
+            spirit = profile["flavor_profile"]["spirit"]
+            spirit_forward = profile["analysis"]["spirit_forward"]
+
+            # spirit_forward should be True if spirit >= 60
+            expected = spirit >= 60
+            assert spirit_forward == expected, (
+                f"spirit_forward should be {expected} for spirit={spirit}"
+            )
+
 
 # =============================================================================
 # SubstitutionFinderTool Tests
@@ -710,6 +897,74 @@ class TestSubstitutionFinderTool:
 
         assert result["found"] is True
         assert result["ingredient"]["id"] == "bourbon"
+
+    # -------------------------------------------------------------------------
+    # Additional Edge Cases (NEW TESTS)
+    # -------------------------------------------------------------------------
+    def test_ingredient_with_no_substitutes(self, tool: SubstitutionFinderTool) -> None:
+        """Test ingredient that exists but has no substitutes."""
+        # Find an ingredient that might not have substitutes
+        result = json.loads(tool._run(ingredient="angostura"))
+
+        if result["found"]:
+            # Verify we get empty substitutes list rather than error
+            assert "substitutes" in result
+            # Total substitutes should be 0 or more
+            assert result["total_substitutes"] >= 0
+
+    def test_resolve_ingredient_id_via_name_alias(
+        self, tool: SubstitutionFinderTool
+    ) -> None:
+        """Test that ingredient ID can be resolved via name alias matching."""
+        # Search by a known name alias
+        result = json.loads(tool._run(ingredient="lime"))
+
+        # If found, verify it resolved to the correct ingredient
+        if result["found"]:
+            assert "ingredient" in result
+            assert "id" in result["ingredient"]
+
+    def test_partial_match_limited_to_5_suggestions(
+        self, tool: SubstitutionFinderTool
+    ) -> None:
+        """Test that partial matches are limited to 5 suggestions."""
+        # Search for something that might match many ingredients
+        result = json.loads(tool._run(ingredient="juice-special-blend"))
+
+        if result["found"] is False and "suggestions" in result:
+            # Should be limited to 5 or fewer
+            assert len(result["suggestions"]) <= 5
+
+    def test_ingredient_lookup_by_id_directly(
+        self, tool: SubstitutionFinderTool
+    ) -> None:
+        """Test that ingredient ID can be looked up directly."""
+        # Use exact ingredient ID
+        result = json.loads(tool._run(ingredient="simple-syrup"))
+
+        assert result["found"] is True
+        assert result["ingredient"]["id"] == "simple-syrup"
+
+    def test_empty_ingredient_string(self, tool: SubstitutionFinderTool) -> None:
+        """Test with an empty ingredient string."""
+        result = json.loads(tool._run(ingredient=""))
+
+        # Should handle gracefully - either not found or handle as edge case
+        assert result["found"] is False
+
+    def test_substitutes_enriched_with_names(
+        self, tool: SubstitutionFinderTool
+    ) -> None:
+        """Test that substitutes are enriched with name information."""
+        result = json.loads(tool._run(ingredient="bourbon"))
+
+        if result["found"] and result["total_substitutes"] > 0:
+            for sub in result["substitutes"]:
+                # Each substitute should have both id and names
+                assert "id" in sub
+                assert "names" in sub
+                assert isinstance(sub["names"], list)
+                assert len(sub["names"]) >= 1
 
 
 # =============================================================================
@@ -983,3 +1238,140 @@ class TestUnlockCalculatorTool:
             assert rec["ingredient_id"].lower() not in cabinet_set, (
                 f"Recommended {rec['ingredient_id']} but it's already in cabinet"
             )
+
+    # -------------------------------------------------------------------------
+    # Additional Edge Cases (NEW TESTS)
+    # -------------------------------------------------------------------------
+    def test_limit_zero_returns_no_recommendations(
+        self, tool: UnlockCalculatorTool
+    ) -> None:
+        """Test that limit=0 returns no recommendations."""
+        cabinet = ["simple-syrup", "lime-juice", "bourbon"]
+        result = json.loads(tool._run(cabinet=cabinet, limit=0))
+
+        assert len(result["recommendations"]) == 0
+        assert result["query"]["limit"] == 0
+
+    def test_very_large_limit(self, tool: UnlockCalculatorTool) -> None:
+        """Test with a limit larger than available recommendations."""
+        cabinet = ["simple-syrup"]
+        result = json.loads(tool._run(cabinet=cabinet, limit=1000))
+
+        # Should not error and return all available recommendations
+        assert result["query"]["limit"] == 1000
+        # Total recommendations should be reasonable
+        assert result["total_recommendations"] >= 0
+
+    def test_duplicate_ingredients_in_cabinet(self, tool: UnlockCalculatorTool) -> None:
+        """Test that duplicate ingredients in cabinet are handled correctly."""
+        cabinet_single = ["bourbon", "simple-syrup"]
+        cabinet_duplicates = ["bourbon", "bourbon", "simple-syrup", "simple-syrup"]
+
+        result_single = json.loads(tool._run(cabinet=cabinet_single))
+        result_duplicates = json.loads(tool._run(cabinet=cabinet_duplicates))
+
+        # Should produce same makeable drinks
+        assert (
+            result_single["current_status"]["drinks_you_can_make"]
+            == result_duplicates["current_status"]["drinks_you_can_make"]
+        )
+
+    def test_makeable_drinks_sorted_by_name(self, tool: UnlockCalculatorTool) -> None:
+        """Test that makeable drinks in current_status are sorted by name."""
+        # Large cabinet to get multiple makeable drinks
+        cabinet = [
+            "bourbon",
+            "simple-syrup",
+            "angostura",
+            "orange-bitters",
+            "rye-whiskey",
+            "sweet-vermouth",
+            "lime-juice",
+            "white-rum",
+        ]
+        result = json.loads(tool._run(cabinet=cabinet))
+
+        makeable = result["current_status"]["drinks_makeable"]
+        if len(makeable) >= 2:
+            names = [d["name"] for d in makeable]
+            assert names == sorted(names), "Makeable drinks should be sorted by name"
+
+    def test_skips_already_makeable_drinks_in_recommendations(
+        self, tool: UnlockCalculatorTool
+    ) -> None:
+        """Test that drinks already makeable are not in unlock recommendations."""
+        # Old Fashioned: bourbon, simple-syrup, angostura, orange-bitters
+        cabinet = ["bourbon", "simple-syrup", "angostura", "orange-bitters"]
+        result = json.loads(tool._run(cabinet=cabinet))
+
+        # Get all drink IDs in recommendations
+        recommended_drink_ids = set()
+        for rec in result["recommendations"]:
+            for drink in rec["drinks"]:
+                recommended_drink_ids.add(drink["id"].lower())
+
+        # Get all makeable drink IDs
+        makeable_ids = {
+            d["id"].lower() for d in result["current_status"]["drinks_makeable"]
+        }
+
+        # Recommended drinks should not overlap with already makeable
+        overlap = recommended_drink_ids & makeable_ids
+        assert len(overlap) == 0, f"Found overlap: {overlap}"
+
+    def test_single_ingredient_cabinet_recommendations(
+        self, tool: UnlockCalculatorTool
+    ) -> None:
+        """Test recommendations with only one ingredient in cabinet."""
+        cabinet = ["vodka"]
+        result = json.loads(tool._run(cabinet=cabinet))
+
+        # Should still get recommendations (ingredients that complete drinks)
+        assert "recommendations" in result
+        # Makeable should be 0 since most drinks need more than vodka alone
+        # (unless there's a single-ingredient vodka drink)
+
+    def test_get_makeable_drinks_internal_method(
+        self, tool: UnlockCalculatorTool
+    ) -> None:
+        """Test the internal _get_makeable_drinks method directly."""
+        from src.app.services.data_loader import load_all_drinks
+
+        all_drinks = load_all_drinks()
+        cabinet_set = {"bourbon", "simple-syrup", "angostura", "orange-bitters"}
+
+        makeable = tool._get_makeable_drinks(cabinet_set, all_drinks)
+
+        # Should find Old Fashioned
+        makeable_ids = {d.id for d in makeable}
+        assert "old-fashioned" in makeable_ids
+
+    def test_mocktails_filter_skips_cocktails_in_unlock_calc(
+        self, tool: UnlockCalculatorTool
+    ) -> None:
+        """Test that mocktails filter correctly skips cocktails in unlock calculation."""
+        # Ingredients that could complete both cocktails and mocktails
+        cabinet = ["lime-juice", "simple-syrup", "club-soda"]
+        result = json.loads(tool._run(cabinet=cabinet, drink_type="mocktails"))
+
+        # All recommended drinks should be mocktails
+        for rec in result["recommendations"]:
+            for drink in rec["drinks"]:
+                assert drink["is_mocktail"] is True, (
+                    f"Found cocktail {drink['name']} in mocktails-only recommendations"
+                )
+
+    def test_cocktails_filter_skips_mocktails_in_unlock_calc(
+        self, tool: UnlockCalculatorTool
+    ) -> None:
+        """Test that cocktails filter correctly skips mocktails in unlock calculation."""
+        # Ingredients that could complete both cocktails and mocktails
+        cabinet = ["lime-juice", "simple-syrup", "club-soda"]
+        result = json.loads(tool._run(cabinet=cabinet, drink_type="cocktails"))
+
+        # All recommended drinks should be cocktails
+        for rec in result["recommendations"]:
+            for drink in rec["drinks"]:
+                assert drink["is_mocktail"] is False, (
+                    f"Found mocktail {drink['name']} in cocktails-only recommendations"
+                )

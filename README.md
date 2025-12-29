@@ -8,31 +8,44 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
 
 ## Development Status
 
-> **Current Phase**: Week 4 API & UI Complete
+> **Current Phase**: Session 5 UX Improvements Complete
 
 | Component | Status | Details |
 |-----------|--------|---------|
-| Data Layer | ✅ Complete | 50 cocktails, 24 mocktails, 134 ingredients |
+| Data Layer | ✅ Complete | 103 cocktails, 39 mocktails, 180 ingredients |
 | Pydantic Models | ✅ Complete | Structured crew I/O with RecipeOutput, AnalysisOutput, BottleAdvisorOutput |
 | CrewAI Agents | ✅ Complete | 5 agents including unified Drink Recommender for fast mode |
 | CrewAI Tools | ✅ Complete | 4 deterministic tools for data operations |
 | Crews & Flow | ✅ Complete | Analysis Crew (fast mode), Recipe Crew, CocktailFlow |
 | API Routes | ✅ Complete | FastAPI endpoints with session management |
 | Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
+| Browse & Search | ✅ Complete | Full drink catalog with search, filters, and detail pages |
 | Deployment | ✅ Complete | Render.com with GitHub Actions CI/CD |
 
 ---
 
 ## Features
 
+### AI-Powered Recommendations
 - **Chat with Raja** - Conversational AI mixologist that guides you to your perfect drink
 - **AI-powered recommendations** - Get drinks matched to your available ingredients and mood
 - **Fast mode analysis** - Single-agent mode for ~50% faster recommendations
 - **Skill level adaptation** - Beginner-friendly recipes to adventurous techniques
-- **Mocktail support** - Spirit-free options for non-alcoholic preferences
 - **"Next bottle" recommendations** - Maximize your drink potential with smart ROI suggestions
+
+### Browse and Discover
+- **142 drinks catalog** - Browse 103 cocktails and 39 mocktails with detailed recipes
+- **Search and filter** - Find drinks by name, tags, or ingredients
+- **Filter by type** - Toggle between cocktails, mocktails, or view all
+- **Filter by difficulty** - Easy, medium, or advanced recipes
+- **Individual drink pages** - Detailed view with ingredients, instructions, and tips
+
+### User Experience
+- **Tabbed navigation** - Switch between Chat, Cabinet, and Browse views
+- **Ingredient autocomplete** - Smart suggestions when building your cabinet
 - **Mixology facts loading screen** - Learn cocktail history while waiting
 - **Mobile-first design** - Optimized for use in the kitchen
+- **Mocktail support** - Spirit-free options for non-alcoholic preferences
 
 ---
 
@@ -54,7 +67,7 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/cocktail-cache.git
+git clone https://github.com/darth-dodo/cocktail-cache.git
 cd cocktail-cache
 
 # Copy environment file and add your API key
@@ -67,6 +80,29 @@ make dev
 
 # Visit http://localhost:8888
 ```
+
+---
+
+## Usage
+
+### Chat with Raja
+1. Open the **Chat** tab
+2. Add ingredients to your cabinet (with autocomplete suggestions)
+3. Set your mood, skill level, and drink preference
+4. Get personalized recommendations from Raja, your AI mixologist
+5. View detailed recipes with technique tips and "next bottle" suggestions
+
+### Browse the Catalog
+1. Open the **Browse** tab to see all 142 drinks
+2. **Search** by drink name, tags, or ingredients
+3. **Filter by type**: All, Cocktails only, or Mocktails only
+4. **Filter by difficulty**: Easy, Medium, or Advanced
+5. Click any drink card to view the full recipe and instructions
+
+### Build Your Cabinet
+1. Open the **Cabinet** tab
+2. Add ingredients using the autocomplete search
+3. Your cabinet is saved and used for AI recommendations
 
 ---
 
@@ -101,11 +137,11 @@ cocktail-cache/
 │       ├── templates/           # Jinja2 templates
 │       └── static/              # CSS and JS assets
 ├── data/
-│   ├── cocktails.json           # 50 cocktail recipes
-│   ├── mocktails.json           # 24 non-alcoholic recipes
-│   ├── ingredients.json         # 134 categorized ingredients
-│   ├── substitutions.json       # 118 ingredient swap rules
-│   └── unlock_scores.json       # Pre-computed bottle ROI (293 mappings)
+│   ├── cocktails.json           # 103 cocktail recipes
+│   ├── mocktails.json           # 39 non-alcoholic recipes
+│   ├── ingredients.json         # 180 categorized ingredients
+│   ├── substitutions.json       # Ingredient swap rules
+│   └── unlock_scores.json       # Pre-computed bottle ROI mappings
 ├── scripts/
 │   ├── compute_unlock_scores.py # Generate bottle recommendations
 │   └── validate_data.py         # Pydantic data validation
@@ -226,7 +262,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 ## Documentation
 
 - [Architecture](docs/architecture.md) - System design and agent specifications
-- [Implementation Guide](docs/implementation-guide.md) - Build order and weekly milestones
+- [Implementation Guide](docs/implementation-guide.md) - Build order and session milestones
 - [Tasks](tasks.md) - Development task tracker with phase status
 
 ---

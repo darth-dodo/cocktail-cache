@@ -3,41 +3,81 @@
 {% block title %}Cocktail Cache - AI-Powered Drink Recommendations{% endblock %}
 
 {% block content %}
-<div class="max-w-lg mx-auto px-2 sm:px-0">
-    <!-- Chat Container -->
-    <div class="glass-card p-0 overflow-hidden flex flex-col chat-container">
-
-        <!-- Chat Header -->
-        <div class="glass-nav px-4 py-3 border-b border-amber-900/20 flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h1 class="text-base font-semibold text-amber-100 truncate">Cocktail Cache</h1>
-                    <p class="text-xs text-stone-400">Raja, Your AI Mixologist</p>
-                </div>
-                <button id="reset-btn" class="btn btn-ghost btn-sm text-stone-400 hover:text-amber-300 p-2" title="Start Over">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                </button>
-            </div>
+{# Define cabinet content #}
+{% set cabinet_content %}
+<div class="p-4 space-y-4">
+    <!-- Cabinet Summary -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-amber-200">Your Cabinet</h2>
+            <p class="text-xs text-stone-400" id="cabinet-summary">Add ingredients you have at home</p>
         </div>
+        <button id="panel-clear-cabinet" class="hidden btn btn-sm glass-btn-ghost text-xs gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            Clear
+        </button>
+    </div>
 
-        <!-- Messages Area -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 scroll-smooth">
-            <!-- Messages will be inserted here -->
-        </div>
+    <!-- Selected Ingredients Display -->
+    <div id="selected-ingredients" class="hidden">
+        <div class="flex flex-wrap gap-1.5" id="selected-ingredients-list"></div>
+    </div>
 
-        <!-- Input Area (dynamic) -->
-        <div id="input-area" class="border-t border-amber-900/20 p-3 sm:p-4 bg-stone-950/50 flex-shrink-0">
-            <!-- Dynamic input controls will be inserted here -->
-        </div>
+    <!-- Search/Add Input -->
+    <div class="relative">
+        <input type="text" id="panel-ingredient-search"
+               class="glass-input w-full text-sm py-2.5 pl-9"
+               placeholder="Search or add ingredients..."
+               autocomplete="off">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <div id="panel-autocomplete" class="autocomplete-dropdown hidden"></div>
+    </div>
+
+    <!-- Category Grid -->
+    <div id="panel-categories" class="space-y-2">
+        <!-- Categories will be rendered here -->
+    </div>
+
+    <!-- Action Button -->
+    <div class="sticky bottom-0 pt-3 bg-gradient-to-t from-stone-950/80 to-transparent">
+        <button id="panel-continue-btn" class="btn glass-btn-primary w-full" disabled>
+            Continue to Chat
+        </button>
     </div>
 </div>
+{% endset %}
+
+{# Define browse content with loading state #}
+{% set browse_content %}
+<div id="browse-panel-content" class="p-4 flex flex-col items-center justify-center min-h-[200px]">
+    <div class="loading-spinner mb-3">
+        <svg class="animate-spin h-8 w-8 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
+    <p class="text-stone-400 text-sm">Loading drinks...</p>
+</div>
+{% endset %}
+
+{# Define suggest content with loading state #}
+{% set suggest_content %}
+<div id="suggest-panel-content" class="p-4 flex flex-col items-center justify-center min-h-[200px]">
+    <div class="loading-spinner mb-3">
+        <svg class="animate-spin h-8 w-8 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
+    <p class="text-stone-400 text-sm">Loading recommendations...</p>
+</div>
+{% endset %}
+
+{% include "partials/chat-container.html" %}
 
 <!-- Message Templates -->
 <template id="bot-message-template">
@@ -73,7 +113,7 @@
                 <!-- Recipe Header -->
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0 flex-1">
-                        <h3 class="text-lg sm:text-xl font-bold text-amber-300 truncate" id="recipe-name">-</h3>
+                        <h3 class="text-lg sm:text-xl font-bold text-amber-300" id="recipe-name">-</h3>
                         <p class="text-stone-400 text-xs sm:text-sm mt-0.5 line-clamp-2" id="recipe-tagline">-</p>
                     </div>
                     <div class="match-score px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex-shrink-0" id="recipe-score">
@@ -182,7 +222,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-stone-400 text-xs">Next bottle to buy</p>
-                        <p class="text-amber-300 font-medium text-sm sm:text-base truncate" id="bottle-name">-</p>
+                        <p class="text-amber-300 font-medium text-sm sm:text-base" id="bottle-name">-</p>
                     </div>
                     <div class="text-right flex-shrink-0">
                         <p class="text-amber-400 font-bold text-sm sm:text-base" id="bottle-unlocks">+0</p>
@@ -196,6 +236,10 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', path='js/cabinet-state.js') }}"></script>
+<script src="{{ url_for('static', path='js/tab-manager.js') }}"></script>
+<script src="{{ url_for('static', path='js/browse-panel.js') }}"></script>
+<script src="{{ url_for('static', path='js/suggest-panel.js') }}"></script>
 <script>
 // Chat state
 const state = {
@@ -204,92 +248,438 @@ const state = {
     cabinet: [],
     mood: '',
     skillLevel: 'intermediate',
-    drinkType: 'both'
+    drinkType: 'both',
+    activeTab: 'chat'
 };
 
 // DOM elements
 const chatMessages = document.getElementById('chat-messages');
 const inputArea = document.getElementById('input-area');
 const resetBtn = document.getElementById('reset-btn');
+const cabinetCount = document.getElementById('cabinet-count');
 
-// Ingredient options organized by category (IDs match database exactly)
-const ingredients = {
-    'Spirits': [
-        { id: 'bourbon', name: 'Bourbon', emoji: '🥃' },
-        { id: 'rye-whiskey', name: 'Rye Whiskey', emoji: '🥃' },
-        { id: 'london-dry-gin', name: 'Gin', emoji: '🍸' },
-        { id: 'vodka', name: 'Vodka', emoji: '🍸' },
-        { id: 'white-rum', name: 'White Rum', emoji: '🥃' },
-        { id: 'aged-rum', name: 'Aged Rum', emoji: '🥃' },
-        { id: 'blanco-tequila', name: 'Tequila', emoji: '🌵' },
-        { id: 'mezcal', name: 'Mezcal', emoji: '🌵' },
-        { id: 'cognac', name: 'Cognac', emoji: '🍷' }
-    ],
-    'Liqueurs': [
-        { id: 'sweet-vermouth', name: 'Sweet Vermouth', emoji: '🍷' },
-        { id: 'dry-vermouth', name: 'Dry Vermouth', emoji: '🍸' },
-        { id: 'campari', name: 'Campari', emoji: '🔴' },
-        { id: 'cointreau', name: 'Cointreau', emoji: '🍊' },
-        { id: 'amaretto', name: 'Amaretto', emoji: '🌰' },
-        { id: 'coffee-liqueur', name: 'Coffee Liqueur', emoji: '☕' },
-        { id: 'maraschino-liqueur', name: 'Maraschino', emoji: '🍒' },
-        { id: 'green-chartreuse', name: 'Green Chartreuse', emoji: '🌿' }
-    ],
-    'Bitters & Syrups': [
-        { id: 'angostura-bitters', name: 'Angostura Bitters', emoji: '💧' },
-        { id: 'orange-bitters', name: 'Orange Bitters', emoji: '🍊' },
-        { id: 'simple-syrup', name: 'Simple Syrup', emoji: '🍯' },
-        { id: 'honey-syrup', name: 'Honey Syrup', emoji: '🍯' },
-        { id: 'grenadine', name: 'Grenadine', emoji: '🍒' }
-    ],
-    'Fresh & Mixers': [
-        { id: 'fresh-lemon-juice', name: 'Lemon Juice', emoji: '🍋' },
-        { id: 'fresh-lime-juice', name: 'Lime Juice', emoji: '🍋' },
-        { id: 'fresh-orange-juice', name: 'Orange Juice', emoji: '🍊' },
-        { id: 'fresh-mint', name: 'Fresh Mint', emoji: '🌿' },
-        { id: 'club-soda', name: 'Club Soda', emoji: '💧' },
-        { id: 'tonic-water', name: 'Tonic Water', emoji: '💧' },
-        { id: 'ginger-beer', name: 'Ginger Beer', emoji: '🍺' },
-        { id: 'egg-white', name: 'Egg White', emoji: '🥚' }
-    ]
-};
+// Panel elements (new structure)
+const panelChat = document.getElementById('panel-chat');
+const panelCabinet = document.getElementById('panel-cabinet');
+const panelBrowse = document.getElementById('panel-browse');
+const panelSuggest = document.getElementById('panel-suggest');
+
+// Ingredients will be loaded from API (single source of truth)
+let ingredients = {};
+let ingredientsLoaded = false;
+
+// Track if browse/suggest panels have been loaded
+let browsePanelLoaded = false;
+let suggestPanelLoaded = false;
+
+// Load ingredients from API
+async function loadIngredients() {
+    if (ingredientsLoaded) return;
+    try {
+        const response = await fetch('/api/ingredients');
+        const data = await response.json();
+        ingredients = data.categories;
+        ingredientsLoaded = true;
+    } catch (error) {
+        console.error('Failed to load ingredients:', error);
+        // Fallback to empty - will show error in UI
+        ingredients = {};
+    }
+}
 
 // Fun mixology facts to display during loading
 const mixologyFacts = [
-    "🍸 The word 'cocktail' first appeared in print in 1806",
-    "🧊 Ice wasn't commonly used in drinks until the 1830s",
-    "🍋 Citrus was originally added to prevent scurvy on ships",
-    "🥃 The Old Fashioned is considered the original cocktail",
-    "🍹 Tiki drinks were invented in 1930s Hollywood",
-    "🫒 The Martini may have originated during the Gold Rush",
-    "🥂 Champagne bubbles were once considered a flaw",
-    "🌿 Mint juleps date back to the 1700s",
-    "🍊 Orange bitters were more popular than Angostura in the 1800s",
-    "🥃 Bourbon must be aged in new charred oak barrels",
-    "🍸 James Bond's 'shaken not stirred' actually bruises the gin",
-    "🧪 The Margarita is the most ordered cocktail in the US",
-    "🍹 Blue Curaçao gets its color from food dye, not the fruit",
-    "🥃 A 'neat' pour means no ice, no water, just spirit",
-    "🍋 The Daiquiri was named after a Cuban mining town",
-    "🌴 The Piña Colada is Puerto Rico's national drink",
-    "🥃 Whiskey and whisky are both correct spellings",
-    "🍸 The Gibson is just a Martini with an onion",
-    "🧊 Shaking a cocktail adds more dilution than stirring",
-    "🍊 The Negroni was invented by an Italian count in 1919"
+    "The word 'cocktail' first appeared in print in 1806",
+    "Ice wasn't commonly used in drinks until the 1830s",
+    "Citrus was originally added to prevent scurvy on ships",
+    "The Old Fashioned is considered the original cocktail",
+    "Tiki drinks were invented in 1930s Hollywood",
+    "The Martini may have originated during the Gold Rush",
+    "Champagne bubbles were once considered a flaw",
+    "Mint juleps date back to the 1700s",
+    "Orange bitters were more popular than Angostura in the 1800s",
+    "Bourbon must be aged in new charred oak barrels",
+    "James Bond's 'shaken not stirred' actually bruises the gin",
+    "The Margarita is the most ordered cocktail in the US",
+    "Blue Curacao gets its color from food dye, not the fruit",
+    "A 'neat' pour means no ice, no water, just spirit",
+    "The Daiquiri was named after a Cuban mining town",
+    "The Pina Colada is Puerto Rico's national drink",
+    "Whiskey and whisky are both correct spellings",
+    "The Gibson is just a Martini with an onion",
+    "Shaking a cocktail adds more dilution than stirring",
+    "The Negroni was invented by an Italian count in 1919"
 ];
 
 let factInterval = null;
 
 // Initialize chat
-function init() {
+async function init() {
     resetBtn.addEventListener('click', resetChat);
+    // Load ingredients from API before showing UI
+    await loadIngredients();
+    // Restore cabinet from localStorage if available
+    const savedCabinet = loadCabinet();
+    if (savedCabinet.length > 0) {
+        state.cabinet = savedCabinet;
+    }
+    // Listen for tab changes from TabManager
+    window.addEventListener('tab-changed', handleTabChange);
+    // Update cabinet count badge
+    updateCabinetCount();
     showWelcome();
 }
 
-function resetChat() {
+// Handle tab changes from TabManager
+function handleTabChange(event) {
+    const { tab, previousTab } = event.detail;
+    state.activeTab = tab;
+
+    // Render cabinet when switching to cabinet tab
+    if (tab === 'cabinet') {
+        renderCabinetPanel();
+    }
+
+    // Load browse panel content on first visit
+    if (tab === 'browse' && !browsePanelLoaded) {
+        loadBrowsePanel();
+    }
+
+    // Load suggest panel content on first visit
+    if (tab === 'suggest' && !suggestPanelLoaded) {
+        loadSuggestPanel();
+    }
+}
+
+// Load browse panel content
+async function loadBrowsePanel() {
+    const browseContent = document.getElementById('browse-panel-content');
+    if (!browseContent) return;
+
+    try {
+        // For now, show a placeholder - this will be replaced with actual browse functionality
+        browseContent.innerHTML = `
+            <div class="text-center py-8">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-600/20 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-amber-200 mb-2">Browse Drinks</h3>
+                <p class="text-stone-400 text-sm mb-4">Explore our collection of cocktails and mocktails</p>
+                <a href="/browse" class="btn glass-btn-primary">
+                    Open Full Browser
+                </a>
+            </div>
+        `;
+        browsePanelLoaded = true;
+    } catch (error) {
+        console.error('Failed to load browse panel:', error);
+        browseContent.innerHTML = `
+            <div class="text-center py-8 text-stone-400">
+                <p>Failed to load drinks. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+// Load suggest panel content
+async function loadSuggestPanel() {
+    const suggestContent = document.getElementById('suggest-panel-content');
+    if (!suggestContent) return;
+
+    try {
+        // For now, show a placeholder - this will be replaced with actual suggest functionality
+        suggestContent.innerHTML = `
+            <div class="text-center py-8">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-600/20 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-amber-200 mb-2">Get Suggestions</h3>
+                <p class="text-stone-400 text-sm mb-4">Let Raja recommend drinks based on your cabinet</p>
+                <button id="get-suggestions-btn" class="btn glass-btn-primary" ${state.cabinet.length === 0 ? 'disabled' : ''}>
+                    ${state.cabinet.length > 0 ? 'Get Recommendations' : 'Add ingredients first'}
+                </button>
+            </div>
+        `;
+        suggestPanelLoaded = true;
+
+        // Add click handler for suggestions button
+        const suggestBtn = document.getElementById('get-suggestions-btn');
+        if (suggestBtn && state.cabinet.length > 0) {
+            suggestBtn.addEventListener('click', () => {
+                // Switch to chat tab and start the flow
+                if (window.TabManager) {
+                    window.TabManager.switchTo('chat');
+                }
+                onCabinetDone();
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load suggest panel:', error);
+        suggestContent.innerHTML = `
+            <div class="text-center py-8 text-stone-400">
+                <p>Failed to load suggestions. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+function updateCabinetCount() {
+    if (state.cabinet.length > 0) {
+        cabinetCount.textContent = state.cabinet.length;
+        cabinetCount.classList.remove('hidden');
+    } else {
+        cabinetCount.classList.add('hidden');
+    }
+    // Also update the nav badge
+    window.dispatchEvent(new CustomEvent('cabinet-updated'));
+
+    // Reset suggest panel when cabinet changes (to update button state)
+    suggestPanelLoaded = false;
+}
+
+function renderCabinetPanel() {
+    const categoriesContainer = document.getElementById('panel-categories');
+    const selectedContainer = document.getElementById('selected-ingredients');
+    const selectedList = document.getElementById('selected-ingredients-list');
+    const clearBtn = document.getElementById('panel-clear-cabinet');
+    const continueBtn = document.getElementById('panel-continue-btn');
+    const summaryEl = document.getElementById('cabinet-summary');
+
+    // Update summary
+    if (state.cabinet.length > 0) {
+        summaryEl.textContent = `${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} selected`;
+        clearBtn.classList.remove('hidden');
+        selectedContainer.classList.remove('hidden');
+        continueBtn.disabled = false;
+        continueBtn.textContent = `Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}`;
+    } else {
+        summaryEl.textContent = 'Add ingredients you have at home';
+        clearBtn.classList.add('hidden');
+        selectedContainer.classList.add('hidden');
+        continueBtn.disabled = true;
+        continueBtn.textContent = 'Continue to Chat';
+    }
+
+    // Render selected ingredients
+    selectedList.innerHTML = state.cabinet.map(id => {
+        const item = findIngredientById(id);
+        const name = item ? item.name : id.charAt(0).toUpperCase() + id.slice(1);
+        const emoji = item ? item.emoji : '';
+        return `
+            <span class="glass-chip active bg-amber-600/30 border-amber-500/50 text-amber-200 px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5">
+                <span>${emoji}</span>${name}
+                <button type="button" data-remove="${id}" class="hover:text-white transition-colors ml-0.5">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </span>
+        `;
+    }).join('');
+
+    // Add remove handlers
+    selectedList.querySelectorAll('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            removeFromCabinet(btn.dataset.remove);
+            renderCabinetPanel();
+        });
+    });
+
+    // Render categories - first category starts expanded
+    categoriesContainer.innerHTML = Object.entries(ingredients).map(([category, items], index) => `
+        <div class="ingredient-category ${index === 0 ? 'open' : ''}">
+            <button type="button" class="category-trigger w-full text-left flex items-center justify-between py-2 px-3 rounded-lg hover:bg-amber-900/20 transition-colors">
+                <span class="text-stone-300 text-sm font-medium">${category}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-stone-500 text-xs">${items.filter(i => state.cabinet.includes(i.id)).length}/${items.length}</span>
+                    <svg class="w-4 h-4 text-stone-500 transform transition-transform category-icon ${index === 0 ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </button>
+            <div class="category-content ${index === 0 ? 'open' : ''}">
+                <div class="flex flex-wrap gap-1.5 pt-2 pb-1 px-1">
+                    ${items.map(item => `
+                        <button type="button"
+                                data-id="${item.id}"
+                                class="panel-ingredient-chip glass-chip px-2.5 py-1 rounded-full text-xs transition-all
+                                       hover:bg-amber-600/20 hover:border-amber-500/40
+                                       ${state.cabinet.includes(item.id) ? 'active bg-amber-600/30 border-amber-500/50 text-amber-200' : 'text-stone-300'}">
+                            <span class="mr-0.5">${item.emoji}</span>${item.name}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Category toggle handlers
+    categoriesContainer.querySelectorAll('.category-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const category = trigger.closest('.ingredient-category');
+            const content = category.querySelector('.category-content');
+            const icon = trigger.querySelector('.category-icon');
+            category.classList.toggle('open');
+            content.classList.toggle('open');
+            icon.classList.toggle('rotate-180');
+        });
+    });
+
+    // Ingredient chip handlers
+    categoriesContainer.querySelectorAll('.panel-ingredient-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const id = chip.dataset.id;
+            if (state.cabinet.includes(id)) {
+                removeFromCabinet(id);
+            } else {
+                addToCabinet(id);
+            }
+            renderCabinetPanel();
+        });
+    });
+
+    // Clear button handler
+    clearBtn.onclick = () => {
+        state.cabinet = [];
+        clearCabinet();
+        updateCabinetCount();
+        renderCabinetPanel();
+    };
+
+    // Continue button handler
+    continueBtn.onclick = () => {
+        if (window.TabManager) {
+            window.TabManager.switchTo('chat');
+        }
+        // If we're at welcome/cabinet/quickstart step and have ingredients, advance the conversation
+        if (state.step === 'cabinet' || state.step === 'welcome' || state.step === 'quickstart') {
+            // Clear old messages and refresh with current cabinet count
+            chatMessages.innerHTML = '';
+            addBotMessage("Hey! I'm Raja, your AI mixologist. Let's find your perfect drink.");
+            setTimeout(() => {
+                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up?`);
+                showQuickStartInput();
+            }, 300);
+        }
+    };
+
+    // Setup search/autocomplete
+    setupPanelSearch();
+}
+
+function findIngredientById(id) {
+    for (const items of Object.values(ingredients)) {
+        const found = items.find(i => i.id === id);
+        if (found) return found;
+    }
+    return null;
+}
+
+function addToCabinet(id) {
+    if (!state.cabinet.includes(id)) {
+        state.cabinet.push(id);
+        saveCabinet(state.cabinet);
+        updateCabinetCount();
+    }
+}
+
+function removeFromCabinet(id) {
+    state.cabinet = state.cabinet.filter(i => i !== id);
+    saveCabinet(state.cabinet);
+    updateCabinetCount();
+}
+
+function setupPanelSearch() {
+    const searchInput = document.getElementById('panel-ingredient-search');
+    const dropdown = document.getElementById('panel-autocomplete');
+    let selectedIndex = -1;
+
+    function getAllIngredients() {
+        const allItems = [];
+        for (const [category, items] of Object.entries(ingredients)) {
+            for (const item of items) {
+                allItems.push({ ...item, category });
+            }
+        }
+        return allItems;
+    }
+
+    function filterIngredients(query) {
+        if (!query || query.length < 2) return [];
+        const lowerQuery = query.toLowerCase();
+        return getAllIngredients()
+            .filter(item => item.name.toLowerCase().includes(lowerQuery) && !state.cabinet.includes(item.id))
+            .slice(0, 6);
+    }
+
+    function renderDropdown(matches) {
+        if (matches.length === 0) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+        dropdown.innerHTML = matches.map((item, index) => `
+            <div class="autocomplete-item ${index === selectedIndex ? 'selected' : ''}"
+                 data-id="${item.id}" data-index="${index}">
+                <span class="autocomplete-emoji">${item.emoji}</span>
+                <span class="autocomplete-name">${item.name}</span>
+                <span class="autocomplete-category">${item.category}</span>
+            </div>
+        `).join('');
+        dropdown.classList.remove('hidden');
+
+        dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', () => {
+                addToCabinet(item.dataset.id);
+                searchInput.value = '';
+                dropdown.classList.add('hidden');
+                renderCabinetPanel();
+            });
+        });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        const matches = filterIngredients(e.target.value.trim());
+        selectedIndex = -1;
+        renderDropdown(matches);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        const items = dropdown.querySelectorAll('.autocomplete-item');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+            renderDropdown(filterIngredients(searchInput.value.trim()));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIndex = Math.max(selectedIndex - 1, 0);
+            renderDropdown(filterIngredients(searchInput.value.trim()));
+        } else if (e.key === 'Enter' && selectedIndex >= 0) {
+            e.preventDefault();
+            const item = items[selectedIndex];
+            if (item) {
+                addToCabinet(item.dataset.id);
+                searchInput.value = '';
+                dropdown.classList.add('hidden');
+                renderCabinetPanel();
+            }
+        } else if (e.key === 'Escape') {
+            dropdown.classList.add('hidden');
+        }
+    });
+}
+
+function resetChat(clearSavedCabinet = false) {
     state.step = 'welcome';
     state.sessionId = null;
-    state.cabinet = [];
+    if (clearSavedCabinet) {
+        state.cabinet = [];
+        clearCabinet();
+    }
+    // Keep cabinet but reset other preferences
     state.mood = '';
     state.skillLevel = 'intermediate';
     state.drinkType = 'both';
@@ -364,12 +754,58 @@ function initCollapsibles(container) {
 // Step handlers
 function showWelcome() {
     setTimeout(() => {
-        addBotMessage("Hey! 👋 I'm Raja, your AI mixologist. Let's find your perfect drink.");
+        addBotMessage("Hey! I'm Raja, your AI mixologist. Let's find your perfect drink.");
         setTimeout(() => {
-            addBotMessage("What's in your cabinet? Tap or type below:");
-            showCabinetInput();
+            if (state.cabinet.length > 0) {
+                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up?`);
+                showQuickStartInput();
+            } else {
+                addBotMessage("First, let's see what you're working with. Tap the Cabinet tab above to add your ingredients, or use the quick-add below:");
+                showCabinetInput();
+            }
         }, 600);
     }, 300);
+}
+
+function showQuickStartInput() {
+    state.step = 'quickstart';
+
+    inputArea.innerHTML = `
+        <div class="space-y-2">
+            <button id="use-cabinet-btn" class="btn glass-btn-primary w-full gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+                Mix with my ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}
+            </button>
+            <div class="flex gap-2">
+                <button id="edit-cabinet-btn" class="btn btn-sm glass-btn-ghost flex-1 text-xs">
+                    Edit Cabinet
+                </button>
+                <button id="start-fresh-btn" class="btn btn-sm glass-btn-ghost flex-1 text-xs">
+                    Start Fresh
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('use-cabinet-btn').addEventListener('click', () => {
+        onCabinetDone();
+    });
+
+    document.getElementById('edit-cabinet-btn').addEventListener('click', () => {
+        if (window.TabManager) {
+            window.TabManager.switchTo('cabinet');
+        }
+    });
+
+    document.getElementById('start-fresh-btn').addEventListener('click', () => {
+        state.cabinet = [];
+        clearCabinet();
+        updateCabinetCount();
+        chatMessages.innerHTML = '';
+        showWelcome();
+    });
 }
 
 function showCabinetInput() {
@@ -407,10 +843,14 @@ function showCabinetInput() {
 
     html += `</div>
         <div class="space-y-2 pt-2 border-t border-amber-900/20">
-            <div class="flex gap-2">
-                <input type="text" id="custom-ingredient-input"
-                       class="glass-input flex-1 text-sm py-2"
-                       placeholder="Type: aperol, prosecco, mint...">
+            <div class="flex gap-2 relative">
+                <div class="flex-1 relative">
+                    <input type="text" id="custom-ingredient-input"
+                           class="glass-input w-full text-sm py-2"
+                           placeholder="Type: aperol, prosecco, mint..."
+                           autocomplete="off">
+                    <div id="autocomplete-dropdown" class="autocomplete-dropdown hidden"></div>
+                </div>
                 <button id="add-custom-btn" class="btn btn-sm glass-btn-secondary px-3" title="Add">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -418,9 +858,16 @@ function showCabinetInput() {
                 </button>
             </div>
             <div id="custom-ingredients-display" class="flex flex-wrap gap-1.5 hidden"></div>
-            <button id="cabinet-done-btn" class="btn btn-sm glass-btn-primary w-full" ${state.cabinet.length === 0 ? 'disabled' : ''}>
-                Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}
-            </button>
+            <div class="flex gap-2">
+                <button id="cabinet-done-btn" class="btn btn-sm glass-btn-primary flex-1" ${state.cabinet.length === 0 ? 'disabled' : ''}>
+                    Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}
+                </button>
+                <button id="clear-cabinet-btn" class="btn btn-sm glass-btn-ghost px-3 ${state.cabinet.length === 0 ? 'hidden' : ''}" title="Clear Cabinet">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            </div>
         </div>`;
 
     inputArea.innerHTML = html;
@@ -449,11 +896,29 @@ function showCabinetInput() {
                 state.cabinet.push(id);
                 chip.classList.add('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
             }
+            saveCabinet(state.cabinet);
             updateCabinetButton();
         });
     });
 
     document.getElementById('cabinet-done-btn').addEventListener('click', onCabinetDone);
+
+    // Clear cabinet button handler
+    document.getElementById('clear-cabinet-btn').addEventListener('click', () => {
+        state.cabinet = [];
+        clearCabinet();
+        // Reset all chip states
+        document.querySelectorAll('.ingredient-chip').forEach(chip => {
+            chip.classList.remove('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
+        });
+        // Clear custom ingredients display
+        const customDisplay = document.getElementById('custom-ingredients-display');
+        if (customDisplay) {
+            customDisplay.classList.add('hidden');
+            customDisplay.innerHTML = '';
+        }
+        updateCabinetButton();
+    });
 
     // Custom ingredient input
     const customInput = document.getElementById('custom-ingredient-input');
@@ -471,6 +936,7 @@ function showCabinetInput() {
         if (newIngredients.length > 0) {
             state.cabinet.push(...newIngredients);
             customInput.value = '';
+            saveCabinet(state.cabinet);
             updateCustomDisplay();
             updateCabinetButton();
         }
@@ -497,6 +963,7 @@ function showCabinetInput() {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     state.cabinet = state.cabinet.filter(i => i !== btn.dataset.remove);
+                    saveCabinet(state.cabinet);
                     updateCustomDisplay();
                     updateCabinetButton();
                 });
@@ -507,18 +974,161 @@ function showCabinetInput() {
     }
 
     addCustomBtn.addEventListener('click', addCustomIngredients);
-    customInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+
+    // Autocomplete functionality
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    let selectedIndex = -1;
+
+    function getAllIngredients() {
+        const allItems = [];
+        for (const [category, items] of Object.entries(ingredients)) {
+            for (const item of items) {
+                allItems.push({ ...item, category });
+            }
+        }
+        return allItems;
+    }
+
+    function filterIngredients(query) {
+        if (!query || query.length < 2) return [];
+        const lowerQuery = query.toLowerCase();
+        const allItems = getAllIngredients();
+        return allItems
+            .filter(item =>
+                item.name.toLowerCase().includes(lowerQuery) &&
+                !state.cabinet.includes(item.id)
+            )
+            .slice(0, 6);
+    }
+
+    function renderDropdown(matches) {
+        if (matches.length === 0) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
+            return;
+        }
+
+        dropdown.innerHTML = matches.map((item, index) => `
+            <div class="autocomplete-item ${index === selectedIndex ? 'selected' : ''}"
+                 data-id="${item.id}"
+                 data-index="${index}">
+                <span class="autocomplete-emoji">${item.emoji}</span>
+                <span class="autocomplete-name">${item.name}</span>
+                <span class="autocomplete-category">${item.category}</span>
+            </div>
+        `).join('');
+
+        dropdown.classList.remove('hidden');
+
+        // Add click handlers to dropdown items
+        dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', () => {
+                selectIngredient(item.dataset.id);
+            });
+        });
+    }
+
+    function selectIngredient(id) {
+        // Find the ingredient and add it to cabinet
+        const allItems = getAllIngredients();
+        const ingredient = allItems.find(item => item.id === id);
+
+        if (ingredient && !state.cabinet.includes(id)) {
+            state.cabinet.push(id);
+            // Update the chip UI if visible
+            const chip = document.querySelector(`.ingredient-chip[data-id="${id}"]`);
+            if (chip) {
+                chip.classList.add('active', 'bg-amber-600/30', 'border-amber-500/50', 'text-amber-200');
+            }
+            saveCabinet(state.cabinet);
+            updateCabinetButton();
+        }
+
+        // Clear input and hide dropdown
+        customInput.value = '';
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        selectedIndex = -1;
+        customInput.focus();
+    }
+
+    function updateSelectedItem() {
+        dropdown.querySelectorAll('.autocomplete-item').forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.classList.add('selected');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
+
+    customInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        const matches = filterIngredients(query);
+        selectedIndex = -1;
+        renderDropdown(matches);
+    });
+
+    customInput.addEventListener('keydown', (e) => {
+        const items = dropdown.querySelectorAll('.autocomplete-item');
+        const isDropdownVisible = !dropdown.classList.contains('hidden') && items.length > 0;
+
+        if (e.key === 'ArrowDown') {
             e.preventDefault();
-            addCustomIngredients();
+            if (isDropdownVisible) {
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelectedItem();
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (isDropdownVisible) {
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateSelectedItem();
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isDropdownVisible && selectedIndex >= 0) {
+                const selectedItem = items[selectedIndex];
+                if (selectedItem) {
+                    selectIngredient(selectedItem.dataset.id);
+                }
+            } else {
+                addCustomIngredients();
+            }
+        } else if (e.key === 'Escape') {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!customInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
         }
     });
 }
 
 function updateCabinetButton() {
     const btn = document.getElementById('cabinet-done-btn');
+    const clearBtn = document.getElementById('clear-cabinet-btn');
     btn.disabled = state.cabinet.length === 0;
     btn.textContent = `Continue with ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}`;
+    // Show/hide clear button based on cabinet contents
+    if (clearBtn) {
+        if (state.cabinet.length === 0) {
+            clearBtn.classList.add('hidden');
+        } else {
+            clearBtn.classList.remove('hidden');
+        }
+    }
+    // Update cabinet count badge
+    updateCabinetCount();
 }
 
 function onCabinetDone() {
@@ -545,11 +1155,11 @@ function showMoodInput() {
     state.step = 'mood';
 
     const moods = [
-        { text: 'Relaxing', emoji: '😌' },
-        { text: 'Celebrating', emoji: '🎉' },
-        { text: 'Date night', emoji: '❤️' },
-        { text: 'Cozy', emoji: '🏠' },
-        { text: 'Adventurous', emoji: '🌟' }
+        { text: 'Relaxing', emoji: '' },
+        { text: 'Celebrating', emoji: '' },
+        { text: 'Date night', emoji: '' },
+        { text: 'Cozy', emoji: '' },
+        { text: 'Adventurous', emoji: '' }
     ];
 
     inputArea.innerHTML = `
@@ -557,7 +1167,7 @@ function showMoodInput() {
             <div class="flex flex-wrap gap-1.5">
                 ${moods.map(m => `
                     <button type="button" class="mood-chip glass-chip px-2.5 py-1.5 rounded-lg text-xs hover:bg-amber-600/20 hover:border-amber-500/40 text-stone-300 transition-all">
-                        <span class="mr-0.5">${m.emoji}</span>${m.text}
+                        ${m.text}
                     </button>
                 `).join('')}
             </div>
@@ -607,31 +1217,31 @@ function showSkillInput() {
         <div class="space-y-3">
             <div class="grid grid-cols-3 gap-2">
                 <button type="button" data-skill="beginner" class="skill-btn glass-card p-2.5 sm:p-3 text-center hover:bg-amber-600/10 transition-all">
-                    <div class="text-xl sm:text-2xl mb-0.5">🥄</div>
-                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Simple</div>
+                    <div class="text-xl sm:text-2xl mb-0.5">Simple</div>
+                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Quick</div>
                 </button>
                 <button type="button" data-skill="intermediate" class="skill-btn glass-card p-2.5 sm:p-3 text-center hover:bg-amber-600/10 transition-all border-amber-500/30">
-                    <div class="text-xl sm:text-2xl mb-0.5">🍸</div>
-                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Classic</div>
+                    <div class="text-xl sm:text-2xl mb-0.5">Classic</div>
+                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Balanced</div>
                 </button>
                 <button type="button" data-skill="adventurous" class="skill-btn glass-card p-2.5 sm:p-3 text-center hover:bg-amber-600/10 transition-all">
-                    <div class="text-xl sm:text-2xl mb-0.5">🧪</div>
-                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Fancy</div>
+                    <div class="text-xl sm:text-2xl mb-0.5">Fancy</div>
+                    <div class="text-stone-200 font-medium text-xs sm:text-sm">Creative</div>
                 </button>
             </div>
 
             <div class="flex gap-1.5">
                 <label class="drink-type-label glass-chip flex-1 text-center py-1.5 rounded-lg cursor-pointer transition-all hover:bg-amber-600/20 text-xs">
                     <input type="radio" name="drinkType" value="cocktail" class="hidden">
-                    <span class="text-stone-300">🍹 Cocktail</span>
+                    <span class="text-stone-300">Cocktail</span>
                 </label>
                 <label class="drink-type-label glass-chip flex-1 text-center py-1.5 rounded-lg cursor-pointer transition-all hover:bg-amber-600/20 text-xs">
                     <input type="radio" name="drinkType" value="mocktail" class="hidden">
-                    <span class="text-stone-300">🧃 Mocktail</span>
+                    <span class="text-stone-300">Mocktail</span>
                 </label>
                 <label class="drink-type-label glass-chip flex-1 text-center py-1.5 rounded-lg cursor-pointer transition-all bg-amber-600/20 border-amber-500/40 text-xs">
                     <input type="radio" name="drinkType" value="both" class="hidden" checked>
-                    <span class="text-amber-200">✨ Either</span>
+                    <span class="text-amber-200">Either</span>
                 </label>
             </div>
         </div>
@@ -666,7 +1276,7 @@ function onSkillDone() {
     addUserMessage(skillLabels[state.skillLevel]);
 
     setTimeout(() => {
-        addBotMessage("Mixing something special... 🍸");
+        addBotMessage("Mixing something special...");
         addTypingIndicator();
         showLoadingInput();
         startFlow();
@@ -836,7 +1446,7 @@ async function onMadeIt() {
     if (!state.sessionId) return;
 
     const drinkId = document.querySelector('#recipe-name')?.textContent?.toLowerCase().replace(/\s+/g, '-') || 'drink';
-    addUserMessage("Made it! 🎉");
+    addUserMessage("Made it!");
 
     try {
         await fetch('/api/flow', {
@@ -849,7 +1459,7 @@ async function onMadeIt() {
             })
         });
 
-        addBotMessage("Cheers! 🥂 Enjoy!");
+        addBotMessage("Cheers! Enjoy!");
         showEndInput();
     } catch (error) {
         addBotMessage("Cheers! Enjoy!");
@@ -895,9 +1505,14 @@ async function onAnother() {
 
 function showEndInput() {
     inputArea.innerHTML = `
-        <button id="start-over-btn" class="btn btn-sm glass-btn-secondary w-full">
-            Start Fresh
-        </button>
+        <div class="space-y-2">
+            <button id="start-over-btn" class="btn btn-sm glass-btn-secondary w-full">
+                Start Fresh
+            </button>
+            <a href="/browse" class="block text-center text-stone-500 hover:text-amber-400 text-xs transition-colors py-1">
+                Or browse our full collection
+            </a>
+        </div>
     `;
     document.getElementById('start-over-btn').addEventListener('click', resetChat);
 }
@@ -905,102 +1520,5 @@ function showEndInput() {
 // Initialize
 init();
 </script>
-
-<style>
-/* Chat container height */
-.chat-container {
-    height: calc(100vh - 140px);
-    height: calc(100dvh - 140px);
-    min-height: 400px;
-    max-height: 800px;
-}
-
-@media (max-width: 640px) {
-    .chat-container {
-        height: calc(100vh - 100px);
-        height: calc(100dvh - 100px);
-        max-height: none;
-    }
-}
-
-/* Glass chips */
-.glass-chip {
-    background: rgba(255, 245, 235, 0.03);
-    border: 1px solid rgba(255, 200, 150, 0.1);
-}
-
-.glass-chip.active {
-    background: rgba(217, 119, 6, 0.25);
-    border-color: rgba(251, 191, 36, 0.5);
-}
-
-/* Messages */
-.glass-message-bot {
-    background: rgba(255, 245, 235, 0.05);
-    border: 1px solid rgba(255, 200, 150, 0.08);
-}
-
-.glass-message-user {
-    background: linear-gradient(135deg, rgba(217, 119, 6, 0.4), rgba(180, 83, 9, 0.4));
-    border: 1px solid rgba(251, 191, 36, 0.2);
-}
-
-/* Collapsible sections */
-.collapsible-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.25s ease-out;
-}
-
-.collapsible-content.open {
-    max-height: 500px;
-}
-
-.category-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.2s ease-out;
-}
-
-.category-content.open {
-    max-height: 200px;
-}
-
-/* Scrollbar */
-#chat-messages::-webkit-scrollbar,
-.max-h-\\[50vh\\]::-webkit-scrollbar {
-    width: 4px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb,
-.max-h-\\[50vh\\]::-webkit-scrollbar-thumb {
-    background: rgba(217, 119, 6, 0.3);
-    border-radius: 2px;
-}
-
-/* Cursors */
-.ingredient-chip, .mood-chip, .skill-btn, .collapsible-trigger, .category-trigger {
-    cursor: pointer;
-}
-
-/* Animations */
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-}
-
-/* Extra small breakpoint */
-@media (min-width: 400px) {
-    .xs\\:inline { display: inline; }
-    .xs\\:hidden { display: none; }
-}
-
-/* Line clamp */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-</style>
+<!-- All styles consolidated in glassmorphic.css -->
 {% endblock %}

@@ -66,3 +66,39 @@ async def root(request: Request) -> HTMLResponse:
         request=request,
         name="index.html",
     )
+
+
+@app.get("/browse", response_class=HTMLResponse)
+async def browse(request: Request) -> HTMLResponse:
+    """Render the drink browse and search interface."""
+    return templates.TemplateResponse(
+        request=request,
+        name="browse.html",
+    )
+
+
+@app.get("/drink/{drink_id}", response_class=HTMLResponse)
+async def drink_detail(request: Request, drink_id: str) -> HTMLResponse:
+    """Render the drink detail page.
+
+    Args:
+        request: The FastAPI request object.
+        drink_id: The unique identifier of the drink.
+
+    Returns:
+        HTMLResponse with the drink detail template.
+    """
+    return templates.TemplateResponse(
+        request=request,
+        name="drink.html",
+        context={"drink_id": drink_id},
+    )
+
+
+@app.get("/suggest-bottle", response_class=HTMLResponse)
+async def suggest_bottle_page(request: Request) -> HTMLResponse:
+    """Render the suggest bottle page for recommendations on what to buy."""
+    return templates.TemplateResponse(
+        request=request,
+        name="suggest-bottle.html",
+    )

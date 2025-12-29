@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Suggest a Bottle - Cocktail Cache{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-2 sm:px-4">
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-amber-300 mb-2">Suggest Your Next Bottle</h1>
+        <p class="text-stone-400 text-sm sm:text-base">Discover which bottles unlock the most new drinks</p>
+    </div>
+
+    <!-- Your Cabinet Section -->
+    <div class="glass-card p-4 mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-amber-300 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                Your Cabinet
+            </h2>
+            <a href="/" class="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </div>
+
+        <!-- Cabinet chips container -->
+        <div id="cabinet-chips" class="flex flex-wrap gap-2 mb-3">
+            <!-- Chips will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Cabinet summary -->
+        <div id="cabinet-summary" class="text-stone-400 text-sm">
+            <span id="makeable-count">Loading...</span>
+        </div>
+
+        <!-- Empty cabinet state -->
+        <div id="empty-cabinet" class="hidden text-center py-6">
+            <svg class="w-12 h-12 mx-auto text-stone-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <h3 class="text-stone-400 font-medium mb-2">Your cabinet is empty</h3>
+            <p class="text-stone-500 text-sm mb-4">Add some bottles to get personalized recommendations</p>
+            <a href="/" class="inline-flex items-center gap-2 glass-btn-primary px-4 py-2 rounded-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Bottles
+            </a>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="text-center py-12">
+        <div class="flex justify-center gap-1 mb-4">
+            <span class="w-3 h-3 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+            <span class="w-3 h-3 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+            <span class="w-3 h-3 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+        </div>
+        <p class="text-stone-400 text-sm">Analyzing your cabinet...</p>
+    </div>
+
+    <!-- Recommendations Section -->
+    <div id="recommendations-section" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-amber-300">Top Recommendations</h2>
+            <span id="total-recs" class="text-stone-500 text-sm"></span>
+        </div>
+
+        <!-- Recommendations Grid -->
+        <div id="recommendations-grid" class="space-y-4">
+            <!-- Cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- No Recommendations State -->
+    <div id="no-recommendations" class="hidden text-center py-12">
+        <svg class="w-16 h-16 mx-auto text-amber-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-amber-300 mb-2">You're all stocked up!</h3>
+        <p class="text-stone-400 text-sm mb-4">Your cabinet already has everything you need</p>
+        <a href="/browse" class="inline-flex items-center gap-2 glass-btn-primary px-4 py-2 rounded-lg">
+            Browse All Drinks
+        </a>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="hidden text-center py-12">
+        <svg class="w-16 h-16 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-red-400 mb-2">Something went wrong</h3>
+        <p id="error-message" class="text-stone-400 text-sm mb-4">Failed to load recommendations</p>
+        <button onclick="fetchRecommendations()" class="inline-flex items-center gap-2 glass-btn-secondary px-4 py-2 rounded-lg">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Try Again
+        </button>
+    </div>
+</div>
+
+<!-- Recommendation Card Template -->
+<template id="recommendation-card-template">
+    <div class="recommendation-card glass-card p-4 animate-fade-in">
+        <!-- Header -->
+        <div class="flex items-start gap-3 mb-3">
+            <span class="rank-badge flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm"></span>
+            <div class="flex-1 min-w-0">
+                <h3 class="ingredient-name text-lg font-semibold text-amber-300 truncate"></h3>
+                <p class="unlock-count text-stone-400 text-sm"></p>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-4">
+            <div class="h-2 bg-stone-800 rounded-full overflow-hidden">
+                <div class="progress-bar h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <!-- Drinks List -->
+        <div class="drinks-section">
+            <button class="toggle-drinks w-full flex items-center justify-between text-stone-400 text-sm hover:text-amber-300 transition-colors py-1">
+                <span>Drinks you'll unlock</span>
+                <svg class="toggle-icon w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div class="drinks-list hidden mt-2 flex flex-wrap gap-2">
+                <!-- Drink chips will be inserted here -->
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Drink Chip Template -->
+<template id="drink-chip-template">
+    <a class="drink-chip inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-colors" href="#">
+        <span class="type-indicator w-1.5 h-1.5 rounded-full"></span>
+        <span class="drink-name"></span>
+    </a>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Constants
+const CABINET_STORAGE_KEY = 'cocktail-cache-cabinet';
+
+// State
+let cabinet = [];
+let maxUnlocks = 0;
+
+// DOM elements
+const cabinetChips = document.getElementById('cabinet-chips');
+const cabinetSummary = document.getElementById('cabinet-summary');
+const makeableCount = document.getElementById('makeable-count');
+const emptyCabinet = document.getElementById('empty-cabinet');
+const loadingState = document.getElementById('loading-state');
+const recommendationsSection = document.getElementById('recommendations-section');
+const recommendationsGrid = document.getElementById('recommendations-grid');
+const totalRecs = document.getElementById('total-recs');
+const noRecommendations = document.getElementById('no-recommendations');
+const errorState = document.getElementById('error-state');
+const errorMessage = document.getElementById('error-message');
+const cardTemplate = document.getElementById('recommendation-card-template');
+const chipTemplate = document.getElementById('drink-chip-template');
+
+// Initialize
+function init() {
+    loadCabinet();
+    setupEventListeners();
+
+    if (cabinet.length > 0) {
+        fetchRecommendations();
+    } else {
+        showEmptyCabinet();
+    }
+}
+
+function loadCabinet() {
+    try {
+        const stored = localStorage.getItem(CABINET_STORAGE_KEY);
+        cabinet = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        console.error('Failed to load cabinet:', e);
+        cabinet = [];
+    }
+
+    renderCabinetChips();
+}
+
+function renderCabinetChips() {
+    cabinetChips.innerHTML = '';
+
+    if (cabinet.length === 0) {
+        return;
+    }
+
+    // Show first 8 ingredients, then "+X more"
+    const displayCount = 8;
+    const displayIngredients = cabinet.slice(0, displayCount);
+
+    displayIngredients.forEach(ingredient => {
+        const chip = document.createElement('span');
+        chip.className = 'glass-chip px-2.5 py-1 rounded-lg text-xs text-stone-300 bg-stone-800/50 border border-stone-700/50';
+        chip.textContent = ingredient.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        cabinetChips.appendChild(chip);
+    });
+
+    if (cabinet.length > displayCount) {
+        const moreChip = document.createElement('span');
+        moreChip.className = 'glass-chip px-2.5 py-1 rounded-lg text-xs text-amber-400 bg-amber-900/20 border border-amber-700/30';
+        moreChip.textContent = `+${cabinet.length - displayCount} more`;
+        cabinetChips.appendChild(moreChip);
+    }
+}
+
+function setupEventListeners() {
+    // Listen for cabinet updates from other pages/tabs
+    window.addEventListener('cabinet-updated', () => {
+        loadCabinet();
+        if (cabinet.length > 0) {
+            fetchRecommendations();
+        } else {
+            showEmptyCabinet();
+        }
+    });
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === CABINET_STORAGE_KEY) {
+            loadCabinet();
+            if (cabinet.length > 0) {
+                fetchRecommendations();
+            } else {
+                showEmptyCabinet();
+            }
+        }
+    });
+}
+
+async function fetchRecommendations() {
+    showLoading();
+
+    try {
+        const response = await fetch('/api/suggest-bottles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cabinet: cabinet,
+                drink_type: 'both',
+                limit: 5
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        renderRecommendations(data);
+    } catch (error) {
+        console.error('Failed to fetch recommendations:', error);
+        showError(error.message);
+    }
+}
+
+function renderRecommendations(data) {
+    hideAllStates();
+
+    // Update makeable count
+    makeableCount.textContent = `You can make ${data.drinks_makeable_now} drink${data.drinks_makeable_now !== 1 ? 's' : ''} with your current cabinet`;
+
+    if (data.recommendations.length === 0) {
+        noRecommendations.classList.remove('hidden');
+        return;
+    }
+
+    // Find max unlocks for progress bar scaling
+    maxUnlocks = Math.max(...data.recommendations.map(r => r.new_drinks_unlocked));
+
+    // Update total count
+    totalRecs.textContent = `Showing top ${data.recommendations.length} of ${data.total_available_recommendations} options`;
+
+    // Render cards
+    recommendationsGrid.innerHTML = '';
+    data.recommendations.forEach((rec, index) => {
+        const card = createRecommendationCard(rec, index + 1);
+        recommendationsGrid.appendChild(card);
+    });
+
+    recommendationsSection.classList.remove('hidden');
+}
+
+function createRecommendationCard(recommendation, rank) {
+    const clone = cardTemplate.content.cloneNode(true);
+    const card = clone.querySelector('.recommendation-card');
+
+    // Rank badge
+    card.querySelector('.rank-badge').textContent = `#${rank}`;
+
+    // Ingredient name
+    card.querySelector('.ingredient-name').textContent = recommendation.ingredient_name;
+
+    // Unlock count
+    card.querySelector('.unlock-count').textContent = `Unlocks ${recommendation.new_drinks_unlocked} new drink${recommendation.new_drinks_unlocked !== 1 ? 's' : ''}`;
+
+    // Progress bar
+    const progressPercent = (recommendation.new_drinks_unlocked / maxUnlocks) * 100;
+    card.querySelector('.progress-bar').style.width = `${progressPercent}%`;
+
+    // Drinks list
+    const drinksList = card.querySelector('.drinks-list');
+    recommendation.drinks.forEach(drink => {
+        const drinkChip = createDrinkChip(drink);
+        drinksList.appendChild(drinkChip);
+    });
+
+    // Toggle drinks visibility
+    const toggleBtn = card.querySelector('.toggle-drinks');
+    const toggleIcon = card.querySelector('.toggle-icon');
+    toggleBtn.addEventListener('click', () => {
+        drinksList.classList.toggle('hidden');
+        toggleIcon.classList.toggle('rotate-180');
+    });
+
+    return clone;
+}
+
+function createDrinkChip(drink) {
+    const clone = chipTemplate.content.cloneNode(true);
+    const chip = clone.querySelector('.drink-chip');
+
+    chip.href = `/drink/${encodeURIComponent(drink.id)}`;
+
+    // Type indicator color
+    const indicator = chip.querySelector('.type-indicator');
+    if (drink.is_mocktail) {
+        indicator.classList.add('bg-green-400');
+        chip.classList.add('bg-green-900/20', 'border', 'border-green-700/30', 'text-green-300', 'hover:bg-green-900/40');
+    } else {
+        indicator.classList.add('bg-amber-400');
+        chip.classList.add('bg-amber-900/20', 'border', 'border-amber-700/30', 'text-amber-300', 'hover:bg-amber-900/40');
+    }
+
+    chip.querySelector('.drink-name').textContent = drink.name;
+
+    return clone;
+}
+
+function showLoading() {
+    hideAllStates();
+    loadingState.classList.remove('hidden');
+}
+
+function showEmptyCabinet() {
+    hideAllStates();
+    emptyCabinet.classList.remove('hidden');
+    cabinetSummary.classList.add('hidden');
+}
+
+function showError(message) {
+    hideAllStates();
+    errorMessage.textContent = message || 'Failed to load recommendations';
+    errorState.classList.remove('hidden');
+}
+
+function hideAllStates() {
+    loadingState.classList.add('hidden');
+    recommendationsSection.classList.add('hidden');
+    noRecommendations.classList.add('hidden');
+    errorState.classList.add('hidden');
+    emptyCabinet.classList.add('hidden');
+    cabinetSummary.classList.remove('hidden');
+}
+
+// Start
+init();
+</script>
+
+<style>
+.recommendation-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+}
+
+.toggle-icon {
+    transition: transform 0.2s ease;
+}
+
+.toggle-icon.rotate-180 {
+    transform: rotate(180deg);
+}
+
+.drink-chip {
+    transition: all 0.15s ease;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for cards */
+.recommendation-card:nth-child(1) { animation-delay: 0ms; }
+.recommendation-card:nth-child(2) { animation-delay: 50ms; }
+.recommendation-card:nth-child(3) { animation-delay: 100ms; }
+.recommendation-card:nth-child(4) { animation-delay: 150ms; }
+.recommendation-card:nth-child(5) { animation-delay: 200ms; }
+</style>
+{% endblock %}

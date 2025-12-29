@@ -9,23 +9,24 @@
 ## Table of Contents
 
 1. [System Overview](#system-overview)
-2. [Agentic Architecture](#agentic-architecture)
-3. [Data Flow](#data-flow)
-4. [BDD Specifications](#bdd-specifications)
-5. [Blueprint](#blueprint)
-6. [Key Decisions](#key-decisions)
+2. [Frontend Architecture](#frontend-architecture)
+3. [Agentic Architecture](#agentic-architecture)
+4. [Data Flow](#data-flow)
+5. [BDD Specifications](#bdd-specifications)
+6. [Blueprint](#blueprint)
+7. [Key Decisions](#key-decisions)
 
 ---
 
 ## Implementation Status
 
-> **Current Phase**: Week 4 API & UI Complete
+> **Current Phase**: Session 6 UX Improvements Complete
 
 ### Completed Components
 
 | Component | Status | Details |
 |-----------|--------|---------|
-| Data Layer | ✅ Complete | 50 cocktails, 24 mocktails, 134 ingredients |
+| Data Layer | ✅ Complete | 103 cocktails, 39 mocktails (142 total), 180 ingredients in 6 categories |
 | Pydantic Models | ✅ Complete | Structured crew I/O (AnalysisOutput, RecipeOutput, BottleAdvisorOutput) |
 | Project Structure | ✅ Complete | FastAPI with routers, templates, static assets |
 | Validation Scripts | ✅ Complete | `validate_data.py`, `compute_unlock_scores.py` |
@@ -36,6 +37,9 @@
 | CrewAI Flow | ✅ Complete | CocktailFlow with state management and rejection workflow |
 | API Routes | ✅ Complete | FastAPI endpoints for recommendations |
 | Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
+| Tabbed Navigation | ✅ Complete | Chat/Cabinet/Browse tabs in unified header |
+| Browse Page | ✅ Complete | Search, filter by type/difficulty, drink detail pages |
+| Cabinet Panel | ✅ Complete | Ingredient management with autocomplete and categories |
 | Deployment | ✅ Complete | Render.com with GitHub Actions CI/CD |
 | Unit Tests | ✅ Complete | 339 tests passing with 87% coverage |
 
@@ -43,21 +47,21 @@
 
 | File | Records | Validation |
 |------|---------|------------|
-| `cocktails.json` | 50 drinks | Pydantic validated |
-| `mocktails.json` | 24 drinks | Pydantic validated |
-| `ingredients.json` | 134 ingredients | 6 categories |
+| `cocktails.json` | 103 drinks | Pydantic validated |
+| `mocktails.json` | 39 drinks | Pydantic validated |
+| `ingredients.json` | 180 ingredients | 6 categories |
 | `substitutions.json` | 118 rules | 7 substitution maps |
 | `unlock_scores.json` | 110 entries | Pre-computed ROI |
 
-### Actual Project Structure (Phase 2)
+### Actual Project Structure (Session 6)
 
 ```
 cocktail-cache/
 ├── src/
 │   └── app/
-│       ├── main.py              # FastAPI entry point (skeleton)
+│       ├── main.py              # FastAPI entry point
 │       ├── config.py            # Environment configuration
-│       ├── models/              # ✅ Complete (Phase 1 + 2)
+│       ├── models/              # ✅ Complete
 │       │   ├── __init__.py      # Exports all models
 │       │   ├── drinks.py        # Drink, IngredientAmount, FlavorProfile
 │       │   ├── ingredients.py   # Ingredient, IngredientsDatabase, SubstitutionsDatabase
@@ -91,13 +95,23 @@ cocktail-cache/
 │       ├── flows/               # ✅ Complete
 │       │   ├── __init__.py      # Flow exports
 │       │   └── cocktail_flow.py # Main orchestration with state
-│       ├── routers/             # 🔲 Week 4
-│       ├── templates/           # 🔲 Week 5
-│       └── static/              # 🔲 Week 5
+│       ├── routers/             # ✅ Complete
+│       │   ├── __init__.py
+│       │   └── api.py           # /recommend, /drinks, /ingredients endpoints
+│       ├── templates/           # ✅ Complete (Jinja2)
+│       │   ├── base.html        # Base layout with shared styles
+│       │   ├── index.html       # Chat interface with tabbed navigation
+│       │   ├── browse.html      # Drink search and filter page
+│       │   ├── drink.html       # Individual drink detail page
+│       │   └── components/      # Reusable template partials
+│       └── static/              # ✅ Complete
+│           ├── css/             # Tailwind-based styles
+│           └── js/
+│               └── cabinet-state.js # Cabinet localStorage management
 ├── data/                        # ✅ Complete
-│   ├── cocktails.json           # 50 cocktail recipes
-│   ├── mocktails.json           # 24 non-alcoholic recipes
-│   ├── ingredients.json         # 134 categorized ingredients
+│   ├── cocktails.json           # 103 cocktail recipes
+│   ├── mocktails.json           # 39 non-alcoholic recipes
+│   ├── ingredients.json         # 180 categorized ingredients
 │   ├── substitutions.json       # 118 ingredient swap rules
 │   └── unlock_scores.json       # Pre-computed bottle ROI (110 entries)
 ├── scripts/                     # ✅ Complete
@@ -181,6 +195,157 @@ cocktail-cache/
 - Selecting from cocktails OR mocktails based on drink type preference
 
 This insight drives the entire architecture.
+
+---
+
+## Frontend Architecture
+
+The frontend uses a mobile-first, server-rendered approach with Jinja2 templates, Tailwind CSS, and vanilla JavaScript for interactivity. No build step required.
+
+### Navigation Structure
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         UNIFIED HEADER                                   │
+│                                                                         │
+│   ┌────────────────────────────────────────────────────────────────┐   │
+│   │  🍸 Raja - Your AI Mixologist                    [Reset]       │   │
+│   └────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+│   ┌──────────────┬──────────────┬──────────────┐                       │
+│   │     Chat     │   Cabinet    │    Browse    │  ← Tab Navigation     │
+│   │   (active)   │    (3)       │              │                       │
+│   └──────────────┴──────────────┴──────────────┘                       │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Tab Behavior**:
+- **Chat**: Conversational interface with Raja for personalized recommendations
+- **Cabinet**: Ingredient management panel with autocomplete and category browser
+- **Browse**: Link to `/browse` page for searching/filtering all 142 drinks
+
+### User Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          USER ENTRY POINTS                              │
+└─────────────────────────────────────────────────────────────────────────┘
+                    │                               │
+                    ▼                               ▼
+        ┌───────────────────┐           ┌───────────────────┐
+        │   Chat Interface  │           │    Browse Page    │
+        │   (index.html)    │           │   (browse.html)   │
+        └───────────────────┘           └───────────────────┘
+                    │                               │
+        ┌───────────┴───────────┐       ┌───────────┴───────────┐
+        │                       │       │                       │
+        ▼                       ▼       ▼                       ▼
+┌───────────────┐     ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+│  Cabinet Tab  │     │  AI Recommend │ │ Search/Filter │ │  Drink Cards  │
+│               │     │               │ │               │ │               │
+│ • Add/remove  │     │ • Mood input  │ │ • Text search │ │ • 142 drinks  │
+│   ingredients │     │ • Preferences │ │ • Type filter │ │ • Quick info  │
+│ • Autocomplete│     │ • Get recipe  │ │ • Difficulty  │ │ • Click → ▼   │
+└───────────────┘     └───────────────┘ └───────────────┘ └───────────────┘
+                              │                                   │
+                              ▼                                   ▼
+                    ┌───────────────────────────────────────────────────┐
+                    │                   DRINK DETAIL                    │
+                    │                   (drink.html)                    │
+                    │                                                   │
+                    │   • Full recipe with ingredients and method       │
+                    │   • Flavor profile visualization                  │
+                    │   • Difficulty, timing, glassware                 │
+                    │   • Tags and categorization                       │
+                    └───────────────────────────────────────────────────┘
+```
+
+### Page Components
+
+#### Chat Interface (`index.html`)
+
+The primary interface combines three tabs in a unified experience:
+
+| Section | Purpose | Key Features |
+|---------|---------|--------------|
+| Header | Identity & navigation | Raja branding, reset button, tab bar |
+| Chat Tab | AI conversation | Message history, mood input, recipe cards |
+| Cabinet Tab | Ingredient management | Autocomplete search, category grid, selected items |
+| Messages | Conversation flow | Bot/user bubbles, collapsible recipe sections |
+| Input Area | Dynamic inputs | Adapts to conversation stage |
+
+**Cabinet Panel Features**:
+- Ingredient autocomplete with fuzzy matching
+- Category-based browsing (spirits, liqueurs, mixers, etc.)
+- Selected ingredients display with remove capability
+- Ingredient count badge in tab
+- LocalStorage persistence via `cabinet-state.js`
+
+#### Browse Page (`browse.html`)
+
+A standalone page for exploring the full drink collection:
+
+| Section | Purpose | Key Features |
+|---------|---------|--------------|
+| Search | Text filtering | Real-time search across drink names |
+| Type Filter | Cocktail/Mocktail | All, Cocktails, Mocktails buttons |
+| Difficulty Filter | Skill-based | Any, Easy, Medium, Hard, Advanced |
+| Results | Drink grid | Responsive card layout, result count |
+| Drink Cards | Quick preview | Name, tagline, type badge, difficulty |
+
+**Filter Behavior**:
+- Filters combine (AND logic)
+- Real-time updates as user types/clicks
+- "No results" state with helpful message
+
+#### Drink Detail Page (`drink.html`)
+
+Displays complete information for a single drink:
+
+| Section | Purpose | Key Features |
+|---------|---------|--------------|
+| Back Link | Navigation | Returns to Browse page |
+| Header Card | Identity | Name, tagline, type badge, difficulty |
+| Meta Info | Quick facts | Timing, glassware, tags |
+| Ingredients | Recipe items | Amounts, ingredient names |
+| Flavor Profile | Taste visualization | Bar charts for sweet, sour, bitter, etc. |
+| Method | Steps | Numbered instructions |
+
+### Client-Side State Management
+
+```javascript
+// Cabinet persistence (cabinet-state.js)
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       LOCAL STORAGE                                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   cocktail-cache-cabinet: ["bourbon", "gin", "lemons", ...]            │
+│                                                                         │
+│   Functions:                                                            │
+│   • saveCabinet(ingredients[])    → Save to localStorage               │
+│   • loadCabinet()                 → Retrieve from localStorage         │
+│   • clearCabinet()                → Remove from localStorage           │
+│   • getCabinetCount()             → Get ingredient count               │
+│                                                                         │
+│   Events:                                                               │
+│   • 'cabinet-updated'             → Dispatched on save/clear           │
+│   • 'storage'                     → Cross-tab synchronization          │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Styling Approach
+
+- **Tailwind CSS**: Utility-first styling with custom glass morphism effects
+- **Mobile-First**: Responsive breakpoints (sm, md, lg)
+- **Dark Theme**: Stone/amber color palette for bar ambiance
+- **Glass Effects**: Semi-transparent cards with backdrop blur
+
+**Key CSS Classes**:
+- `glass-card`: Semi-transparent card with border and shadow
+- `glass-input`: Styled input with amber focus ring
+- `glass-btn-primary`: Amber gradient button
+- `chat-tab`: Tab navigation styling with active states
 
 ---
 
@@ -880,24 +1045,21 @@ cocktail-cache/
 │   │   └── api.py                # /recommend, /another, /recipe
 │   │
 │   ├── templates/                # Jinja2 templates
-│   │   ├── base.html
-│   │   ├── index.html
-│   │   └── components/
-│   │       ├── cabinet_grid.html
-│   │       ├── recipe_card.html
-│   │       ├── flavor_chart.html
-│   │       ├── skill_selector.html   # Skill level toggle
-│   │       ├── drink_type_toggle.html # Cocktail/Mocktail selector
-│   │       └── history_list.html     # Recently made drinks
+│   │   ├── base.html             # Base layout with Tailwind
+│   │   ├── index.html            # Chat interface with tabs
+│   │   ├── browse.html           # Drink search/filter page
+│   │   ├── drink.html            # Drink detail page
+│   │   └── components/           # Reusable partials
 │   │
 │   └── static/
-│       ├── styles.css
-│       └── htmx.min.js
+│       ├── css/                  # Tailwind styles
+│       └── js/
+│           └── cabinet-state.js  # Cabinet localStorage
 │
 ├── data/                         # Static data files
-│   ├── cocktails.json            # 50 classic cocktail recipes
-│   ├── mocktails.json            # 20+ non-alcoholic recipes
-│   ├── ingredients.json          # Categorized ingredient list
+│   ├── cocktails.json            # 103 cocktail recipes
+│   ├── mocktails.json            # 39 non-alcoholic recipes
+│   ├── ingredients.json          # 180 categorized ingredients
 │   ├── substitutions.json        # Ingredient swap mappings
 │   └── unlock_scores.json        # Pre-computed at build
 │
@@ -941,9 +1103,10 @@ cocktail-cache/
 | `tools/` | One file per tool | Easy to test |
 | `flows/` | One flow file | We only have one flow |
 | `models/` | Pydantic models | Type safety, validation |
-| `data/` | JSON files (cocktails + mocktails) | No database needed |
+| `data/` | JSON files (142 drinks) | No database needed |
 | `tests/features/` | BDD feature files | Executable specs |
-| `templates/components/` | UI partials (skill, history, drink type) | Progressive enhancement |
+| `templates/` | Page templates (index, browse, drink) | Server-rendered, no build step |
+| `static/js/` | Cabinet state management | Vanilla JS, localStorage |
 
 ---
 
@@ -953,11 +1116,11 @@ cocktail-cache/
 
 | Component | Decision | Rationale |
 |-----------|----------|-----------|
-| Database | JSON files | 100 recipes don't need SQLite |
+| Database | JSON files | 142 recipes don't need SQLite |
 | Caching | In-memory dict | Redis is overkill for MVP |
 | Auth | None | Local storage is enough |
 | Crew execution | Sequential | Prove need for parallel first |
-| Frontend | HTMX | No build step, no JS framework |
+| Frontend | Jinja2 + Vanilla JS | No build step, server-rendered with minimal client JS |
 | State | Flow state only | No persistent user state |
 | Hosting | Fly.io | Good free tier, simple deploy |
 
@@ -1061,7 +1224,7 @@ export PARALLEL_CREWS=false
 
 ---
 
-*Document Version: 1.3*
-*Last Updated: 2025-12-27*
+*Document Version: 1.4*
+*Last Updated: 2025-12-28*
 *Principles: KISS + YAGNI*
-*Changes: Added PARALLEL_CREWS config, parallel execution architecture, updated latency estimates*
+*Changes: Added Frontend Architecture section (tabbed navigation, browse page, drink details), updated data counts (142 drinks, 180 ingredients)*
