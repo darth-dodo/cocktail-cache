@@ -66,7 +66,7 @@
 
     {% block head_extra %}{% endblock %}
 </head>
-<body class="h-full bg-gradient-to-br from-stone-950 via-amber-950/40 to-stone-950">
+<body class="{% block body_class %}{% endblock %} bg-gradient-to-br from-stone-950 via-amber-950/40 to-stone-950 min-h-screen">
     <!-- Animated background orbs - warm amber/burgundy tones (clipped to viewport) -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none" style="clip-path: inset(0);" aria-hidden="true">
         <div class="absolute -top-40 -right-40 w-80 h-80 bg-amber-600/15 rounded-full blur-3xl animate-pulse"></div>
@@ -74,19 +74,21 @@
         <div class="absolute -bottom-40 right-1/3 w-72 h-72 bg-rose-900/15 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
     </div>
 
-    <!-- Main content wrapper - full height flex container -->
-    <div class="relative z-10 h-full flex flex-col">
-        <!-- Page content - takes remaining space -->
-        <main class="flex-1 flex flex-col min-h-0">
+    <!-- Main content wrapper -->
+    <div class="relative z-10 {% block layout_class %}{% endblock %}">
+        <!-- Page content -->
+        <main class="{% block main_class %}{% endblock %}">
             {% block content %}{% endblock %}
         </main>
 
-        <!-- Footer - fixed at bottom, minimal -->
-        <footer class="flex-shrink-0 py-1">
+        <!-- Footer -->
+        {% block footer %}
+        <footer class="py-1">
             <div class="text-center">
                 <p class="text-[10px] text-stone-600">Drink responsibly</p>
             </div>
         </footer>
+        {% endblock %}
     </div>
 
     {% block scripts %}{% endblock %}
