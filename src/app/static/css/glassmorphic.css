@@ -20,6 +20,8 @@ body {
     -webkit-overflow-scrolling: touch;
     /* Safe area for iOS notches/home bar */
     padding-bottom: env(safe-area-inset-bottom, 0);
+    /* Prevent zoom gestures */
+    touch-action: pan-x pan-y;
 }
 
 /* Chat/App layout - fixed viewport, internal scrolling */
@@ -470,8 +472,12 @@ html:has(body.page-chat) {
     }
 
     .glass-input,
-    .glass-select {
-        font-size: 16px; /* Prevents zoom on iOS */
+    .glass-select,
+    input,
+    textarea,
+    select {
+        font-size: 16px !important; /* Prevents zoom on iOS - must be 16px+ */
+        touch-action: manipulation; /* Disable double-tap zoom */
     }
 
     .glass-radio-label {
