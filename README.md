@@ -19,16 +19,7 @@
 
 ---
 
-## The Problem
-
-You have guests arriving in an hour. Your bar cabinet has a random assortment of bottles — some gifts, some impulse buys, some half-forgotten. You want to serve something impressive, but you're stuck thinking: *"What can I actually make with this?"*
-
-**Sound familiar?**
-
-- Recipe sites assume you have ingredients you don't
-- Cocktail apps are overwhelming with thousands of drinks
-- You don't know which bottle to buy next
-- You're worried about messing up the technique
+An AI-powered home bar advisor that helps you craft great cocktails with whatever bottles you have. Chat with Raja, your AI mixologist, to get personalized drink recommendations, technique guidance, and smart suggestions for your next bottle purchase.
 
 ---
 
