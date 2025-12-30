@@ -850,9 +850,11 @@ async function sendChatMessage() {
         }
         // If Raja recommended a drink from our database, show a clickable link
         else if (data.recommended_drink_id) {
-            const drinkName = data.drinks_mentioned && data.drinks_mentioned.length > 0
-                ? data.drinks_mentioned[0].name
-                : data.recommended_drink_id;
+            // Find the recommended drink's name from drinks_mentioned
+            // (not just the first mentioned drink - Raja may mention multiple)
+            const recommendedDrink = data.drinks_mentioned?.find(d => d.id === data.recommended_drink_id);
+            const drinkName = recommendedDrink?.name
+                || data.recommended_drink_id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             addDrinkSuggestion(data.recommended_drink_id, drinkName);
         }
 

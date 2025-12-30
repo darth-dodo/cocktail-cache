@@ -26,7 +26,7 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
 ## Meet Raja, Your AI Mixologist
 
 <p align="center">
-  <img src=".playwright-mcp/raja-chat-working.png" alt="Raja Chat Interface" width="300">
+  <img src=".playwright-mcp/chat-full-conversation.png" alt="Raja Chat Interface" width="300">
 </p>
 
 **Raja** is a 20-year bartender veteran from Colaba, Bombay. He knows his craft, tells great stories, and speaks with warmth:
