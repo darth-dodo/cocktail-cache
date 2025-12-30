@@ -15,10 +15,18 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    /* Allow scrolling by default for standalone pages */
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
     /* Safe area for iOS notches/home bar */
     padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Lock body scroll on chat interface (when chat container is present) */
+body:has(.chat-interface-container) {
+    overflow: hidden;
 }
 
 /* Ensure box-sizing is consistent */
