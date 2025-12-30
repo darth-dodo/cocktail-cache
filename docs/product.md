@@ -10,7 +10,7 @@
 
 **Timeline**: 4-6 sessions to Polished MVP
 
-**Current Status**: Session 6 complete with enhanced UX features including browse/search functionality, tabbed navigation, and individual drink detail pages.
+**Current Status**: Session 7 complete with Raja conversational chat interface, enhanced UX features including browse/search functionality, tabbed navigation, and individual drink detail pages.
 
 ---
 
@@ -658,7 +658,7 @@ sequenceDiagram
 
 ## MVP Scope
 
-### Completed (Sessions 1-6)
+### Completed (Sessions 1-7)
 
 | Feature | Session | Status |
 |---------|------|--------|
@@ -680,6 +680,12 @@ sequenceDiagram
 | Tabbed navigation (Chat/Cabinet/Browse) | 6 | Done |
 | Ingredient autocomplete | 6 | Done |
 | Flavor profile visualization | 6 | Done |
+| Raja conversational chat interface | 7 | Done |
+| Raja personality (Hindi phrases, Bombay culture) | 7 | Done |
+| Chat history persistence within session | 7 | Done |
+| Context-aware responses based on cabinet | 7 | Done |
+| Intent detection and mood extraction | 7 | Done |
+| Drink mentions as clickable links | 7 | Done |
 
 ### Out of Scope (Future)
 
@@ -769,6 +775,7 @@ sequenceDiagram
 4. **Session 4**: Integration + "next bottle" logic
 5. **Session 5**: Mobile optimization + Render deployment
 6. **Session 6**: UX improvements - browse/search, tabbed navigation, drink detail pages
+7. **Session 7**: Raja conversational chat interface with Bombay personality
 
 ## Future Enhancements
 
@@ -788,13 +795,13 @@ Raja is now a fully conversational bartender persona from Bombay who users can c
 
 | ID | Requirement | Priority | Status | Notes |
 |----|-------------|----------|--------|-------|
-| FR-14.1 | Conversational chat interface with Raja | P0 | In Progress | Natural language chat replacing structured forms |
-| FR-14.2 | Raja personality from Bombay (Hindi phrases, cultural references) | P0 | In Progress | "Arrey bhai!", Bollywood references, monsoon mentions |
-| FR-14.3 | Chat history persistence within session | P0 | In Progress | In-memory session storage |
-| FR-14.4 | Context-aware responses based on cabinet | P0 | In Progress | Raja knows what user can make |
-| FR-14.5 | Intent detection (recommendation, recipe question, general chat) | P1 | Planned | Route to appropriate response type |
-| FR-14.6 | Mood extraction from conversation | P1 | Planned | Detect mood without explicit form |
-| FR-14.7 | Drink mentions as clickable links | P1 | Planned | Navigate to drink detail pages |
+| FR-14.1 | Conversational chat interface with Raja | P0 | Done | Natural language chat replacing structured forms |
+| FR-14.2 | Raja personality from Bombay (Hindi phrases, cultural references) | P0 | Done | "Arrey bhai!", Bollywood references, monsoon mentions |
+| FR-14.3 | Chat history persistence within session | P0 | Done | In-memory session storage |
+| FR-14.4 | Context-aware responses based on cabinet | P0 | Done | Raja knows what user can make |
+| FR-14.5 | Intent detection (recommendation, recipe question, general chat) | P1 | Done | Route to appropriate response type |
+| FR-14.6 | Mood extraction from conversation | P1 | Done | Detect mood without explicit form |
+| FR-14.7 | Drink mentions as clickable links | P1 | Done | Navigate to drink detail pages |
 | FR-14.8 | Session restoration after page refresh | P2 | Planned | localStorage + API integration |
 
 **Raja's Personality**:
