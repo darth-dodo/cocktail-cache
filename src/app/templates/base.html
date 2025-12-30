@@ -64,6 +64,23 @@
         }
     </script>
 
+    <!-- Mobile viewport height fix for iOS Safari -->
+    <script>
+        // Fix for mobile browser viewport height issues (iOS Safari address bar)
+        function setAppHeight() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+        }
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 100));
+        // Also update on visual viewport resize (keyboard open/close)
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', setAppHeight);
+        }
+    </script>
+
     {% block head_extra %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %} bg-gradient-to-br from-stone-950 via-amber-950/40 to-stone-950 min-h-screen">
