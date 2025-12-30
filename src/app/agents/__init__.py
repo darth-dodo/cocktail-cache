@@ -21,6 +21,7 @@ from src.app.agents.cabinet_analyst import create_cabinet_analyst
 from src.app.agents.drink_recommender import create_drink_recommender
 from src.app.agents.llm_config import get_default_llm, get_llm
 from src.app.agents.mood_matcher import create_mood_matcher
+from src.app.agents.raja_bartender import create_raja_bartender
 from src.app.agents.recipe_writer import create_recipe_writer
 
 __all__ = [
@@ -31,6 +32,7 @@ __all__ = [
     "create_recipe_writer",
     "create_bottle_advisor",
     "create_bar_growth_advisor",
+    "create_raja_bartender",
     # LLM configuration
     "get_default_llm",
     "get_llm",

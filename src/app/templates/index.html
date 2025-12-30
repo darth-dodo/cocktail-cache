@@ -250,6 +250,7 @@
 const state = {
     step: 'welcome',
     sessionId: null,
+    chatSessionId: null,
     cabinet: [],
     mood: '',
     skillLevel: 'intermediate',
@@ -564,9 +565,9 @@ function renderCabinetPanel() {
         if (state.step === 'cabinet' || state.step === 'welcome' || state.step === 'quickstart') {
             // Clear old messages and refresh with current cabinet count
             chatMessages.innerHTML = '';
-            addBotMessage("Hey! I'm Raja, your AI mixologist. Let's find your perfect drink.");
+            addBotMessage("Arrey, welcome! I'm Raja, your Bombay bartender. Been mixing drinks for 35 years - learned my craft from the best in the business! ⚠️ Just a note, yaar - I'm an AI, so please double-check any recipes with reliable sources! :)");
             setTimeout(() => {
-                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up?`);
+                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up, or just want to chat?`);
                 showQuickStartInput();
             }, 300);
         }
@@ -680,6 +681,7 @@ function setupPanelSearch() {
 function resetChat(clearSavedCabinet = false) {
     state.step = 'welcome';
     state.sessionId = null;
+    state.chatSessionId = null;
     if (clearSavedCabinet) {
         state.cabinet = [];
         clearCabinet();
@@ -756,17 +758,119 @@ function initCollapsibles(container) {
     });
 }
 
+// Raja Chat Functions
+function showChatInput() {
+    inputArea.innerHTML = `
+        <div class="flex gap-2">
+            <input type="text" id="chat-input"
+                   class="glass-input flex-1 text-sm py-2.5"
+                   placeholder="Ask Raja anything about cocktails..."
+                   autocomplete="off">
+            <button id="chat-send-btn" class="btn glass-btn-primary px-4">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+
+    sendBtn.addEventListener('click', sendChatMessage);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+
+    input.focus();
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    if (!message) return;
+
+    input.value = '';
+    input.disabled = true;
+
+    addUserMessage(message);
+    addTypingIndicator();
+
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: state.chatSessionId || null,
+                message: message,
+                cabinet: state.cabinet,
+                skill_level: state.skillLevel,
+                drink_type: state.drinkType
+            })
+        });
+
+        const data = await response.json();
+        removeTypingIndicator();
+
+        state.chatSessionId = data.session_id;
+
+        // Add Raja's response
+        addBotMessage(data.content);
+
+        // If Raja recommended a drink, show a clickable link
+        if (data.recommended_drink_id) {
+            const drinkName = data.drinks_mentioned && data.drinks_mentioned.length > 0
+                ? data.drinks_mentioned[0].name
+                : data.recommended_drink_id;
+            addDrinkSuggestion(data.recommended_drink_id, drinkName);
+        }
+
+    } catch (error) {
+        removeTypingIndicator();
+        addBotMessage("Arrey, something went wrong! Let me try again, yaar.");
+    }
+
+    input.disabled = false;
+    input.focus();
+    showChatInput();
+}
+
+function addDrinkSuggestion(drinkId, drinkName) {
+    const div = document.createElement('div');
+    div.className = 'flex gap-2 sm:gap-3 animate-fade-in mt-2';
+    div.innerHTML = `
+        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8"></div>
+        <a href="/drinks/${drinkId}" class="glass-card p-3 hover:bg-amber-600/10 transition-all flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-full bg-amber-600/20 flex items-center justify-center">
+                <span class="text-lg">&#127864;</span>
+            </div>
+            <div class="flex-1">
+                <p class="text-amber-300 font-medium group-hover:text-amber-200">${drinkName}</p>
+                <p class="text-stone-500 text-xs">Tap to view recipe</p>
+            </div>
+            <svg class="w-5 h-5 text-stone-500 group-hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    `;
+    chatMessages.appendChild(div);
+    scrollToBottom();
+}
+
 // Step handlers
 function showWelcome() {
     setTimeout(() => {
-        addBotMessage("Hey! I'm Raja, your AI mixologist. Let's find your perfect drink.");
+        addBotMessage("Arrey, welcome! I'm Raja, your Bombay bartender. Been mixing drinks for 35 years - learned my craft from the best in the business! Ask me anything about cocktails, yaar! ⚠️ Just a note - I'm an AI assistant, so please verify recipes with reliable sources!");
         setTimeout(() => {
             if (state.cabinet.length > 0) {
-                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up?`);
+                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up, or just want to chat?`);
                 showQuickStartInput();
             } else {
-                addBotMessage("First, let's see what you're working with. Tap the Cabinet tab above to add your ingredients!");
-                showCabinetInput();
+                addBotMessage("You can ask me anything about cocktails, or tap the Cabinet tab to tell me what ingredients you have!");
+                showChatInput();
             }
         }, 600);
     }, 300);
@@ -777,12 +881,20 @@ function showQuickStartInput() {
 
     inputArea.innerHTML = `
         <div class="space-y-2">
-            <button id="use-cabinet-btn" class="btn glass-btn-primary w-full gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-                Mix with my ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}
-            </button>
+            <div class="flex gap-2">
+                <button id="use-cabinet-btn" class="btn glass-btn-primary flex-1 gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                    Mix with my ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''}
+                </button>
+                <button id="just-chat-btn" class="btn glass-btn-secondary flex-1 gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Just chat
+                </button>
+            </div>
             <div class="flex gap-2">
                 <button id="edit-cabinet-btn" class="btn btn-sm glass-btn-ghost flex-1 text-xs">
                     Edit Cabinet
@@ -796,6 +908,14 @@ function showQuickStartInput() {
 
     document.getElementById('use-cabinet-btn').addEventListener('click', () => {
         onCabinetDone();
+    });
+
+    document.getElementById('just-chat-btn').addEventListener('click', () => {
+        addUserMessage("I just want to chat");
+        setTimeout(() => {
+            addBotMessage("Bilkul, yaar! Ask me anything - about cocktails, techniques, ingredients, or what drink would suit your mood. I'm all ears!");
+            showChatInput();
+        }, 400);
     });
 
     document.getElementById('edit-cabinet-btn').addEventListener('click', () => {
@@ -816,23 +936,47 @@ function showQuickStartInput() {
 function showCabinetInput() {
     state.step = 'cabinet';
 
-    // Simple input area - just a button to go to Cabinet tab
+    // Chat input with option to go to cabinet
     inputArea.innerHTML = `
         <div class="space-y-2">
-            <button id="go-to-cabinet-btn" class="btn glass-btn-primary w-full gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex gap-2">
+                <input type="text" id="chat-input"
+                       class="glass-input flex-1 text-sm py-2.5"
+                       placeholder="Ask Raja anything about cocktails..."
+                       autocomplete="off">
+                <button id="chat-send-btn" class="btn glass-btn-primary px-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </button>
+            </div>
+            <button id="go-to-cabinet-btn" class="btn btn-sm glass-btn-ghost w-full gap-2 text-xs">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                 </svg>
-                Open Cabinet
+                Or add ingredients to my cabinet
             </button>
         </div>
     `;
+
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+
+    sendBtn.addEventListener('click', sendChatMessage);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
 
     document.getElementById('go-to-cabinet-btn').addEventListener('click', () => {
         if (window.TabManager) {
             window.TabManager.switchTo('cabinet');
         }
     });
+
+    input.focus();
 }
 
 function updateCabinetButton() {
