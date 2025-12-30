@@ -252,6 +252,7 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', path='js/cabinet-state.js') }}"></script>
+<script src="{{ url_for('static', path='js/chat-state.js') }}"></script>
 <script src="{{ url_for('static', path='js/tab-manager.js') }}"></script>
 <script src="{{ url_for('static', path='js/browse-panel.js') }}"></script>
 <script src="{{ url_for('static', path='js/suggest-panel.js') }}"></script>
@@ -343,7 +344,18 @@ async function init() {
     window.addEventListener('tab-changed', handleTabChange);
     // Update cabinet count badge
     updateCabinetCount();
-    showWelcome();
+
+    // Restore chat state from sessionStorage if available
+    const { messagesHtml, sessionId } = loadChatState();
+    if (messagesHtml && messagesHtml.length > 0) {
+        chatMessages.innerHTML = messagesHtml;
+        state.chatSessionId = sessionId;
+        state.step = 'chatting';
+        showChatInput();
+        scrollToBottom();
+    } else {
+        showWelcome();
+    }
 }
 
 // Handle tab changes from TabManager
@@ -701,6 +713,8 @@ function resetChat(clearSavedCabinet = false) {
     state.skillLevel = 'intermediate';
     state.drinkType = 'both';
     chatMessages.innerHTML = '';
+    // Clear saved chat state
+    clearChatState();
     showWelcome();
 }
 
@@ -830,11 +844,17 @@ async function sendChatMessage() {
         // Add Raja's response
         addBotMessage(data.content);
 
-        // If Raja recommended a drink, show a clickable link
-        if (data.recommended_drink_id) {
-            const drinkName = data.drinks_mentioned && data.drinks_mentioned.length > 0
-                ? data.drinks_mentioned[0].name
-                : data.recommended_drink_id;
+        // If Raja provided a special recipe (drink not in our database)
+        if (data.special_recipe) {
+            addSpecialRecipe(data.special_recipe);
+        }
+        // If Raja recommended a drink from our database, show a clickable link
+        else if (data.recommended_drink_id) {
+            // Find the recommended drink's name from drinks_mentioned
+            // (not just the first mentioned drink - Raja may mention multiple)
+            const recommendedDrink = data.drinks_mentioned?.find(d => d.id === data.recommended_drink_id);
+            const drinkName = recommendedDrink?.name
+                || data.recommended_drink_id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             addDrinkSuggestion(data.recommended_drink_id, drinkName);
         }
 
@@ -842,6 +862,9 @@ async function sendChatMessage() {
         removeTypingIndicator();
         addBotMessage("Arrey, something went wrong! Let me try again, yaar.");
     }
+
+    // Save chat state after each interaction
+    saveChatState(chatMessages.innerHTML, state.chatSessionId);
 
     input.disabled = false;
     input.focus();
@@ -870,6 +893,62 @@ function addDrinkSuggestion(drinkId, drinkName) {
     scrollToBottom();
 }
 
+function addSpecialRecipe(recipe) {
+    // This is Raja's special from memory - a drink not in our database
+    const div = document.createElement('div');
+    div.className = 'flex gap-2 sm:gap-3 animate-fade-in mt-3';
+
+    const ingredientsList = recipe.ingredients.map(ing => `<li class="text-stone-300">${ing}</li>`).join('');
+    const methodList = recipe.method.map((step, i) => `<li class="text-stone-300"><span class="text-amber-500 font-medium">${i + 1}.</span> ${step}</li>`).join('');
+
+    div.innerHTML = `
+        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8"></div>
+        <div class="glass-card p-4 flex-1 border border-amber-600/30">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-2xl">✨</span>
+                <div>
+                    <p class="text-amber-300 font-bold text-lg">${recipe.name}</p>
+                    <p class="text-amber-500/70 text-xs font-medium">Raja's Special from Memory</p>
+                </div>
+            </div>
+            ${recipe.tagline ? `<p class="text-stone-400 text-sm italic mb-3">"${recipe.tagline}"</p>` : ''}
+
+            <div class="space-y-3">
+                <div>
+                    <p class="text-amber-400 font-semibold text-sm mb-1">Ingredients</p>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        ${ingredientsList}
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="text-amber-400 font-semibold text-sm mb-1">Method</p>
+                    <ol class="text-sm space-y-1">
+                        ${methodList}
+                    </ol>
+                </div>
+
+                ${recipe.glassware || recipe.garnish ? `
+                <div class="flex gap-4 text-sm">
+                    ${recipe.glassware ? `<div><span class="text-amber-400">Glass:</span> <span class="text-stone-300">${recipe.glassware}</span></div>` : ''}
+                    ${recipe.garnish ? `<div><span class="text-amber-400">Garnish:</span> <span class="text-stone-300">${recipe.garnish}</span></div>` : ''}
+                </div>
+                ` : ''}
+
+                ${recipe.tip ? `
+                <div class="bg-amber-900/20 rounded-lg p-3 mt-2">
+                    <p class="text-amber-200 text-sm"><span class="font-semibold">💡 Raja's Tip:</span> ${recipe.tip}</p>
+                </div>
+                ` : ''}
+            </div>
+
+            <p class="text-stone-500 text-xs mt-3 italic">This drink is not in our collection - recipe from Raja's memory</p>
+        </div>
+    `;
+    chatMessages.appendChild(div);
+    scrollToBottom();
+}
+
 // Step handlers
 function showWelcome() {
     setTimeout(() => {
@@ -882,6 +961,8 @@ function showWelcome() {
                 addBotMessage("Ask me anything about cocktails, or check the Cabinet tab to tell me what you have!");
                 showChatInput();
             }
+            // Save initial welcome state
+            saveChatState(chatMessages.innerHTML, state.chatSessionId);
         }, 600);
     }, 300);
 }

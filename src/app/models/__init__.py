@@ -11,6 +11,7 @@ from src.app.models.chat import (
     MessageIntent,
     MessageRole,
     RajaChatOutput,
+    SpecialRecipe,
 )
 from src.app.models.cocktail import CocktailMatch
 from src.app.models.config import AgentConfig, LLMConfig, TaskConfig
@@ -55,6 +56,7 @@ __all__ = [
     "MessageIntent",
     "MessageRole",
     "RajaChatOutput",
+    "SpecialRecipe",
     # Config Models
     "AgentConfig",
     "LLMConfig",

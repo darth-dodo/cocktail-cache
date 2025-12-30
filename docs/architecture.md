@@ -21,7 +21,7 @@
 
 ## Implementation Status
 
-> **Current Phase**: Session 6 UX Improvements Complete
+> **Current Phase**: Session 8 Chat Improvements & Unit Toggle Complete
 
 ### Completed Components
 
@@ -39,11 +39,14 @@
 | API Routes | ✅ Complete | FastAPI endpoints for recommendations |
 | Rate Limiting | ✅ Complete | SlowAPI with tiered limits (LLM/compute/static) |
 | Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
+| Chat Persistence | ✅ Complete | sessionStorage for chat history across tab navigation |
 | Tabbed Navigation | ✅ Complete | Chat/Cabinet/Browse tabs in unified header |
 | Browse Page | ✅ Complete | Search, filter by type/difficulty, drink detail pages |
 | Cabinet Panel | ✅ Complete | Ingredient management with autocomplete and categories |
+| Unit Toggle | ✅ Complete | oz/ml conversion with localStorage preference |
+| Error Pages | ✅ Complete | Custom 404/500 pages matching app theme |
 | Deployment | ✅ Complete | Render.com with GitHub Actions CI/CD |
-| Unit Tests | ✅ Complete | 339 tests passing with 87% coverage |
+| Unit Tests | ✅ Complete | 751 tests passing with 78% coverage |
 
 ### Data Files Summary
 

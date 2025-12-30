@@ -2,15 +2,26 @@
 
 > **⚠️ SINGLE SOURCE OF TRUTH**: This file is the authoritative reference for all implementation tasks, session progress, and feature status. All agents should read, reference, and update this file.
 
-> **Status**: Session 7 Complete - Raja Conversational Chat Interface
+> **Status**: Session 8 Complete - Chat Improvements & Unit Toggle
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI -> UX Polish
 >
-> **Test Coverage**: 339 tests passing, 87% coverage
+> **Test Coverage**: 751 tests passing, 78% coverage
 >
 > **Live Demo**: https://cocktail-cache.onrender.com | **GitHub**: https://github.com/darth-dodo/cocktail-cache
 
-## Recent Changes (Session 7 - Raja Conversational Chat)
+## Recent Changes (Session 8 - Chat Improvements & Unit Toggle)
+
+- **oz/ml Unit Toggle**: Drink detail page now has toggle to switch between imperial (oz) and metric (ml) measurements
+- **Unit Preference Persistence**: User's unit preference saved to localStorage across sessions
+- **Clean Rounding**: Converts to nearest 5ml for practical measurements (2 oz → 60 ml)
+- **Chat Persistence**: Conversation history maintained in sessionStorage when navigating between tabs
+- **Drink Name Fix**: Recommendation cards now display correct drink name (not first mentioned drink)
+- **404/500 Error Pages**: Custom styled error pages matching app theme
+- **Drink ID Validation**: Prevents crashes from invalid drink IDs in URLs
+- **Test Suite Expansion**: 751 tests passing (up from 339)
+
+## Previous Changes (Session 7 - Raja Conversational Chat)
 
 - **Raja Chat Interface**: Conversational AI bartender persona from Bombay
 - **Hindi Phrases**: Natural use of "Arrey bhai!", "Ekdum first class!", "Kya baat hai!"
@@ -689,6 +700,74 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
+## Session 8: Chat Improvements & Unit Toggle (COMPLETE)
+
+### Phase 8.1: Error Pages ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Create `src/app/templates/404.html` - Custom 404 error page
+- [x] Create `src/app/templates/500.html` - Custom 500 error page
+- [x] Style error pages to match app theme (dark, glass-morphism)
+- [x] Add helpful navigation links on error pages
+- [x] Register custom exception handlers in FastAPI
+
+### Phase 8.2: Chat Persistence ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Create `src/app/static/js/chat-state.js` for chat state management
+- [x] Store chat messages in sessionStorage (clears on browser close)
+- [x] Preserve session ID for API continuity
+- [x] Restore chat history when navigating between tabs
+- [x] Clear chat state functionality
+
+### Phase 8.3: Drink Name Fix ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Fix recommendation card showing wrong drink name
+- [x] Match recommended drink by ID instead of using first mentioned drink
+- [x] Handle edge case when drink not found in mentions array
+
+### Phase 8.4: Unit Toggle ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Add oz/ml toggle button to drink detail page ingredients section
+- [x] Implement conversion logic (1 oz ≈ 30 ml, rounded to nearest 5ml)
+- [x] Store user preference in localStorage
+- [x] Re-render ingredients on toggle without page reload
+- [x] Non-convertible units (dashes, pieces) remain unchanged
+- [x] Visual feedback showing active unit
+
+### Phase 8.5: Drink ID Validation ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Validate drink IDs before API calls
+- [x] Handle invalid drink IDs gracefully
+- [x] Return proper 404 for non-existent drinks
+
+### Phase 8.6: Test Suite Expansion ✅ COMPLETE
+
+**Status**: COMPLETE
+
+- [x] Add tests for 404/500 error pages
+- [x] Add tests for drink ID validation
+- [x] Expand test coverage to 751 tests
+
+### Session 8 Quality Gate: PASSED ✅
+
+- [x] Unit toggle works correctly (oz ↔ ml)
+- [x] User preference persists across page loads
+- [x] Chat history preserved when switching tabs
+- [x] Correct drink name displayed in recommendation cards
+- [x] Custom error pages display properly
+- [x] 751 tests passing
+
+---
+
 ## Session Log Template
 
 ```markdown
@@ -729,6 +808,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Session 5 | UI Complete | Mobile responsive, deployed to Render | PASSED |
 | Session 6 | UX Polish | Navigation, discovery, browse, drink details | PASSED |
 | Session 7 | Raja Chat | Conversational AI bartender with Bombay personality | PASSED |
+| Session 8 | Chat & UX | Unit toggle, error pages, chat persistence (751 tests) | PASSED |
 
 ### Session 6 UX Progress
 
@@ -740,7 +820,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Cabinet Panel | ✅ Complete | P0 |
 | Ingredient Autocomplete | ✅ Complete | P1 |
 | Data Expansion (142 drinks) | ✅ Complete | P1 |
-| Error States & Fallbacks | ⏳ Pending | P1 |
+| Error States & Fallbacks | ✅ Complete | P1 |
 | Loading Skeletons | ⏳ Pending | P2 |
 | Made-it History | ⏳ Pending | P2 |
 | Accessibility Audit | ⏳ Pending | P2 |
@@ -757,7 +837,20 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Intent detection | ✅ Complete | P1 |
 | Mood extraction from conversation | ✅ Complete | P1 |
 | Drink mentions as clickable links | ✅ Complete | P1 |
-| Session restoration (localStorage) | ⏳ Pending | P2 |
+| Session restoration (localStorage) | ✅ Complete | P0 |
+
+### Session 8 Chat & UX Progress
+
+| Feature | Status | Priority |
+|---------|--------|----------|
+| oz/ml unit toggle | ✅ Complete | P1 |
+| Unit preference persistence | ✅ Complete | P1 |
+| Chat tab persistence (sessionStorage) | ✅ Complete | P1 |
+| Correct drink name in recommendations | ✅ Complete | P0 |
+| Custom 404 error page | ✅ Complete | P1 |
+| Custom 500 error page | ✅ Complete | P1 |
+| Drink ID validation | ✅ Complete | P1 |
+| Test suite expansion (751 tests) | ✅ Complete | P0 |
 
 ---
 
@@ -768,7 +861,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Time to recommendation | <8s | ~5s (fast mode) | Single-agent analysis |
 | Cost per request | <$0.10 | ~$0.05 | 2-3 LLM calls in fast mode |
 | Mobile Lighthouse | 90+ | TBD | Vanilla JS, minimal deps |
-| Test coverage | 70%+ | 87% | 339 tests passing |
+| Test coverage | 70%+ | 78% | 751 tests passing |
 | LLM calls per request | 4 | 2-3 | Fast mode default |
 | Drinks in catalog | 100+ | 142 | Expanded dataset |
 | Browse page load | <1s | TBD | JSON API response |
@@ -778,8 +871,8 @@ ANTHROPIC_API_KEY=sk-ant-...
 ## Next Priority Tasks
 
 ### High Priority (P1)
-1. **Error States**: Add user-friendly error handling for empty cabinet, no matches, API failures
-2. **Loading Skeletons**: Replace bounce animations with skeleton screens for perceived performance
+1. **Loading Skeletons**: Replace bounce animations with skeleton screens for perceived performance
+2. **Empty State Handling**: Better UX for empty cabinet, no matches scenarios
 
 ### Medium Priority (P2)
 3. **Made-it History**: Track drinks made with localStorage, show count badge

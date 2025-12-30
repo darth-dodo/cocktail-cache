@@ -868,13 +868,16 @@ class TestPageRoutes:
         # Should be 404 because page route is singular /drink/
         assert response.status_code == 404
 
-    def test_drink_page_renders_for_any_id(self, api_client: TestClient):
-        """Drink page renders for any ID (404 handled client-side via API)."""
+    def test_drink_page_returns_404_for_nonexistent_drink(self, api_client: TestClient):
+        """Drink page returns 404 for non-existent drink with custom error page."""
         response = api_client.get("/drink/nonexistent-drink-xyz")
 
-        # Page route always renders, API call handles 404
-        assert response.status_code == 200
+        # Page route validates drink ID and returns 404 for invalid drinks
+        assert response.status_code == 404
         assert "text/html" in response.headers.get("content-type", "")
+        # Custom 404 page should contain Raja's message
+        assert "404" in response.text
+        assert "Collection" in response.text or "not found" in response.text.lower()
 
     def test_api_drinks_uses_plural(self, api_client: TestClient):
         """API endpoint uses plural /api/drinks/{id}."""
@@ -882,3 +885,50 @@ class TestPageRoutes:
 
         assert response.status_code == 200
         assert "application/json" in response.headers.get("content-type", "")
+
+
+# =============================================================================
+# Error Page Tests
+# =============================================================================
+
+
+class TestErrorPages:
+    """Tests for custom 404 and 500 error pages."""
+
+    def test_404_page_for_unknown_drink(self, api_client: TestClient):
+        """404 page shows for unknown drink routes."""
+        response = api_client.get("/drink/unknown-drink-xyz")
+
+        assert response.status_code == 404
+        assert "text/html" in response.headers.get("content-type", "")
+        assert "404" in response.text
+
+    def test_404_page_includes_drink_id(self, api_client: TestClient):
+        """404 page includes the requested drink ID in the message."""
+        response = api_client.get("/drink/my-custom-drink")
+
+        assert response.status_code == 404
+        assert "my-custom-drink" in response.text
+
+    def test_404_page_has_navigation_links(self, api_client: TestClient):
+        """404 page includes navigation links to browse and home."""
+        response = api_client.get("/drink/unknown-xyz")
+
+        assert response.status_code == 404
+        assert "/browse" in response.text or "Browse" in response.text
+        assert "Go Back" in response.text or "history.back" in response.text
+
+    def test_api_404_returns_json(self, api_client: TestClient):
+        """API routes return JSON 404 errors, not HTML pages."""
+        response = api_client.get("/api/drinks/nonexistent-drink")
+
+        assert response.status_code == 404
+        assert "application/json" in response.headers.get("content-type", "")
+        data = response.json()
+        assert "detail" in data
+
+    def test_unknown_page_route_returns_404(self, api_client: TestClient):
+        """Unknown page routes return 404."""
+        response = api_client.get("/unknown-page-xyz")
+
+        assert response.status_code == 404

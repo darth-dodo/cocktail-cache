@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/badge/GitHub-darth--dodo%2Fcocktail--cache-blue?logo=github" alt="GitHub">
   </a>
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
-  <img src="https://img.shields.io/badge/Tests-714_passing-brightgreen?logo=pytest" alt="Tests: 714 passing">
+  <img src="https://img.shields.io/badge/Tests-751_passing-brightgreen?logo=pytest" alt="Tests: 751 passing">
   <img src="https://img.shields.io/badge/Coverage-78%25-green?logo=codecov" alt="Coverage: 78%">
 </p>
 
@@ -26,7 +26,7 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
 ## Meet Raja, Your AI Mixologist
 
 <p align="center">
-  <img src=".playwright-mcp/raja-chat-working.png" alt="Raja Chat Interface" width="300">
+  <img src=".playwright-mcp/chat-full-conversation.png" alt="Raja Chat Interface" width="300">
 </p>
 
 **Raja** is a 20-year bartender veteran from Colaba, Bombay. He knows his craft, tells great stories, and speaks with warmth:
@@ -43,7 +43,7 @@ Just tell Raja what you have and how you're feeling. He'll find the perfect drin
 Add your bottles to your cabinet — spirits, mixers, bitters, fresh ingredients. Your cabinet is saved automatically.
 
 ### 2. Describe Your Mood
-"Celebrating a promotion" • "Quiet evening alone" • "Impressing a date" • "Sunday afternoon vibes"
+"Celebrating a promotion" • "Quiet evening alone" • "Cocktail nights with friends" • "Sunday afternoon vibes"
 
 ### 3. Get Your Perfect Drink
 Raja recommends drinks you can actually make, with step-by-step instructions adapted to your skill level.

@@ -10,7 +10,7 @@
 
 **Timeline**: 4-6 sessions to Polished MVP
 
-**Current Status**: Session 7 complete with Raja conversational chat interface, enhanced UX features including browse/search functionality, tabbed navigation, and individual drink detail pages.
+**Current Status**: Session 8 complete with oz/ml unit toggle, chat persistence, custom error pages, and 751 tests. Previous sessions delivered Raja conversational chat interface, browse/search functionality, tabbed navigation, and individual drink detail pages.
 
 ---
 
@@ -168,16 +168,16 @@ So that I can make informed choices.
 
 ### FR-4: Recipe Display
 
-| ID | Requirement | Priority | Notes |
-|----|-------------|----------|-------|
-| FR-4.1 | Ingredient list with exact amounts | P0 | oz or ml toggle |
-| FR-4.2 | Step-by-step method | P0 | Numbered, clear actions |
-| FR-4.3 | Technique tips per step | P0 | "How to know when it's shaken enough" |
-| FR-4.4 | Prep steps (e.g., honey syrup) | P1 | Make-ahead instructions |
-| FR-4.5 | Timing and difficulty indicator | P1 | "3 minutes, Easy" |
-| FR-4.6 | Garnish instructions | P1 | What to use, how to apply |
-| FR-4.7 | Skill-adapted instructions | P0 | Beginner gets more detail, advanced gets concise |
-| FR-4.8 | Mocktail badge | P0 | Clear visual indicator for non-alcoholic drinks |
+| ID | Requirement | Priority | Status | Notes |
+|----|-------------|----------|--------|-------|
+| FR-4.1 | Ingredient list with exact amounts | P0 | Done | oz/ml toggle with localStorage persistence |
+| FR-4.2 | Step-by-step method | P0 | Done | Numbered, clear actions |
+| FR-4.3 | Technique tips per step | P0 | Done | "How to know when it's shaken enough" |
+| FR-4.4 | Prep steps (e.g., honey syrup) | P1 | Planned | Make-ahead instructions |
+| FR-4.5 | Timing and difficulty indicator | P1 | Done | "3 minutes, Easy" |
+| FR-4.6 | Garnish instructions | P1 | Done | What to use, how to apply |
+| FR-4.7 | Skill-adapted instructions | P0 | Done | Beginner gets more detail, advanced gets concise |
+| FR-4.8 | Mocktail badge | P0 | Done | Clear visual indicator for non-alcoholic drinks |
 
 ### FR-5: Substitutions
 

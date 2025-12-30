@@ -3,13 +3,17 @@
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.app.config import get_settings
 from src.app.routers import api_router
+from src.app.services.data_loader import load_all_drinks
 
 # Application paths
 APP_DIR = Path(__file__).parent
@@ -87,7 +91,17 @@ async def drink_detail(request: Request, drink_id: str) -> HTMLResponse:
 
     Returns:
         HTMLResponse with the drink detail template.
+
+    Raises:
+        HTTPException: If drink is not found.
     """
+    # Validate drink exists before rendering page
+    all_drinks = load_all_drinks()
+    drink_ids = {d.id for d in all_drinks}
+
+    if drink_id not in drink_ids:
+        raise HTTPException(status_code=404, detail=f"Drink not found: {drink_id}")
+
     return templates.TemplateResponse(
         request=request,
         name="drink.html",
@@ -101,4 +115,57 @@ async def suggest_bottle_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="suggest-bottle.html",
+    )
+
+
+# Custom exception handlers for HTML pages
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+) -> Response:
+    """Custom HTTP exception handler with Raja's personality for 404 and 500 errors."""
+    # For API routes, return JSON
+    if request.url.path.startswith("/api/"):
+        return await http_exception_handler(request, exc)
+
+    # Handle 404 errors with custom page
+    if exc.status_code == 404:
+        # Extract drink_id if this was a drink page request
+        drink_id = None
+        if request.url.path.startswith("/drink/"):
+            drink_id = request.url.path.replace("/drink/", "")
+
+        return templates.TemplateResponse(
+            request=request,
+            name="404.html",
+            context={"drink_id": drink_id},
+            status_code=404,
+        )
+
+    # Handle 500 errors with custom page
+    if exc.status_code == 500:
+        return templates.TemplateResponse(
+            request=request,
+            name="500.html",
+            status_code=500,
+        )
+
+    # Default handler for other HTTP errors
+    return await http_exception_handler(request, exc)
+
+
+@app.exception_handler(Exception)
+async def custom_exception_handler(request: Request, exc: Exception) -> Response:
+    """Custom exception handler for unhandled exceptions (500 errors)."""
+    # For API routes, return JSON
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"},
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="500.html",
+        status_code=500,
     )

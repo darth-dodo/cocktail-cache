@@ -155,6 +155,20 @@ class DrinkReference(BaseModel):
     )
 
 
+class SpecialRecipe(BaseModel):
+    """A recipe for a drink not in our database - Raja's special from memory."""
+
+    name: str = Field(..., description="Name of the drink")
+    tagline: str = Field(default="", description="Short description of the drink")
+    ingredients: list[str] = Field(
+        ..., description="List of ingredients with amounts (e.g., '2 oz bourbon')"
+    )
+    method: list[str] = Field(..., description="Step-by-step preparation instructions")
+    glassware: str = Field(default="", description="Recommended glass type")
+    garnish: str = Field(default="", description="Garnish suggestion")
+    tip: str = Field(default="", description="Raja's personal tip for this drink")
+
+
 class ChatResponse(BaseModel):
     """Response from Raja in the chat."""
 
@@ -183,6 +197,12 @@ class ChatResponse(BaseModel):
         default=None, description="ID of recommended drink if any"
     )
 
+    # For special recipes not in our database
+    special_recipe: SpecialRecipe | None = Field(
+        default=None,
+        description="Full recipe for a drink NOT in our database - Raja's special",
+    )
+
 
 class RajaChatOutput(BaseModel):
     """Structured output from the Raja chat agent task."""
@@ -208,4 +228,8 @@ class RajaChatOutput(BaseModel):
     )
     suggested_follow_up: str | None = Field(
         default=None, description="Suggested topic for continuing conversation"
+    )
+    special_recipe: SpecialRecipe | None = Field(
+        default=None,
+        description="Full recipe for a drink NOT in our database - Raja's special from memory",
     )
