@@ -2,8 +2,11 @@
 
 {% block title %}Loading... - Cocktail Cache{% endblock %}
 
+{# Standalone page - uses natural scrolling (default body behavior) #}
+{% block main_class %}py-6{% endblock %}
+
 {% block content %}
-<div class="max-w-3xl mx-auto px-2 sm:px-4">
+<div class="max-w-3xl mx-auto px-2 sm:px-4 pb-8">
     <!-- Back Link -->
     <a href="/browse" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 mb-6 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
