@@ -844,3 +844,41 @@ class TestResponseSchemas:
         expected_fields = required_fields | optional_fields
 
         assert set(data.keys()) == expected_fields
+
+
+# =============================================================================
+# Page Route Tests
+# =============================================================================
+
+
+class TestPageRoutes:
+    """Tests for HTML page routes to ensure URL consistency."""
+
+    def test_drink_page_singular_route(self, api_client: TestClient):
+        """Drink detail page uses singular /drink/{id} route."""
+        response = api_client.get("/drink/old-fashioned")
+
+        assert response.status_code == 200
+        assert "text/html" in response.headers.get("content-type", "")
+
+    def test_drinks_plural_route_is_404(self, api_client: TestClient):
+        """Plural /drinks/{id} route returns 404 (API uses /api/drinks)."""
+        response = api_client.get("/drinks/old-fashioned")
+
+        # Should be 404 because page route is singular /drink/
+        assert response.status_code == 404
+
+    def test_drink_page_renders_for_any_id(self, api_client: TestClient):
+        """Drink page renders for any ID (404 handled client-side via API)."""
+        response = api_client.get("/drink/nonexistent-drink-xyz")
+
+        # Page route always renders, API call handles 404
+        assert response.status_code == 200
+        assert "text/html" in response.headers.get("content-type", "")
+
+    def test_api_drinks_uses_plural(self, api_client: TestClient):
+        """API endpoint uses plural /api/drinks/{id}."""
+        response = api_client.get("/api/drinks/old-fashioned")
+
+        assert response.status_code == 200
+        assert "application/json" in response.headers.get("content-type", "")
