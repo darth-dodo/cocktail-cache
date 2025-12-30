@@ -158,6 +158,12 @@ def _get_drink_by_id(drink_id: str) -> dict | None:
     return None
 
 
+def _get_all_drink_ids() -> set[str]:
+    """Get a set of all drink IDs in our database."""
+    all_drinks = load_all_drinks()
+    return {drink.id for drink in all_drinks}
+
+
 def create_raja_chat_crew(session: ChatSession, user_message: str) -> Crew:
     """Create the Raja Chat Crew for conversational interactions.
 
@@ -192,6 +198,10 @@ def create_raja_chat_crew(session: ChatSession, user_message: str) -> Crew:
     # Format conversation history
     history_text = session.history.format_for_prompt(last_n=8)
 
+    # Get all drink IDs from our database for validation
+    all_drink_ids = _get_all_drink_ids()
+    drink_ids_sample = sorted(all_drink_ids)[:50]  # Sample for prompt context
+
     # Build the chat task
     chat_task = Task(
         description=f"""You are Raja, responding to a customer in your bar. Stay in character!
@@ -208,6 +218,9 @@ CUSTOMER'S BAR CABINET:
 DRINKS THEY CAN MAKE:
 {available_drinks_text}
 
+OUR DRINK DATABASE (sample of {len(all_drink_ids)} drinks):
+{", ".join(drink_ids_sample)}{"..." if len(all_drink_ids) > 50 else ""}
+
 CUSTOMER INFO:
 - Skill Level: {session.skill_level}
 - Drink Preference: {session.drink_type_preference}
@@ -221,9 +234,15 @@ INSTRUCTIONS:
 5. Be encouraging but concise. Warm and wise, not lengthy lectures.
 6. If they need ingredients, tell them kindly - "Yaar, grab some X and you're all set."
 
+CRITICAL - DRINK RECOMMENDATIONS:
+- If recommending a drink that IS in our database (check the drink IDs above), use "recommended_drink_id" with the exact ID.
+- If recommending a drink that is NOT in our database, you MUST provide the FULL RECIPE in "special_recipe" field.
+  This is "Raja's Special from Memory" - a drink you know but we don't have in our collection.
+  Include: name, tagline, ingredients (with amounts like "2 oz bourbon"), method (step-by-step), glassware, garnish, and your personal tip.
+
 IMPORTANT: Return a JSON object matching the RajaChatOutput schema.""",
         expected_output="""A JSON object with structure:
-{
+{{
   "response": "Raja's conversational response with personality",
   "detected_intent": "recommendation_request|recipe_question|general_chat|greeting|technique_question|ingredient_question|cabinet_update|feedback|goodbye",
   "detected_mood": "relaxed|celebratory|contemplative|adventurous|tired|social|romantic|null",
@@ -231,8 +250,25 @@ IMPORTANT: Return a JSON object matching the RajaChatOutput schema.""",
   "ingredients_mentioned": ["bourbon", "sweet-vermouth"],
   "recommendation_made": true,
   "recommended_drink_id": "manhattan",
-  "suggested_follow_up": "Shall I tell you the story of how the Manhattan was invented?"
-}""",
+  "suggested_follow_up": "Shall I tell you the story of how the Manhattan was invented?",
+  "special_recipe": null
+}}
+
+If drink is NOT in our database, include special_recipe:
+{{
+  "response": "Arrey yaar, let me share a special one from my memory...",
+  "recommendation_made": true,
+  "recommended_drink_id": null,
+  "special_recipe": {{
+    "name": "Drink Name",
+    "tagline": "Short description",
+    "ingredients": ["2 oz bourbon", "1 oz sweet vermouth", "2 dashes bitters"],
+    "method": ["Add ingredients to mixing glass", "Stir with ice for 30 seconds", "Strain into chilled coupe"],
+    "glassware": "coupe",
+    "garnish": "cherry",
+    "tip": "Raja's personal tip for making this drink perfect"
+  }}
+}}""",
         agent=raja,
         output_pydantic=RajaChatOutput,
     )
@@ -381,6 +417,7 @@ def run_raja_chat(request: ChatRequest) -> ChatResponse:
         suggested_action=_get_suggested_action(raja_output),
         recommendation_offered=raja_output.recommendation_made,
         recommended_drink_id=raja_output.recommended_drink_id,
+        special_recipe=raja_output.special_recipe,
     )
 
 

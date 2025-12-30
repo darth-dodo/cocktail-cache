@@ -830,8 +830,12 @@ async function sendChatMessage() {
         // Add Raja's response
         addBotMessage(data.content);
 
-        // If Raja recommended a drink, show a clickable link
-        if (data.recommended_drink_id) {
+        // If Raja provided a special recipe (drink not in our database)
+        if (data.special_recipe) {
+            addSpecialRecipe(data.special_recipe);
+        }
+        // If Raja recommended a drink from our database, show a clickable link
+        else if (data.recommended_drink_id) {
             const drinkName = data.drinks_mentioned && data.drinks_mentioned.length > 0
                 ? data.drinks_mentioned[0].name
                 : data.recommended_drink_id;
@@ -865,6 +869,62 @@ function addDrinkSuggestion(drinkId, drinkName) {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
         </a>
+    `;
+    chatMessages.appendChild(div);
+    scrollToBottom();
+}
+
+function addSpecialRecipe(recipe) {
+    // This is Raja's special from memory - a drink not in our database
+    const div = document.createElement('div');
+    div.className = 'flex gap-2 sm:gap-3 animate-fade-in mt-3';
+
+    const ingredientsList = recipe.ingredients.map(ing => `<li class="text-stone-300">${ing}</li>`).join('');
+    const methodList = recipe.method.map((step, i) => `<li class="text-stone-300"><span class="text-amber-500 font-medium">${i + 1}.</span> ${step}</li>`).join('');
+
+    div.innerHTML = `
+        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8"></div>
+        <div class="glass-card p-4 flex-1 border border-amber-600/30">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-2xl">✨</span>
+                <div>
+                    <p class="text-amber-300 font-bold text-lg">${recipe.name}</p>
+                    <p class="text-amber-500/70 text-xs font-medium">Raja's Special from Memory</p>
+                </div>
+            </div>
+            ${recipe.tagline ? `<p class="text-stone-400 text-sm italic mb-3">"${recipe.tagline}"</p>` : ''}
+
+            <div class="space-y-3">
+                <div>
+                    <p class="text-amber-400 font-semibold text-sm mb-1">Ingredients</p>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        ${ingredientsList}
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="text-amber-400 font-semibold text-sm mb-1">Method</p>
+                    <ol class="text-sm space-y-1">
+                        ${methodList}
+                    </ol>
+                </div>
+
+                ${recipe.glassware || recipe.garnish ? `
+                <div class="flex gap-4 text-sm">
+                    ${recipe.glassware ? `<div><span class="text-amber-400">Glass:</span> <span class="text-stone-300">${recipe.glassware}</span></div>` : ''}
+                    ${recipe.garnish ? `<div><span class="text-amber-400">Garnish:</span> <span class="text-stone-300">${recipe.garnish}</span></div>` : ''}
+                </div>
+                ` : ''}
+
+                ${recipe.tip ? `
+                <div class="bg-amber-900/20 rounded-lg p-3 mt-2">
+                    <p class="text-amber-200 text-sm"><span class="font-semibold">💡 Raja's Tip:</span> ${recipe.tip}</p>
+                </div>
+                ` : ''}
+            </div>
+
+            <p class="text-stone-500 text-xs mt-3 italic">This drink is not in our collection - recipe from Raja's memory</p>
+        </div>
     `;
     chatMessages.appendChild(div);
     scrollToBottom();
