@@ -15,14 +15,14 @@ Rate Limit Tiers:
 
 from collections.abc import Callable
 from functools import wraps
-from typing import TypeVar
+from typing import Any, TypeVar, cast
 
 from fastapi import HTTPException
 from ratelimit import RateLimitException, sleep_and_retry
 from ratelimit import limits as ratelimit_limits
 
 # Type variable for generic function decoration
-F = TypeVar("F", bound=Callable)
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 class RateLimits:
@@ -54,10 +54,10 @@ def rate_limit_llm(func: F) -> F:
     @sleep_and_retry
     @ratelimit_limits(calls=RateLimits.LLM_CALLS, period=RateLimits.LLM_PERIOD)
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
         return await func(*args, **kwargs)
 
-    return wrapper
+    return cast(F, wrapper)
 
 
 def rate_limit_compute(func: F) -> F:
@@ -69,10 +69,10 @@ def rate_limit_compute(func: F) -> F:
     @sleep_and_retry
     @ratelimit_limits(calls=RateLimits.COMPUTE_CALLS, period=RateLimits.COMPUTE_PERIOD)
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
         return await func(*args, **kwargs)
 
-    return wrapper
+    return cast(F, wrapper)
 
 
 def rate_limit_llm_strict(func: F) -> F:
@@ -84,7 +84,7 @@ def rate_limit_llm_strict(func: F) -> F:
 
     @ratelimit_limits(calls=RateLimits.LLM_CALLS, period=RateLimits.LLM_PERIOD)
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return await func(*args, **kwargs)
         except RateLimitException as e:
@@ -93,7 +93,7 @@ def rate_limit_llm_strict(func: F) -> F:
                 detail="Rate limit exceeded. Please try again later.",
             ) from e
 
-    return wrapper
+    return cast(F, wrapper)
 
 
 def rate_limit_compute_strict(func: F) -> F:
@@ -104,7 +104,7 @@ def rate_limit_compute_strict(func: F) -> F:
 
     @ratelimit_limits(calls=RateLimits.COMPUTE_CALLS, period=RateLimits.COMPUTE_PERIOD)
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return await func(*args, **kwargs)
         except RateLimitException as e:
@@ -113,4 +113,4 @@ def rate_limit_compute_strict(func: F) -> F:
                 detail="Rate limit exceeded. Please try again later.",
             ) from e
 
-    return wrapper
+    return cast(F, wrapper)
