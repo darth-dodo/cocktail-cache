@@ -17,6 +17,7 @@ dependencies = [
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
     "python-multipart>=0.0.20",
+    "ratelimit>=2.2.1",
 ]
 
 [project.optional-dependencies]
@@ -67,6 +68,10 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_ignores = true
 strict = false
+
+[[tool.mypy.overrides]]
+module = "ratelimit.*"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

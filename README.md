@@ -1,272 +1,198 @@
 # Cocktail Cache
 
-**Your cabinet. Your mood. Your perfect drink.**
+> **Your cabinet. Your mood. Your perfect drink.**
+
+<p align="center">
+  <a href="https://cocktail-cache.onrender.com">
+    <img src="https://img.shields.io/badge/🍸_Try_it_Live-cocktail--cache.onrender.com-amber?style=for-the-badge&labelColor=1a1a1a" alt="Live Demo">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/darth-dodo/cocktail-cache">
+    <img src="https://img.shields.io/badge/GitHub-darth--dodo%2Fcocktail--cache-blue?logo=github" alt="GitHub">
+  </a>
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+  <img src="https://img.shields.io/badge/Tests-714_passing-brightgreen?logo=pytest" alt="Tests: 714 passing">
+  <img src="https://img.shields.io/badge/Coverage-78%25-green?logo=codecov" alt="Coverage: 78%">
+</p>
+
+---
 
 An AI-powered home bar advisor that helps you craft great cocktails with whatever bottles you have. Chat with Raja, your AI mixologist, to get personalized drink recommendations, technique guidance, and smart suggestions for your next bottle purchase.
 
 ---
 
-## Development Status
+## Meet Raja, Your AI Mixologist
 
-> **Current Phase**: Session 5 UX Improvements Complete
+<p align="center">
+  <img src=".playwright-mcp/raja-chat-working.png" alt="Raja Chat Interface" width="300">
+</p>
 
-| Component | Status | Details |
-|-----------|--------|---------|
-| Data Layer | ✅ Complete | 103 cocktails, 39 mocktails, 180 ingredients |
-| Pydantic Models | ✅ Complete | Structured crew I/O with RecipeOutput, AnalysisOutput, BottleAdvisorOutput |
-| CrewAI Agents | ✅ Complete | 5 agents including unified Drink Recommender for fast mode |
-| CrewAI Tools | ✅ Complete | 4 deterministic tools for data operations |
-| Crews & Flow | ✅ Complete | Analysis Crew (fast mode), Recipe Crew, CocktailFlow |
-| API Routes | ✅ Complete | FastAPI endpoints with session management |
-| Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
-| Browse & Search | ✅ Complete | Full drink catalog with search, filters, and detail pages |
-| Deployment | ✅ Complete | Render.com with GitHub Actions CI/CD |
+**Raja** is a 20-year bartender veteran from Colaba, Bombay. He knows his craft, tells great stories, and speaks with warmth:
+
+> *"Arrey bhai! Feeling relaxed after a long day? With your bourbon and lemons, let me suggest a Gold Rush — ekdum first class for unwinding!"*
+
+Just tell Raja what you have and how you're feeling. He'll find the perfect drink.
+
+---
+
+## How It Works
+
+### 1. Tell Raja What You Have
+Add your bottles to your cabinet — spirits, mixers, bitters, fresh ingredients. Your cabinet is saved automatically.
+
+### 2. Describe Your Mood
+"Celebrating a promotion" • "Quiet evening alone" • "Impressing a date" • "Sunday afternoon vibes"
+
+### 3. Get Your Perfect Drink
+Raja recommends drinks you can actually make, with step-by-step instructions adapted to your skill level.
+
+### 4. Know What to Buy Next
+Raja tells you which single bottle will unlock the most new drinks — maximum impact for your next purchase.
 
 ---
 
 ## Features
 
-### AI-Powered Recommendations
-- **Chat with Raja** - Conversational AI mixologist that guides you to your perfect drink
-- **AI-powered recommendations** - Get drinks matched to your available ingredients and mood
-- **Fast mode analysis** - Single-agent mode for ~50% faster recommendations
-- **Skill level adaptation** - Beginner-friendly recipes to adventurous techniques
-- **"Next bottle" recommendations** - Maximize your drink potential with smart ROI suggestions
-
-### Browse and Discover
-- **142 drinks catalog** - Browse 103 cocktails and 39 mocktails with detailed recipes
-- **Search and filter** - Find drinks by name, tags, or ingredients
-- **Filter by type** - Toggle between cocktails, mocktails, or view all
-- **Filter by difficulty** - Easy, medium, or advanced recipes
-- **Individual drink pages** - Detailed view with ingredients, instructions, and tips
-
-### User Experience
-- **Tabbed navigation** - Switch between Chat, Cabinet, and Browse views
-- **Ingredient autocomplete** - Smart suggestions when building your cabinet
-- **Mixology facts loading screen** - Learn cocktail history while waiting
-- **Mobile-first design** - Optimized for use in the kitchen
-- **Mocktail support** - Spirit-free options for non-alcoholic preferences
+| Feature | Description |
+|---------|-------------|
+| **142 Drinks** | 103 cocktails + 39 mocktails with detailed recipes |
+| **Smart Matching** | Only shows drinks you can make with your cabinet |
+| **Skill Adaptation** | Beginner-friendly to adventurous techniques |
+| **Next Bottle Advice** | ROI-based suggestions for cabinet expansion |
+| **Browse & Search** | Explore the full catalog with filters |
+| **Mobile-First** | Designed for use in the kitchen |
 
 ---
 
-## Tech Stack
+## Screenshots
+
+<p align="center">
+  <img src=".playwright-mcp/mobile-chat-tab.png" alt="Chat Tab" width="200">
+  <img src=".playwright-mcp/mobile-cabinet-tab.png" alt="Cabinet Tab" width="200">
+  <img src=".playwright-mcp/mobile-browse-tab.png" alt="Browse Tab" width="200">
+</p>
+
+<p align="center">
+  <em>Chat with Raja • Build Your Cabinet • Browse All Drinks</em>
+</p>
+
+---
+
+## Try It Now
+
+**[cocktail-cache.onrender.com](https://cocktail-cache.onrender.com)**
+
+No signup required. Just start chatting with Raja.
+
+---
+
+## For Developers
+
+<details>
+<summary><strong>Tech Stack & Architecture</strong></summary>
+
+### Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Runtime | Python 3.12 |
-| API Framework | FastAPI |
-| AI Orchestration | CrewAI |
-| LLM Provider | Anthropic Claude |
-| Frontend | HTMX + Jinja2 |
-| Package Manager | uv |
-| Deployment | Render |
+| **Runtime** | Python 3.12 |
+| **API** | FastAPI |
+| **AI** | CrewAI + Anthropic Claude |
+| **Frontend** | HTMX + Jinja2 + Tailwind |
+| **Deployment** | Render |
 
----
+### Codebase Health
 
-## Quick Start
+| Metric | Value |
+|--------|-------|
+| **Test Suite** | 714 tests |
+| **Code Coverage** | 78% |
+| **Models** | 100% covered |
+| **Services** | 96%+ covered |
+| **Type Checking** | Strict mypy |
+| **Linting** | Ruff + pre-commit hooks |
+
+### Quick Start
 
 ```bash
-# Clone the repository
 git clone https://github.com/darth-dodo/cocktail-cache.git
 cd cocktail-cache
 
-# Copy environment file and add your API key
 cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+# Add your ANTHROPIC_API_KEY
 
-# Install dependencies and start development server
 make install
 make dev
-
 # Visit http://localhost:8888
 ```
 
----
+### Architecture
 
-## Usage
+```mermaid
+flowchart LR
+    User[User] --> Chat[Chat with Raja]
+    Chat --> AI[CrewAI Agents]
+    AI --> Claude[Anthropic Claude]
+    AI --> Data[(142 Drinks<br/>180 Ingredients)]
+    AI --> Recipe[Recipe + Tips]
+    Recipe --> User
+```
 
-### Chat with Raja
-1. Open the **Chat** tab
-2. Add ingredients to your cabinet (with autocomplete suggestions)
-3. Set your mood, skill level, and drink preference
-4. Get personalized recommendations from Raja, your AI mixologist
-5. View detailed recipes with technique tips and "next bottle" suggestions
+### AI Agents
 
-### Browse the Catalog
-1. Open the **Browse** tab to see all 142 drinks
-2. **Search** by drink name, tags, or ingredients
-3. **Filter by type**: All, Cocktails only, or Mocktails only
-4. **Filter by difficulty**: Easy, Medium, or Advanced
-5. Click any drink card to view the full recipe and instructions
+- **Raja Bartender** — Conversational AI with Bombay personality
+- **Drink Recommender** — Matches cabinet + mood to drinks
+- **Recipe Writer** — Generates skill-adapted instructions
+- **Bottle Advisor** — Calculates next bottle ROI
 
-### Build Your Cabinet
-1. Open the **Cabinet** tab
-2. Add ingredients using the autocomplete search
-3. Your cabinet is saved and used for AI recommendations
+### Documentation
 
----
+- [Architecture](docs/architecture.md) — System design
+- [Product Requirements](docs/product.md) — PRD and user stories
+- [API Reference](docs/api.md) — REST endpoints
 
-## Development Commands
+</details>
+
+<details>
+<summary><strong>Development Commands</strong></summary>
 
 | Command | Description |
 |---------|-------------|
-| `make install` | Install project dependencies with uv |
-| `make dev` | Start development server with hot reload |
+| `make install` | Install dependencies |
+| `make dev` | Start dev server (port 8888) |
 | `make test` | Run test suite |
-| `make check` | Run linting and type checks |
-| `make format` | Format code with ruff |
-| `make clean` | Remove build artifacts and caches |
+| `make check` | Linting and type checks |
+| `make format` | Format code |
+
+</details>
 
 ---
 
-## Project Structure
+## Contributing
 
-```
-cocktail-cache/
-├── src/
-│   └── app/
-│       ├── main.py              # FastAPI entry point
-│       ├── config.py            # Environment configuration
-│       ├── agents/              # CrewAI agent definitions
-│       ├── crews/               # Crew compositions
-│       ├── tools/               # CrewAI tools (RecipeDB, etc.)
-│       ├── flows/               # Flow orchestration
-│       ├── models/              # Pydantic models (Drink, Ingredient, etc.)
-│       ├── services/            # Data loading and business logic
-│       ├── routers/             # API routes
-│       ├── templates/           # Jinja2 templates
-│       └── static/              # CSS and JS assets
-├── data/
-│   ├── cocktails.json           # 103 cocktail recipes
-│   ├── mocktails.json           # 39 non-alcoholic recipes
-│   ├── ingredients.json         # 180 categorized ingredients
-│   ├── substitutions.json       # Ingredient swap rules
-│   └── unlock_scores.json       # Pre-computed bottle ROI mappings
-├── scripts/
-│   ├── compute_unlock_scores.py # Generate bottle recommendations
-│   └── validate_data.py         # Pydantic data validation
-├── tests/                       # Test suite
-└── tasks.md                     # Development task tracker
-```
-
----
-
-## Data Validation
-
-Run the validation script to verify all data files:
-
-```bash
-uv run python scripts/validate_data.py
-```
-
-To recompute unlock scores after modifying recipes:
-
-```bash
-uv run python scripts/compute_unlock_scores.py
-```
-
----
-
-## Deployment
-
-This project is configured for deployment on Render using the included `render.yaml` configuration.
-
----
-
-## Using the Agents
-
-The CrewAI agents can be used directly for testing and development:
-
-```python
-import os
-os.environ["ANTHROPIC_API_KEY"] = "your-api-key"
-
-# Option 1: Use the high-level flow (recommended)
-from src.app.flows import run_cocktail_flow
-
-result = run_cocktail_flow(
-    cabinet=["bourbon", "lemons", "honey", "simple-syrup"],
-    mood="unwinding after a long week",
-    skill_level="intermediate",
-    drink_type="cocktail",
-)
-print(f"Selected: {result.selected}")
-print(f"Recipe: {result.recipe}")
-print(f"Next bottle: {result.next_bottle}")
-
-# Option 2: Use individual crews with fast mode (default)
-from src.app.crews import run_analysis_crew, run_recipe_crew
-
-# Run analysis crew in fast mode (~50% faster)
-analysis_result = run_analysis_crew(
-    cabinet=["bourbon", "lemons", "honey", "simple-syrup"],
-    mood="unwinding after a long week",
-    skill_level="intermediate",
-    drink_type="cocktail",
-    fast_mode=True,  # Default: uses unified Drink Recommender agent
-)
-for candidate in analysis_result.candidates:
-    print(f"{candidate.name}: {candidate.mood_score}% match")
-
-# Run recipe crew (optionally skip bottle advice for faster response)
-recipe_result = run_recipe_crew(
-    cocktail_id="gold-rush",
-    skill_level="beginner",
-    cabinet=["bourbon", "lemons", "honey"],
-    include_bottle_advice=False,  # Skip bottle recommendations
-)
-print(f"Recipe: {recipe_result.recipe.name}")
-```
-
-### Available Components
-
-#### Flows
-| Flow | Purpose | Crews Used |
-|------|---------|------------|
-| CocktailFlow | Full recommendation pipeline | Analysis → Recipe |
-
-#### Crews
-| Crew | Mode | Purpose |
-|------|------|---------|
-| Analysis Crew | Fast (default) | Single Drink Recommender agent (~50% faster) |
-| Analysis Crew | Full | Cabinet Analyst → Mood Matcher (detailed analysis) |
-| Recipe Crew | Standard | Recipe Writer → Bottle Advisor |
-| Recipe Crew | Recipe Only | Recipe Writer (skip bottle advice) |
-
-#### Agents
-| Agent | Purpose | Primary Tool |
-|-------|---------|--------------|
-| Drink Recommender | Find and rank drinks in one call (fast mode) | RecipeDBTool, FlavorProfilerTool |
-| Cabinet Analyst | Find makeable drinks from cabinet | RecipeDBTool |
-| Mood Matcher | Rank drinks by mood fit | FlavorProfilerTool |
-| Recipe Writer | Generate skill-appropriate recipes | RecipeDBTool, SubstitutionFinderTool |
-| Bottle Advisor | Recommend next bottle purchase | UnlockCalculatorTool |
-
-#### Structured Output Models
-| Model | Purpose |
-|-------|---------|
-| AnalysisOutput | Crew output with ranked drink candidates |
-| RecipeOutput | Complete recipe with technique tips |
-| BottleAdvisorOutput | Bottle recommendations with ROI data |
-| RecipeCrewOutput | Combined recipe + bottle advice |
-
-### Environment Variables
-
-```bash
-# Required for running agents
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
----
-
-## Documentation
-
-- [Architecture](docs/architecture.md) - System design and agent specifications
-- [Implementation Guide](docs/implementation-guide.md) - Build order and session milestones
-- [Tasks](tasks.md) - Development task tracker with phase status
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes
+4. Push and open a Pull Request
 
 ---
 
 ## License
 
-MIT
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  <strong>Built with</strong><br/>
+  <a href="https://crewai.com">CrewAI</a> •
+  <a href="https://anthropic.com">Anthropic Claude</a> •
+  <a href="https://fastapi.tiangolo.com">FastAPI</a> •
+  <a href="https://htmx.org">HTMX</a>
+</p>
+
+<p align="center">
+  <a href="https://cocktail-cache.onrender.com"><strong>Try it Live →</strong></a>
+</p>

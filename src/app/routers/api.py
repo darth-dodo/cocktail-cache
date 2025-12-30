@@ -3,6 +3,11 @@
 This module provides the unified /flow endpoint that handles all
 cocktail recommendation actions: starting a new flow, requesting
 another recommendation, and marking drinks as made.
+
+Global rate limits protect upstream API quotas (privacy-first, no user tracking):
+- /flow: 10/min (LLM calls - expensive)
+- /suggest-bottles: 30/min (compute-intensive)
+- Static data endpoints: No limit (fast local lookups)
 """
 
 import logging
@@ -24,6 +29,7 @@ from src.app.models import (
     RecipeOutput,
     SkillLevel,
 )
+from src.app.rate_limit import rate_limit_compute, rate_limit_llm
 
 logger = logging.getLogger(__name__)
 
@@ -666,7 +672,8 @@ async def get_ingredients() -> IngredientsResponse:
 
 
 @router.post("/flow", response_model=FlowResponse)
-async def flow_endpoint(request: FlowRequest) -> FlowResponse:
+@rate_limit_llm
+async def flow_endpoint(flow_request: FlowRequest) -> FlowResponse:
     """Unified endpoint for all cocktail flow operations.
 
     Handles three actions:
@@ -674,8 +681,10 @@ async def flow_endpoint(request: FlowRequest) -> FlowResponse:
     - ANOTHER: Request a different recommendation for existing session
     - MADE: Mark a drink as made in the user's history
 
+    Rate limited to 10 calls/minute globally to protect LLM API quotas.
+
     Args:
-        request: The flow request with action and required parameters.
+        flow_request: The flow request with action and required parameters.
 
     Returns:
         FlowResponse with recommendation or status message.
@@ -683,17 +692,19 @@ async def flow_endpoint(request: FlowRequest) -> FlowResponse:
     Raises:
         HTTPException: If session not found or validation fails.
     """
-    logger.info(f"Flow endpoint called with action: {request.action}")
+    logger.info(f"Flow endpoint called with action: {flow_request.action}")
 
-    if request.action == FlowAction.START:
-        return await _handle_start(request)
-    elif request.action == FlowAction.ANOTHER:
-        return await _handle_another(request)
-    elif request.action == FlowAction.MADE:
-        return await _handle_made(request)
+    if flow_request.action == FlowAction.START:
+        return await _handle_start(flow_request)
+    elif flow_request.action == FlowAction.ANOTHER:
+        return await _handle_another(flow_request)
+    elif flow_request.action == FlowAction.MADE:
+        return await _handle_made(flow_request)
     else:
         # This should never happen due to enum validation
-        raise HTTPException(status_code=400, detail=f"Unknown action: {request.action}")
+        raise HTTPException(
+            status_code=400, detail=f"Unknown action: {flow_request.action}"
+        )
 
 
 async def _handle_start(request: FlowRequest) -> FlowResponse:
@@ -1022,7 +1033,10 @@ def _is_kitchen_item(ingredient_id: str) -> bool:
 
 
 @router.post("/suggest-bottles", response_model=SuggestBottlesResponse)
-async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesResponse:
+@rate_limit_compute
+async def suggest_bottles(
+    bottles_request: SuggestBottlesRequest,
+) -> SuggestBottlesResponse:
     """Get bottle purchase recommendations based on your cabinet.
 
     Uses the "Track your BAR, assume your KITCHEN" philosophy:
@@ -1033,8 +1047,10 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
     Returns ranked recommendations of Core Bottles to purchase,
     with optional AI-generated personalized advice.
 
+    Rate limited to 30 calls/minute globally.
+
     Args:
-        request: Request with cabinet ingredients and filters.
+        bottles_request: Request with cabinet ingredients and filters.
 
     Returns:
         SuggestBottlesResponse with ranked bottle recommendations.
@@ -1044,12 +1060,12 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
     from src.app.services.data_loader import load_all_drinks
 
     logger.info(
-        f"Suggest bottles request: cabinet_size={len(request.cabinet)}, "
-        f"drink_type={request.drink_type}, limit={request.limit}"
+        f"Suggest bottles request: cabinet_size={len(bottles_request.cabinet)}, "
+        f"drink_type={bottles_request.drink_type}, limit={bottles_request.limit}"
     )
 
     # Normalize cabinet to lowercase
-    cabinet_set = {ing.lower().strip() for ing in request.cabinet}
+    cabinet_set = {ing.lower().strip() for ing in bottles_request.cabinet}
 
     # Load all drinks
     all_drinks = load_all_drinks()
@@ -1057,9 +1073,9 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
     # Filter by drink type
     filtered_drinks = []
     for drink in all_drinks:
-        if request.drink_type == "cocktails" and drink.is_mocktail:
+        if bottles_request.drink_type == "cocktails" and drink.is_mocktail:
             continue
-        if request.drink_type == "mocktails" and not drink.is_mocktail:
+        if bottles_request.drink_type == "mocktails" and not drink.is_mocktail:
             continue
         filtered_drinks.append(drink)
 
@@ -1145,7 +1161,7 @@ async def suggest_bottles(request: SuggestBottlesRequest) -> SuggestBottlesRespo
     all_recommendations.sort(key=lambda x: x.new_drinks_unlocked, reverse=True)
 
     # Apply limit
-    top_recommendations = all_recommendations[: request.limit]
+    top_recommendations = all_recommendations[: bottles_request.limit]
 
     # ==========================================================================
     # Track missing essentials (bitters, specialty syrups)

@@ -12,9 +12,10 @@
 2. [Frontend Architecture](#frontend-architecture)
 3. [Agentic Architecture](#agentic-architecture)
 4. [Data Flow](#data-flow)
-5. [BDD Specifications](#bdd-specifications)
-6. [Blueprint](#blueprint)
-7. [Key Decisions](#key-decisions)
+5. [API Rate Limiting](#api-rate-limiting)
+6. [BDD Specifications](#bdd-specifications)
+7. [Blueprint](#blueprint)
+8. [Key Decisions](#key-decisions)
 
 ---
 
@@ -36,6 +37,7 @@
 | CrewAI Crews | ✅ Complete | Analysis Crew (fast/full modes) + Recipe Crew (optional bottle advice) |
 | CrewAI Flow | ✅ Complete | CocktailFlow with state management and rejection workflow |
 | API Routes | ✅ Complete | FastAPI endpoints for recommendations |
+| Rate Limiting | ✅ Complete | SlowAPI with tiered limits (LLM/compute/static) |
 | Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
 | Tabbed Navigation | ✅ Complete | Chat/Cabinet/Browse tabs in unified header |
 | Browse Page | ✅ Complete | Search, filter by type/difficulty, drink detail pages |
@@ -135,56 +137,52 @@ cocktail-cache/
 
 ## System Overview
 
+```mermaid
+flowchart TB
+    subgraph Input["User Input"]
+        Cabinet["Cabinet<br/>bourbon, gin, lemons..."]
+        Mood["Mood<br/>Unwinding after work"]
+        Prefs["Preferences<br/>Skill level, drink type"]
+    end
+
+    subgraph Processing["Processing Layer"]
+        subgraph Static["Pre-computed Data<br/>(No LLM)"]
+            Recipes["142 Recipes"]
+            Flavors["Flavor Profiles"]
+            Subs["Substitutions"]
+            Unlock["Unlock Scores"]
+        end
+
+        subgraph AI["Runtime AI<br/>(CrewAI)"]
+            Interpret["Mood Interpretation"]
+            Copy["Personalized Copy"]
+            Tips["Technique Tips"]
+        end
+    end
+
+    subgraph Output["Output"]
+        Drink["Recommended Drink<br/>+ Recipe"]
+        Bottle["Next Bottle<br/>ROI-based"]
+        Profile["Flavor Profile<br/>+ Difficulty"]
+    end
+
+    Cabinet --> Static
+    Mood --> AI
+    Prefs --> AI
+    Static --> AI
+    AI --> Output
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         COCKTAIL CACHE                                  │
-│                                                                         │
-│  "Your cabinet. Your mood. Your perfect drink."                         │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           USER INPUT                                    │
-│                                                                         │
-│   Cabinet: [bourbon, gin, lemons, honey, angostura...]                  │
-│   Mood: "Unwinding after a long week"                                   │
-│   Constraints: [not too sweet]                                          │
-│   Preferred Spirit: bourbon (optional)                                  │
-│   Drink Type: cocktail | mocktail | both                                │
-│   Skill Level: beginner | intermediate | adventurous                    │
-│   Recent History: [last 3-10 made drinks to exclude]                    │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    │                               │
-                    ▼                               ▼
-    ┌───────────────────────────┐   ┌───────────────────────────┐
-    │     PRE-COMPUTED DATA     │   │      RUNTIME AI           │
-    │     (No LLM needed)       │   │      (CrewAI)             │
-    ├───────────────────────────┤   ├───────────────────────────┤
-    │ • Cocktail recipes        │   │ • Mood interpretation     │
-    │ • Flavor profiles         │   │ • Personalized copy       │
-    │ • Ingredient categories   │   │ • Technique tips          │
-    │ • Substitution mappings   │   │ • Contextual advice       │
-    │ • Unlock scores           │   │                           │
-    └───────────────────────────┘   └───────────────────────────┘
-                    │                               │
-                    └───────────────┬───────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                            OUTPUT                                       │
-│                                                                         │
-│   Recommendation: Gold Rush (or Mocktail if selected)                   │
-│   Recipe: [ingredients, method, skill-adapted tips]                     │
-│   Flavor Profile: {sweet: 40, sour: 50, bitter: 10}                     │
-│   Next Bottle: Campari (unlocks 4 new drinks)                           │
-│   Difficulty Badge: Easy | Medium | Advanced                            │
-│   Mocktail Badge: Spirit-free indicator (if applicable)                 │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+
+### Input Parameters
+
+| Parameter | Description | Options |
+|-----------|-------------|---------|
+| **Cabinet** | Ingredients available | List of ingredient IDs |
+| **Mood** | Natural language description | Free text |
+| **Skill Level** | User expertise | beginner, intermediate, adventurous |
+| **Drink Type** | Alcohol preference | cocktail, mocktail, both |
+| **Constraints** | Taste preferences | "not too sweet", etc. |
+| **History** | Recent drinks to exclude | Last 3-10 made drinks |
 
 ### Core Insight
 
@@ -204,19 +202,23 @@ The frontend uses a mobile-first, server-rendered approach with Jinja2 templates
 
 ### Navigation Structure
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         UNIFIED HEADER                                   │
-│                                                                         │
-│   ┌────────────────────────────────────────────────────────────────┐   │
-│   │  🍸 Raja - Your AI Mixologist                    [Reset]       │   │
-│   └────────────────────────────────────────────────────────────────┘   │
-│                                                                         │
-│   ┌──────────────┬──────────────┬──────────────┐                       │
-│   │     Chat     │   Cabinet    │    Browse    │  ← Tab Navigation     │
-│   │   (active)   │    (3)       │              │                       │
-│   └──────────────┴──────────────┴──────────────┘                       │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Header["Unified Header"]
+        direction TB
+        Brand["🍸 Raja - Your AI Mixologist"]
+        Reset["Reset Button"]
+
+        subgraph Tabs["Tab Navigation"]
+            direction LR
+            Chat["Chat<br/>(active)"]
+            Cabinet["Cabinet<br/>(3)"]
+            Browse["Browse"]
+        end
+    end
+
+    Brand --> Tabs
+    Reset -.-> Brand
 ```
 
 **Tab Behavior**:
@@ -226,38 +228,36 @@ The frontend uses a mobile-first, server-rendered approach with Jinja2 templates
 
 ### User Flow Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          USER ENTRY POINTS                              │
-└─────────────────────────────────────────────────────────────────────────┘
-                    │                               │
-                    ▼                               ▼
-        ┌───────────────────┐           ┌───────────────────┐
-        │   Chat Interface  │           │    Browse Page    │
-        │   (index.html)    │           │   (browse.html)   │
-        └───────────────────┘           └───────────────────┘
-                    │                               │
-        ┌───────────┴───────────┐       ┌───────────┴───────────┐
-        │                       │       │                       │
-        ▼                       ▼       ▼                       ▼
-┌───────────────┐     ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
-│  Cabinet Tab  │     │  AI Recommend │ │ Search/Filter │ │  Drink Cards  │
-│               │     │               │ │               │ │               │
-│ • Add/remove  │     │ • Mood input  │ │ • Text search │ │ • 142 drinks  │
-│   ingredients │     │ • Preferences │ │ • Type filter │ │ • Quick info  │
-│ • Autocomplete│     │ • Get recipe  │ │ • Difficulty  │ │ • Click → ▼   │
-└───────────────┘     └───────────────┘ └───────────────┘ └───────────────┘
-                              │                                   │
-                              ▼                                   ▼
-                    ┌───────────────────────────────────────────────────┐
-                    │                   DRINK DETAIL                    │
-                    │                   (drink.html)                    │
-                    │                                                   │
-                    │   • Full recipe with ingredients and method       │
-                    │   • Flavor profile visualization                  │
-                    │   • Difficulty, timing, glassware                 │
-                    │   • Tags and categorization                       │
-                    └───────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Entry["User Entry Points"]
+        Chat["Chat Interface<br/>index.html"]
+        Browse["Browse Page<br/>browse.html"]
+    end
+
+    subgraph ChatFeatures["Chat Interface"]
+        CabinetTab["Cabinet Tab<br/>Add/remove ingredients"]
+        RajaChat["Chat with Raja<br/>Get recommendations"]
+    end
+
+    subgraph BrowseFeatures["Browse Interface"]
+        Search["Search & Filter<br/>By name, type, difficulty"]
+        Cards["Drink Cards<br/>142 drinks"]
+    end
+
+    subgraph Detail["Drink Detail Page"]
+        Recipe["Full Recipe<br/>Ingredients + Method"]
+        Flavor["Flavor Profile<br/>Visualization"]
+        Meta["Meta Info<br/>Timing, Glassware, Tags"]
+    end
+
+    Chat --> CabinetTab
+    Chat --> RajaChat
+    Browse --> Search
+    Browse --> Cards
+    RajaChat --> Detail
+    Cards --> Detail
+    Search --> Cards
 ```
 
 ### Page Components
@@ -313,25 +313,29 @@ Displays complete information for a single drink:
 
 ### Client-Side State Management
 
-```javascript
-// Cabinet persistence (cabinet-state.js)
-┌─────────────────────────────────────────────────────────────────────────┐
-│                       LOCAL STORAGE                                      │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│   cocktail-cache-cabinet: ["bourbon", "gin", "lemons", ...]            │
-│                                                                         │
-│   Functions:                                                            │
-│   • saveCabinet(ingredients[])    → Save to localStorage               │
-│   • loadCabinet()                 → Retrieve from localStorage         │
-│   • clearCabinet()                → Remove from localStorage           │
-│   • getCabinetCount()             → Get ingredient count               │
-│                                                                         │
-│   Events:                                                               │
-│   • 'cabinet-updated'             → Dispatched on save/clear           │
-│   • 'storage'                     → Cross-tab synchronization          │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph LocalStorage["LocalStorage (cabinet-state.js)"]
+        direction TB
+        Key["cocktail-cache-cabinet<br/>['bourbon', 'gin', 'lemons', ...]"]
+
+        subgraph Functions["Functions"]
+            direction LR
+            Save["saveCabinet()"]
+            Load["loadCabinet()"]
+            Clear["clearCabinet()"]
+            Count["getCabinetCount()"]
+        end
+
+        subgraph Events["Events"]
+            direction LR
+            Updated["cabinet-updated<br/>Dispatched on save/clear"]
+            Storage["storage<br/>Cross-tab sync"]
+        end
+    end
+
+    Functions --> Key
+    Key --> Events
 ```
 
 ### Styling Approach
@@ -355,60 +359,48 @@ Displays complete information for a single drink:
 
 The system supports two modes for the Analysis Crew:
 
-**Fast Mode (Default)** - Single LLM call, ~50% faster:
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        COCKTAIL FLOW                                    │
-│                     (Orchestrates everything)                           │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    │                               │
-                    ▼                               ▼
-┌───────────────────────────────┐   ┌───────────────────────────────────┐
-│   CREW 1: ANALYSIS (FAST)     │   │        CREW 2: RECIPE             │
-│   "Find and rank drinks"      │   │   "How to make it, what          │
-│                               │   │    to buy next"                   │
-├───────────────────────────────┤   ├───────────────────────────────────┤
-│                               │   │                                   │
-│  ┌─────────────────────────┐  │   │  ┌─────────────────────────────┐  │
-│  │   DRINK RECOMMENDER     │  │   │  │      RECIPE WRITER          │  │
-│  │   (Unified Agent)       │  │   │  │                             │  │
-│  │                         │  │   │  │  Input: Selected cocktail   │  │
-│  │  Input: Cabinet + Mood  │  │   │  │  Tools: RecipeDB,           │  │
-│  │  Tools: RecipeDB,       │  │   │  │         SubstitutionFinder  │  │
-│  │         FlavorProfiler  │  │   │  │  Output: RecipeOutput       │  │
-│  │  Output: AnalysisOutput │  │   │  └───────────┬─────────────────┘  │
-│  │  (1 LLM call)           │  │   │              │ (optional)         │
-│  └─────────────────────────┘  │   │              ▼                    │
-│                               │   │  ┌─────────────────────────────┐  │
-│                               │   │  │     BOTTLE ADVISOR          │  │
-│                               │   │  │                             │  │
-│                               │   │  │  Input: Cabinet             │  │
-│                               │   │  │  Tool: UnlockCalculator     │  │
-│                               │   │  │  Output: BottleAdvisorOutput│  │
-│                               │   │  └─────────────────────────────┘  │
-└───────────────────────────────┘   └───────────────────────────────────┘
+#### Fast Mode (Default) - Single LLM call, ~50% faster
+
+```mermaid
+flowchart LR
+    subgraph Flow["Cocktail Flow"]
+        direction TB
+        Input["User Input<br/>Cabinet + Mood + Skill"]
+    end
+
+    subgraph Analysis["Crew 1: Analysis (Fast)"]
+        DR["Drink Recommender<br/>(1 LLM call)"]
+    end
+
+    subgraph Recipe["Crew 2: Recipe"]
+        RW["Recipe Writer"]
+        BA["Bottle Advisor<br/>(optional)"]
+    end
+
+    Input --> DR
+    DR --> RW
+    RW --> BA
 ```
 
-**Full Mode** - Two LLM calls, more detailed analysis:
+#### Full Mode - Two LLM calls, detailed analysis
+
+```mermaid
+flowchart TB
+    subgraph AnalysisFull["Crew 1: Analysis (Full)"]
+        CA["Cabinet Analyst<br/>RecipeDB Tool"]
+        MM["Mood Matcher<br/>FlavorProfiler Tool"]
+    end
+
+    CA --> MM
 ```
-┌───────────────────────────────┐
-│   CREW 1: ANALYSIS (FULL)     │
-├───────────────────────────────┤
-│  ┌─────────────────────────┐  │
-│  │    CABINET ANALYST      │  │
-│  │  Tool: RecipeDB         │  │
-│  │  Output: Candidates     │  │
-│  └───────────┬─────────────┘  │
-│              ▼                │
-│  ┌─────────────────────────┐  │
-│  │     MOOD MATCHER        │  │
-│  │  Tool: FlavorProfiler   │  │
-│  │  Output: AnalysisOutput │  │
-│  └─────────────────────────┘  │
-└───────────────────────────────┘
-```
+
+### Crew Comparison
+
+| Mode | LLM Calls | Latency | Use Case |
+|------|-----------|---------|----------|
+| Fast + no bottle | 2 | ~3-4s | Quick recommendations |
+| Fast + bottle | 3 | ~3-4s | Standard (default) |
+| Full + bottle | 4 | ~6-8s | Detailed analysis |
 
 ### Agent Specifications
 
@@ -599,40 +591,47 @@ Note: Tracing is disabled by default to avoid sending data to external services.
 
 ### Tool Specifications
 
+```mermaid
+graph TB
+    subgraph Tools["CrewAI Tools (All Deterministic)"]
+        subgraph RecipeDB["RecipeDB Tool"]
+            R1["query_by_ingredients()"]
+            R2["get_recipe()"]
+        end
+
+        subgraph FlavorProfiler["FlavorProfiler Tool"]
+            F1["get_profile()"]
+            F2["Returns: sweet, sour, bitter, spirit"]
+        end
+
+        subgraph SubFinder["SubstitutionFinder Tool"]
+            S1["find_subs()"]
+            S2["Returns: [{sub, quality, ratio}]"]
+        end
+
+        subgraph UnlockCalc["UnlockCalculator Tool"]
+            U1["get_scores()"]
+            U2["Returns: {bottle: ROI score}"]
+        end
+    end
+
+    subgraph Data["JSON Data Files"]
+        Cocktails["cocktails.json<br/>103 recipes"]
+        Mocktails["mocktails.json<br/>39 recipes"]
+        Ingredients["ingredients.json<br/>180 items"]
+        Subs["substitutions.json<br/>118 rules"]
+        Unlock["unlock_scores.json<br/>Pre-computed ROI"]
+    end
+
+    RecipeDB --> Cocktails
+    RecipeDB --> Mocktails
+    FlavorProfiler --> Cocktails
+    SubFinder --> Subs
+    UnlockCalc --> Unlock
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                            TOOLS                                        │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐         │
-│  │   RecipeDB      │  │ FlavorProfiler  │  │SubstitutionFind │         │
-│  ├─────────────────┤  ├─────────────────┤  ├─────────────────┤         │
-│  │                 │  │                 │  │                 │         │
-│  │ query_by_       │  │ get_profile()   │  │ find_subs()     │         │
-│  │   ingredients() │  │                 │  │                 │         │
-│  │                 │  │ Returns:        │  │ Returns:        │         │
-│  │ get_recipe()    │  │ {sweet, sour,   │  │ [{sub, quality, │         │
-│  │                 │  │  bitter, spirit}│  │   ratio_adj}]   │         │
-│  │ Data: JSON file │  │                 │  │                 │         │
-│  │ No AI needed    │  │ Data: JSON file │  │ Data: JSON file │         │
-│  │                 │  │ No AI needed    │  │ No AI needed    │         │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘         │
-│                                                                         │
-│  ┌─────────────────┐                                                    │
-│  │UnlockCalculator │  KEY INSIGHT: All tools are deterministic.        │
-│  ├─────────────────┤  They query pre-computed data.                    │
-│  │                 │  AI is only for interpretation and copy.          │
-│  │ get_scores()    │                                                    │
-│  │                 │                                                    │
-│  │ Returns:        │                                                    │
-│  │ {bottle: score} │                                                    │
-│  │                 │                                                    │
-│  │ Pre-computed    │                                                    │
-│  │ at build time   │                                                    │
-│  └─────────────────┘                                                    │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+
+> **Key Insight**: All tools are deterministic. They query pre-computed data.
+> AI is only for mood interpretation and personalized copy.
 
 ---
 
@@ -650,59 +649,57 @@ The system supports several configuration parameters for performance tuning:
 
 ### Request Lifecycle
 
-```
-                              REQUEST
-                                 │
-                                 ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ 1. PARSE INPUT                                                       │
-│    • Validate cabinet ingredients against known list                 │
-│    • Normalize names ("Maker's Mark" → "bourbon")                    │
-│    • Store in flow state                                             │
-└──────────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ 2. PRE-FILTER (No AI)                                                │
-│    • Query RecipeDB for all cocktails matching cabinet               │
-│    • This is a simple set intersection, not AI                       │
-│    • Returns 5-50 candidates depending on cabinet size               │
-└──────────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ 3. ANALYSIS CREW                                                     │
-│    • Fast mode (default): 1 LLM call via Drink Recommender           │
-│    • Full mode (fast_mode=False): 2 LLM calls (Cabinet Analyst →     │
-│      Mood Matcher)                                                   │
-│    • Output: AnalysisOutput with ranked candidates                   │
-└──────────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ 4. RECIPE CREW                                                       │
-│    • Recipe Writer: Full recipe with tips (RecipeOutput)             │
-│    • Bottle Advisor (optional, include_bottle_advice=True):          │
-│      Next bottle recommendation (BottleAdvisorOutput)                │
-│    • Output: RecipeCrewOutput (combined structured output)           │
-└──────────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ 5. RESPONSE                                                          │
-│    • Assemble JSON response                                          │
-│    • Store state for "show me something else"                        │
-│    • Return to client                                                │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Request["REQUEST"]
 
+    subgraph Step1["1. PARSE INPUT"]
+        P1["Validate cabinet ingredients"]
+        P2["Normalize names<br/>(Maker's Mark → bourbon)"]
+        P3["Store in flow state"]
+    end
 
-TOTAL LLM CALLS: 2-4 (depending on configuration)
-  - Fast mode + no bottle advice: 2 calls (~3-4 seconds)
-  - Fast mode + bottle advice (sequential): 3 calls (~5-6 seconds)
-  - Fast mode + bottle advice (parallel): 3 calls (~3-4 seconds) [40% faster]
-  - Full mode + bottle advice: 4 calls (~6-8 seconds)
-TARGET LATENCY: <8 seconds (fast mode with parallel: <4 seconds)
+    subgraph Step2["2. PRE-FILTER (No AI)"]
+        F1["Query RecipeDB for matching cocktails"]
+        F2["Simple set intersection"]
+        F3["Returns 5-50 candidates"]
+    end
+
+    subgraph Step3["3. ANALYSIS CREW"]
+        A1["Fast mode: 1 LLM call<br/>(Drink Recommender)"]
+        A2["Full mode: 2 LLM calls<br/>(Cabinet Analyst → Mood Matcher)"]
+        A3["Output: AnalysisOutput"]
+    end
+
+    subgraph Step4["4. RECIPE CREW"]
+        R1["Recipe Writer<br/>(RecipeOutput)"]
+        R2["Bottle Advisor (optional)<br/>(BottleAdvisorOutput)"]
+        R3["Output: RecipeCrewOutput"]
+    end
+
+    subgraph Step5["5. RESPONSE"]
+        S1["Assemble JSON response"]
+        S2["Store state for 'show me something else'"]
+        S3["Return to client"]
+    end
+
+    Request --> Step1
+    Step1 --> Step2
+    Step2 --> Step3
+    Step3 --> Step4
+    Step4 --> Step5
 ```
+
+**LLM Call Configurations**:
+
+| Configuration | LLM Calls | Latency |
+|---------------|-----------|---------|
+| Fast mode + no bottle advice | 2 | ~3-4s |
+| Fast mode + bottle advice (sequential) | 3 | ~5-6s |
+| Fast mode + bottle advice (parallel) | 3 | ~3-4s (40% faster) |
+| Full mode + bottle advice | 4 | ~6-8s |
+
+**Target Latency**: <8 seconds (fast mode with parallel: <4 seconds)
 
 ### State Management
 
@@ -737,6 +734,102 @@ class CocktailFlowState(BaseModel):
 ```
 
 **Note**: History, skill level, and drink type are stored in browser local storage and passed with each request.
+
+---
+
+## API Rate Limiting
+
+Rate limiting protects upstream API quotas (especially expensive LLM calls) using a **privacy-first approach**. Implementation uses the [ratelimit](https://github.com/tomasbasham/ratelimit) library with global function-level limits.
+
+### Privacy-First Design
+
+**No user tracking**: Unlike traditional rate limiting that tracks per-user/IP, our approach uses global limits shared across all users. This protects API quotas while preserving user privacy.
+
+| Approach | User Tracking | Privacy | Use Case |
+|----------|---------------|---------|----------|
+| Per-IP (SlowAPI) | ✅ Tracks IPs | ❌ Low | Multi-tenant APIs |
+| **Global (ratelimit)** | ❌ No tracking | ✅ High | Quota protection |
+
+### Rate Limit Tiers
+
+| Tier | Limit | Endpoints | Rationale |
+|------|-------|-----------|-----------|
+| **LLM** | 10/minute | `/api/flow` | AI calls are expensive (~$0.001-0.01 per request) |
+| **COMPUTE** | 30/minute | `/api/suggest-bottles` | CPU-intensive recommendation algorithms |
+| **STATIC** | No limit | `/api/drinks`, `/api/drinks/{id}`, `/api/ingredients` | Fast JSON lookups |
+| **HEALTH** | No limit | `/health` | Monitoring/orchestration must always work |
+
+### Behavior
+
+The default decorators use `sleep_and_retry`, which automatically waits when limits are reached rather than returning immediate 429 errors. This provides a better user experience.
+
+For fail-fast scenarios, strict variants are available that raise HTTP 429 immediately.
+
+### Implementation
+
+```python
+# src/app/rate_limit.py
+from ratelimit import limits, sleep_and_retry
+
+class RateLimits:
+    LLM_CALLS = 10
+    LLM_PERIOD = 60  # seconds
+    COMPUTE_CALLS = 30
+    COMPUTE_PERIOD = 60  # seconds
+
+def rate_limit_llm(func):
+    """Decorator for LLM endpoints - waits on limit."""
+    @sleep_and_retry
+    @limits(calls=RateLimits.LLM_CALLS, period=RateLimits.LLM_PERIOD)
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        return await func(*args, **kwargs)
+    return wrapper
+```
+
+### Endpoint Decorators
+
+```python
+# Apply rate limits in routers/api.py
+@router.post("/flow")
+@rate_limit_llm
+async def flow_endpoint(...): ...
+
+@router.post("/suggest-bottles")
+@rate_limit_compute
+async def suggest_bottles(...): ...
+
+# Static endpoints have no rate limiting - fast local lookups
+@router.get("/drinks")
+async def get_drinks(): ...
+```
+
+### Client-Side Handling
+
+Recommended approach for handling rate limits:
+
+```javascript
+async function callApi(url, options) {
+  const response = await fetch(url, options);
+
+  if (response.status === 429) {
+    const retryAfter = response.headers.get('Retry-After');
+    // Show user-friendly message with retry time
+    throw new Error(`Too many requests. Try again in ${retryAfter}s`);
+  }
+
+  return response;
+}
+```
+
+### Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| In-memory storage | Simple for MVP; Redis for production multi-instance |
+| IP-based tracking | No auth system; reasonable for single-user sessions |
+| Per-minute windows | Matches typical user interaction patterns |
+| Tiered limits | Protects expensive resources while allowing browsing |
 
 ---
 
@@ -1181,19 +1274,20 @@ When `PARALLEL_CREWS=true` (the default), the Recipe Writer and Bottle Advisor t
 
 ### Parallel Execution Flow
 
-```
-analyze (1.5-4s)
-    │
-    ├──────────────────┬───────────────────┐
-    │                  │                   │
-    ▼                  ▼                   │
-Recipe Writer    Bottle Advisor           │  ← PARALLEL (asyncio.gather)
-(1.5-2s)         (1.5-2s)                 │
-    │                  │                   │
-    └──────────────────┴───────────────────┘
-                       │
-                       ▼
-                 merge_results
+```mermaid
+flowchart TB
+    Analyze["analyze<br/>(1.5-4s)"]
+
+    subgraph Parallel["PARALLEL (asyncio.gather)"]
+        direction LR
+        Recipe["Recipe Writer<br/>(1.5-2s)"]
+        Bottle["Bottle Advisor<br/>(1.5-2s)"]
+    end
+
+    Merge["merge_results"]
+
+    Analyze --> Parallel
+    Parallel --> Merge
 ```
 
 ### Why This Works
@@ -1230,60 +1324,59 @@ export PARALLEL_CREWS=false
 
 Raja Chat introduces a conversational AI interface where users interact with Raja, a bartender persona from Bombay, through natural language chat. This supplements the existing recommendation flow with a more engaging, personality-rich experience.
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         RAJA CHAT ARCHITECTURE                           │
-│                                                                         │
-│   "Arrey bhai! Welcome to my bar. What's your mood today?"              │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    │                               │
-                    ▼                               ▼
-┌───────────────────────────────┐   ┌───────────────────────────────────┐
-│       FRONTEND CHAT           │   │        SESSION MANAGEMENT          │
-│       (raja-chat.js)          │   │        (In-Memory Store)          │
-├───────────────────────────────┤   ├───────────────────────────────────┤
-│ • Message input/display       │   │ • ChatSession with history        │
-│ • Typing indicators           │   │ • User context (cabinet, prefs)   │
-│ • Drink link rendering        │   │ • Mentioned drinks/ingredients    │
-│ • LocalStorage session ID     │   │ • Mood extraction state           │
-└───────────────────────────────┘   └───────────────────────────────────┘
-                    │                               │
-                    └───────────────┬───────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         RAJA CHAT CREW                                   │
-│                                                                         │
-│   ┌─────────────────────────────────────────────────────────────────┐   │
-│   │                    RAJA BARTENDER AGENT                         │   │
-│   │                                                                 │   │
-│   │   Role: "Raja - Your Bombay Bartender"                         │   │
-│   │   LLM: Claude Haiku (temperature: 0.85)                        │   │
-│   │                                                                 │   │
-│   │   Personality Traits:                                          │   │
-│   │   • 20 years bartending in Colaba, Bombay                      │   │
-│   │   • Hindi phrases ("Arrey bhai!", "Ekdum first class!")        │   │
-│   │   • Bollywood, cricket, monsoon references                     │   │
-│   │   • Storytelling about drink history                           │   │
-│   │   • Asks about mood, dinner, music for context                 │   │
-│   │                                                                 │   │
-│   │   Context Injection:                                           │   │
-│   │   • Conversation history (last 8 messages)                     │   │
-│   │   • User's cabinet and makeable drinks                         │   │
-│   │   • Skill level and preferences                                │   │
-│   │   • Current detected mood                                      │   │
-│   └─────────────────────────────────────────────────────────────────┘   │
-│                                                                         │
-│   Output: RajaChatOutput (Pydantic structured response)                 │
-│   • response: Raja's message with personality                           │
-│   • detected_intent: greeting | recommendation | recipe_question | ...  │
-│   • detected_mood: relaxed | celebratory | contemplative | ...          │
-│   • drinks_mentioned: ["manhattan", "negroni"]                          │
-│   • recommendation_made: true/false                                     │
-│   • recommended_drink_id: "manhattan"                                   │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Header["Raja Chat Architecture"]
+        Greeting["🍸 Arrey bhai! Welcome to my bar.<br/>What's your mood today?"]
+    end
+
+    subgraph Frontend["Frontend Chat (raja-chat.js)"]
+        F1["Message input/display"]
+        F2["Typing indicators"]
+        F3["Drink link rendering"]
+        F4["LocalStorage session ID"]
+    end
+
+    subgraph Session["Session Management (In-Memory Store)"]
+        S1["ChatSession with history"]
+        S2["User context (cabinet, prefs)"]
+        S3["Mentioned drinks/ingredients"]
+        S4["Mood extraction state"]
+    end
+
+    subgraph RajaCrew["Raja Chat Crew"]
+        subgraph Agent["Raja Bartender Agent"]
+            Role["Role: Raja - Your Bombay Bartender<br/>LLM: Claude Haiku (temp: 0.85)"]
+
+            subgraph Personality["Personality Traits"]
+                P1["20 years in Colaba, Bombay"]
+                P2["Hindi phrases"]
+                P3["Bollywood & cricket refs"]
+                P4["Drink history stories"]
+            end
+
+            subgraph Context["Context Injection"]
+                C1["Last 8 messages"]
+                C2["Cabinet & makeable drinks"]
+                C3["Skill level & preferences"]
+                C4["Detected mood"]
+            end
+        end
+
+        subgraph Output["RajaChatOutput"]
+            O1["response: Raja's message"]
+            O2["detected_intent: greeting | recommendation | ..."]
+            O3["detected_mood: relaxed | celebratory | ..."]
+            O4["drinks_mentioned: ['manhattan', 'negroni']"]
+            O5["recommendation_made: true/false"]
+        end
+    end
+
+    Header --> Frontend
+    Header --> Session
+    Frontend --> RajaCrew
+    Session --> RajaCrew
+    Agent --> Output
 ```
 
 ### Chat Pydantic Models
@@ -1300,152 +1393,40 @@ class MessageIntent(str, Enum):
     GREETING = "greeting"
     RECOMMENDATION_REQUEST = "recommendation_request"
     RECIPE_QUESTION = "recipe_question"
-    TECHNIQUE_QUESTION = "technique_question"
-    INGREDIENT_QUESTION = "ingredient_question"
-    GENERAL_CHAT = "general_chat"
-    CABINET_UPDATE = "cabinet_update"
-    FEEDBACK = "feedback"
-    GOODBYE = "goodbye"
-
-class ChatMessage(BaseModel):
-    id: str
-    role: MessageRole
-    content: str
-    timestamp: datetime
-    intent: MessageIntent | None
-    metadata: dict[str, Any]
+    # ... additional intents
 
 class ChatSession(BaseModel):
     session_id: str
-    history: ChatHistory  # List of ChatMessage
+    history: ChatHistory
     cabinet: list[str]
     skill_level: str
     current_mood: str | None
-    last_recommended_drink: str | None
-    mentioned_drinks: list[str]
 
 class ChatRequest(BaseModel):
     session_id: str | None
     message: str
     cabinet: list[str] | None
-    skill_level: str | None
-    drink_type: str | None
 
 class ChatResponse(BaseModel):
     session_id: str
-    message_id: str
     content: str
     drinks_mentioned: list[DrinkReference]
-    suggested_action: str | None
     recommendation_offered: bool
-    recommended_drink_id: str | None
-```
-
-### Agent Configuration
-
-```yaml
-# src/app/agents/config/agents.yaml
-
-raja_bartender:
-  role: "Raja - Your Bombay Bartender"
-  goal: "Have natural, personality-rich conversations about cocktails while providing expert mixology advice"
-  backstory: >
-    You are Raja, a charismatic bartender from Colaba, Bombay (now Mumbai). You've been
-    behind the bar for 20 years, starting at Leopold Cafe and now running your own
-    speakeasy. You speak with warmth and occasional Hindi phrases ("Arrey bhai!",
-    "Ekdum first class!", "Kya baat hai!"). You have strong opinions about cocktails -
-    you believe a good drink tells a story. You love sharing the history behind drinks
-    and often relate them to your experiences in Bombay's bar scene. You're patient
-    with beginners but can go deep with enthusiasts. You occasionally reference Bollywood,
-    cricket, and monsoon season when describing drinks. When someone asks for a
-    recommendation, you ask about their mood, what they had for dinner, or what music
-    they're listening to - because context matters for the perfect drink.
-  verbose: false
-  allow_delegation: false
-```
-
-### LLM Configuration for Conversation
-
-```yaml
-# src/app/agents/config/llm.yaml
-
-conversational:
-  model: "anthropic/claude-3-5-haiku-20241022"
-  max_tokens: 1024
-  temperature: 0.85  # Higher for personality variation
-```
-
-### API Endpoints
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/chat` | POST | Send message, get Raja's response |
-| `/api/chat/{session_id}/history` | GET | Retrieve conversation history |
-| `/api/chat/{session_id}` | DELETE | End session, cleanup resources |
-
-### Request Flow
-
-```
-1. User sends message via POST /api/chat
-   │
-   ├── First message: session_id=null, cabinet=[], skill_level="intermediate"
-   │   → Create new ChatSession with greeting
-   │
-   └── Follow-up: session_id="abc123"
-       → Retrieve existing session, update context
-       │
-       ▼
-2. Add user message to session history
-       │
-       ▼
-3. Build crew inputs:
-   • Format conversation history (last 8 messages)
-   • Get makeable drinks from cabinet
-   • Include user preferences
-       │
-       ▼
-4. Run Raja Chat Crew (single agent, 1 LLM call)
-       │
-       ▼
-5. Parse RajaChatOutput (Pydantic with JSON fallback)
-       │
-       ▼
-6. Update session state:
-   • Add Raja's response to history
-   • Update detected mood
-   • Track mentioned drinks
-       │
-       ▼
-7. Return ChatResponse with:
-   • Raja's message
-   • Drink references (clickable)
-   • Suggested action (view_recipe, update_cabinet)
-   • Recommendation metadata
 ```
 
 ### Design Decisions
 
 | Decision | Rationale |
 |----------|-----------|
-| Separate agent from recommendation flow | Different LLM settings (higher temp), distinct context management |
-| Server-side session storage | Maintains continuity, limits context to last N messages |
+| Separate agent from recommendation flow | Different LLM settings, distinct context management |
+| Server-side session storage | Maintains continuity, limits context |
 | Context window of 8 messages | Balance between context and token usage |
-| Higher temperature (0.85) | More personality variation in responses |
+| Higher temperature (0.85) | More personality variation |
 | Single-agent crew | Simpler, faster for conversational use case |
-| Personality in YAML | Easy to tune without code changes |
-
-### Integration with Existing Flow
-
-Raja Chat integrates with but does not replace the existing recommendation flow:
-
-1. **Cabinet Sharing**: Uses same cabinet data from localStorage
-2. **Drink Links**: Recommended drinks link to `/drink/{id}` detail pages
-3. **Session Context**: Stores `recommended_drink_id` for follow-up questions
-4. **Fallback**: Users can still use traditional recommendation UI
 
 ---
 
-*Document Version: 1.5*
+*Document Version: 1.6*
 *Last Updated: 2025-12-30*
 *Principles: KISS + YAGNI*
-*Changes: Added Raja Conversational Chat Architecture section with agent config, Pydantic models, API endpoints, and design rationale*
+*Changes: Added privacy-first rate limiting, Raja Chat architecture*
