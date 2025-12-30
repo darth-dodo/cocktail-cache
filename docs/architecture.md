@@ -12,9 +12,10 @@
 2. [Frontend Architecture](#frontend-architecture)
 3. [Agentic Architecture](#agentic-architecture)
 4. [Data Flow](#data-flow)
-5. [BDD Specifications](#bdd-specifications)
-6. [Blueprint](#blueprint)
-7. [Key Decisions](#key-decisions)
+5. [API Rate Limiting](#api-rate-limiting)
+6. [BDD Specifications](#bdd-specifications)
+7. [Blueprint](#blueprint)
+8. [Key Decisions](#key-decisions)
 
 ---
 
@@ -36,6 +37,7 @@
 | CrewAI Crews | ✅ Complete | Analysis Crew (fast/full modes) + Recipe Crew (optional bottle advice) |
 | CrewAI Flow | ✅ Complete | CocktailFlow with state management and rejection workflow |
 | API Routes | ✅ Complete | FastAPI endpoints for recommendations |
+| Rate Limiting | ✅ Complete | SlowAPI with tiered limits (LLM/compute/static) |
 | Chat UI | ✅ Complete | Conversational interface with Raja the AI Mixologist |
 | Tabbed Navigation | ✅ Complete | Chat/Cabinet/Browse tabs in unified header |
 | Browse Page | ✅ Complete | Search, filter by type/difficulty, drink detail pages |
@@ -735,6 +737,102 @@ class CocktailFlowState(BaseModel):
 
 ---
 
+## API Rate Limiting
+
+Rate limiting protects upstream API quotas (especially expensive LLM calls) using a **privacy-first approach**. Implementation uses the [ratelimit](https://github.com/tomasbasham/ratelimit) library with global function-level limits.
+
+### Privacy-First Design
+
+**No user tracking**: Unlike traditional rate limiting that tracks per-user/IP, our approach uses global limits shared across all users. This protects API quotas while preserving user privacy.
+
+| Approach | User Tracking | Privacy | Use Case |
+|----------|---------------|---------|----------|
+| Per-IP (SlowAPI) | ✅ Tracks IPs | ❌ Low | Multi-tenant APIs |
+| **Global (ratelimit)** | ❌ No tracking | ✅ High | Quota protection |
+
+### Rate Limit Tiers
+
+| Tier | Limit | Endpoints | Rationale |
+|------|-------|-----------|-----------|
+| **LLM** | 10/minute | `/api/flow` | AI calls are expensive (~$0.001-0.01 per request) |
+| **COMPUTE** | 30/minute | `/api/suggest-bottles` | CPU-intensive recommendation algorithms |
+| **STATIC** | No limit | `/api/drinks`, `/api/drinks/{id}`, `/api/ingredients` | Fast JSON lookups |
+| **HEALTH** | No limit | `/health` | Monitoring/orchestration must always work |
+
+### Behavior
+
+The default decorators use `sleep_and_retry`, which automatically waits when limits are reached rather than returning immediate 429 errors. This provides a better user experience.
+
+For fail-fast scenarios, strict variants are available that raise HTTP 429 immediately.
+
+### Implementation
+
+```python
+# src/app/rate_limit.py
+from ratelimit import limits, sleep_and_retry
+
+class RateLimits:
+    LLM_CALLS = 10
+    LLM_PERIOD = 60  # seconds
+    COMPUTE_CALLS = 30
+    COMPUTE_PERIOD = 60  # seconds
+
+def rate_limit_llm(func):
+    """Decorator for LLM endpoints - waits on limit."""
+    @sleep_and_retry
+    @limits(calls=RateLimits.LLM_CALLS, period=RateLimits.LLM_PERIOD)
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        return await func(*args, **kwargs)
+    return wrapper
+```
+
+### Endpoint Decorators
+
+```python
+# Apply rate limits in routers/api.py
+@router.post("/flow")
+@rate_limit_llm
+async def flow_endpoint(...): ...
+
+@router.post("/suggest-bottles")
+@rate_limit_compute
+async def suggest_bottles(...): ...
+
+# Static endpoints have no rate limiting - fast local lookups
+@router.get("/drinks")
+async def get_drinks(): ...
+```
+
+### Client-Side Handling
+
+Recommended approach for handling rate limits:
+
+```javascript
+async function callApi(url, options) {
+  const response = await fetch(url, options);
+
+  if (response.status === 429) {
+    const retryAfter = response.headers.get('Retry-After');
+    // Show user-friendly message with retry time
+    throw new Error(`Too many requests. Try again in ${retryAfter}s`);
+  }
+
+  return response;
+}
+```
+
+### Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| In-memory storage | Simple for MVP; Redis for production multi-instance |
+| IP-based tracking | No auth system; reasonable for single-user sessions |
+| Per-minute windows | Matches typical user interaction patterns |
+| Tiered limits | Protects expensive resources while allowing browsing |
+
+---
+
 ## BDD Specifications
 
 ### Feature: Cocktail Recommendation
@@ -1295,152 +1393,40 @@ class MessageIntent(str, Enum):
     GREETING = "greeting"
     RECOMMENDATION_REQUEST = "recommendation_request"
     RECIPE_QUESTION = "recipe_question"
-    TECHNIQUE_QUESTION = "technique_question"
-    INGREDIENT_QUESTION = "ingredient_question"
-    GENERAL_CHAT = "general_chat"
-    CABINET_UPDATE = "cabinet_update"
-    FEEDBACK = "feedback"
-    GOODBYE = "goodbye"
-
-class ChatMessage(BaseModel):
-    id: str
-    role: MessageRole
-    content: str
-    timestamp: datetime
-    intent: MessageIntent | None
-    metadata: dict[str, Any]
+    # ... additional intents
 
 class ChatSession(BaseModel):
     session_id: str
-    history: ChatHistory  # List of ChatMessage
+    history: ChatHistory
     cabinet: list[str]
     skill_level: str
     current_mood: str | None
-    last_recommended_drink: str | None
-    mentioned_drinks: list[str]
 
 class ChatRequest(BaseModel):
     session_id: str | None
     message: str
     cabinet: list[str] | None
-    skill_level: str | None
-    drink_type: str | None
 
 class ChatResponse(BaseModel):
     session_id: str
-    message_id: str
     content: str
     drinks_mentioned: list[DrinkReference]
-    suggested_action: str | None
     recommendation_offered: bool
-    recommended_drink_id: str | None
-```
-
-### Agent Configuration
-
-```yaml
-# src/app/agents/config/agents.yaml
-
-raja_bartender:
-  role: "Raja - Your Bombay Bartender"
-  goal: "Have natural, personality-rich conversations about cocktails while providing expert mixology advice"
-  backstory: >
-    You are Raja, a charismatic bartender from Colaba, Bombay (now Mumbai). You've been
-    behind the bar for 20 years, starting at Leopold Cafe and now running your own
-    speakeasy. You speak with warmth and occasional Hindi phrases ("Arrey bhai!",
-    "Ekdum first class!", "Kya baat hai!"). You have strong opinions about cocktails -
-    you believe a good drink tells a story. You love sharing the history behind drinks
-    and often relate them to your experiences in Bombay's bar scene. You're patient
-    with beginners but can go deep with enthusiasts. You occasionally reference Bollywood,
-    cricket, and monsoon season when describing drinks. When someone asks for a
-    recommendation, you ask about their mood, what they had for dinner, or what music
-    they're listening to - because context matters for the perfect drink.
-  verbose: false
-  allow_delegation: false
-```
-
-### LLM Configuration for Conversation
-
-```yaml
-# src/app/agents/config/llm.yaml
-
-conversational:
-  model: "anthropic/claude-3-5-haiku-20241022"
-  max_tokens: 1024
-  temperature: 0.85  # Higher for personality variation
-```
-
-### API Endpoints
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/chat` | POST | Send message, get Raja's response |
-| `/api/chat/{session_id}/history` | GET | Retrieve conversation history |
-| `/api/chat/{session_id}` | DELETE | End session, cleanup resources |
-
-### Request Flow
-
-```
-1. User sends message via POST /api/chat
-   │
-   ├── First message: session_id=null, cabinet=[], skill_level="intermediate"
-   │   → Create new ChatSession with greeting
-   │
-   └── Follow-up: session_id="abc123"
-       → Retrieve existing session, update context
-       │
-       ▼
-2. Add user message to session history
-       │
-       ▼
-3. Build crew inputs:
-   • Format conversation history (last 8 messages)
-   • Get makeable drinks from cabinet
-   • Include user preferences
-       │
-       ▼
-4. Run Raja Chat Crew (single agent, 1 LLM call)
-       │
-       ▼
-5. Parse RajaChatOutput (Pydantic with JSON fallback)
-       │
-       ▼
-6. Update session state:
-   • Add Raja's response to history
-   • Update detected mood
-   • Track mentioned drinks
-       │
-       ▼
-7. Return ChatResponse with:
-   • Raja's message
-   • Drink references (clickable)
-   • Suggested action (view_recipe, update_cabinet)
-   • Recommendation metadata
 ```
 
 ### Design Decisions
 
 | Decision | Rationale |
 |----------|-----------|
-| Separate agent from recommendation flow | Different LLM settings (higher temp), distinct context management |
-| Server-side session storage | Maintains continuity, limits context to last N messages |
+| Separate agent from recommendation flow | Different LLM settings, distinct context management |
+| Server-side session storage | Maintains continuity, limits context |
 | Context window of 8 messages | Balance between context and token usage |
-| Higher temperature (0.85) | More personality variation in responses |
+| Higher temperature (0.85) | More personality variation |
 | Single-agent crew | Simpler, faster for conversational use case |
-| Personality in YAML | Easy to tune without code changes |
-
-### Integration with Existing Flow
-
-Raja Chat integrates with but does not replace the existing recommendation flow:
-
-1. **Cabinet Sharing**: Uses same cabinet data from localStorage
-2. **Drink Links**: Recommended drinks link to `/drink/{id}` detail pages
-3. **Session Context**: Stores `recommended_drink_id` for follow-up questions
-4. **Fallback**: Users can still use traditional recommendation UI
 
 ---
 
-*Document Version: 1.5*
+*Document Version: 1.6*
 *Last Updated: 2025-12-30*
 *Principles: KISS + YAGNI*
-*Changes: Added Raja Conversational Chat Architecture section with agent config, Pydantic models, API endpoints, and design rationale*
+*Changes: Added privacy-first rate limiting, Raja Chat architecture*
