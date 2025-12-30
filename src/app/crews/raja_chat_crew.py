@@ -200,7 +200,8 @@ def create_raja_chat_crew(session: ChatSession, user_message: str) -> Crew:
 
     # Get all drink IDs from our database for validation
     all_drink_ids = _get_all_drink_ids()
-    drink_ids_sample = sorted(all_drink_ids)[:50]  # Sample for prompt context
+    # Include ALL drink IDs so Raja can accurately identify which drinks are in our DB
+    all_drink_ids_sorted = sorted(all_drink_ids)
 
     # Build the chat task
     chat_task = Task(
@@ -218,8 +219,8 @@ CUSTOMER'S BAR CABINET:
 DRINKS THEY CAN MAKE:
 {available_drinks_text}
 
-OUR DRINK DATABASE (sample of {len(all_drink_ids)} drinks):
-{", ".join(drink_ids_sample)}{"..." if len(all_drink_ids) > 50 else ""}
+OUR DRINK DATABASE ({len(all_drink_ids)} drinks - ONLY these IDs are valid):
+{", ".join(all_drink_ids_sorted)}
 
 CUSTOMER INFO:
 - Skill Level: {session.skill_level}
@@ -235,10 +236,11 @@ INSTRUCTIONS:
 6. If they need ingredients, tell them kindly - "Yaar, grab some X and you're all set."
 
 CRITICAL - DRINK RECOMMENDATIONS:
-- If recommending a drink that IS in our database (check the drink IDs above), use "recommended_drink_id" with the exact ID.
-- If recommending a drink that is NOT in our database, you MUST provide the FULL RECIPE in "special_recipe" field.
+- The DRINK DATABASE above contains ALL valid drink IDs. ONLY use "recommended_drink_id" if the EXACT ID is in that list.
+- If recommending a drink whose ID is NOT in the list above, you MUST use "special_recipe" instead.
   This is "Raja's Special from Memory" - a drink you know but we don't have in our collection.
   Include: name, tagline, ingredients (with amounts like "2 oz bourbon"), method (step-by-step), glassware, garnish, and your personal tip.
+- NEVER invent or guess drink IDs. If unsure, use special_recipe.
 
 IMPORTANT: Return a JSON object matching the RajaChatOutput schema.""",
         expected_output="""A JSON object with structure:
@@ -367,6 +369,17 @@ def run_raja_chat(request: ChatRequest) -> ChatResponse:
 
     # Parse output
     raja_output = _parse_raja_output(result)
+
+    # Validate recommended_drink_id against our database
+    # If Raja recommends a drink not in our DB, clear the ID to prevent dead links
+    if raja_output.recommended_drink_id:
+        all_drink_ids = _get_all_drink_ids()
+        if raja_output.recommended_drink_id not in all_drink_ids:
+            logger.warning(
+                f"Raja recommended unknown drink: {raja_output.recommended_drink_id}, clearing ID"
+            )
+            raja_output.recommended_drink_id = None
+            # Note: If special_recipe was also provided by Raja, it will still be used
 
     # Update session state
     if raja_output.detected_mood:

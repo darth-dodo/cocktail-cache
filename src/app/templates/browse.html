@@ -103,13 +103,13 @@
     <!-- Results Count -->
     <div class="flex justify-between items-center mb-4 px-1">
         <p id="results-count" class="text-stone-400 text-sm">Loading drinks...</p>
-        <a href="/" class="ask-ai-link text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-amber-900/20 transition-all" title="Get personalized recommendations">
+        <button onclick="window.history.back()" class="ask-ai-link text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-amber-900/20 transition-all" title="Go back to chat with Raja">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
-            <span class="hidden sm:inline">Ask AI Instead</span>
-            <span class="sm:hidden">AI</span>
-        </a>
+            <span class="hidden sm:inline">Back to Chat</span>
+            <span class="sm:hidden">Back</span>
+        </button>
     </div>
 
     <!-- Drinks Grid -->
@@ -126,12 +126,12 @@
         <p class="text-stone-500 text-sm mb-4">Try adjusting your search or filters</p>
         <div class="glass-card inline-block px-4 py-3 rounded-lg">
             <p class="text-stone-400 text-sm mb-2">Looking for something specific?</p>
-            <a href="/" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors">
+            <button onclick="window.history.back()" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
-                Ask our AI mixologist for a custom recommendation
-            </a>
+                Go back to ask Raja for a recommendation
+            </button>
         </div>
     </div>
 

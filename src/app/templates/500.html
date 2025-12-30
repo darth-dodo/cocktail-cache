@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Something Went Wrong - Cocktail Cache{% endblock %}
+
+{# Standalone page - uses natural scrolling (default body behavior) #}
+{% block main_class %}py-6{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12 text-center">
+    <!-- Glass Card Container -->
+    <div class="glass-card p-8 sm:p-12">
+        <!-- Icon -->
+        <div class="mb-6">
+            <span class="text-6xl sm:text-8xl">🔥</span>
+        </div>
+
+        <!-- 500 Message -->
+        <h1 class="text-4xl sm:text-5xl font-bold recipe-title mb-4">500</h1>
+        <h2 class="text-xl sm:text-2xl text-amber-300 mb-4">Oops, Something Spilled!</h2>
+
+        <p class="text-stone-400 text-lg mb-8 max-w-md mx-auto">
+            Arrey yaar, looks like something went wrong in the back of the bar.
+            My apologies - let me clean this up. Please try again in a moment!
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onclick="window.location.reload()" class="btn glass-btn-secondary flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Try Again
+            </button>
+            <a href="/" class="btn glass-btn-primary flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Go Home
+            </a>
+        </div>
+
+        <!-- Fun Message -->
+        <div class="mt-10 pt-6 border-t border-amber-900/30">
+            <p class="text-stone-500 text-sm italic">
+                "Even the best bartenders drop a glass sometimes.
+                What matters is we clean it up and pour the next one perfectly." - Raja
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

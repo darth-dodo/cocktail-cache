@@ -17,6 +17,7 @@ from crewai import Crew
 
 from src.app.crews.raja_chat_crew import (
     _format_drinks_for_prompt,
+    _get_all_drink_ids,
     _get_drink_by_id,
     _get_makeable_drinks,
     _get_suggested_action,
@@ -582,6 +583,139 @@ class TestGetSuggestedAction:
         result = _get_suggested_action(output)
 
         assert result is None
+
+
+class TestGetAllDrinkIds:
+    """Tests for _get_all_drink_ids helper function."""
+
+    @patch("src.app.crews.raja_chat_crew.load_all_drinks")
+    def test_returns_set_of_drink_ids(self, mock_load):
+        """Should return a set of all drink IDs from the database."""
+        from src.app.crews.raja_chat_crew import _get_all_drink_ids
+
+        mock_drink1 = MagicMock()
+        mock_drink1.id = "old-fashioned"
+        mock_drink2 = MagicMock()
+        mock_drink2.id = "manhattan"
+        mock_drink3 = MagicMock()
+        mock_drink3.id = "mojito"
+        mock_load.return_value = [mock_drink1, mock_drink2, mock_drink3]
+
+        result = _get_all_drink_ids()
+
+        assert isinstance(result, set)
+        assert result == {"old-fashioned", "manhattan", "mojito"}
+
+    @patch("src.app.crews.raja_chat_crew.load_all_drinks")
+    def test_returns_empty_set_when_no_drinks(self, mock_load):
+        """Should return empty set when no drinks in database."""
+        from src.app.crews.raja_chat_crew import _get_all_drink_ids
+
+        mock_load.return_value = []
+
+        result = _get_all_drink_ids()
+
+        assert result == set()
+
+
+class TestDrinkIdValidation:
+    """Tests for drink ID validation in crew creation and run_raja_chat.
+
+    Note: The actual validation of recommended_drink_id happens in run_raja_chat(),
+    not in _parse_raja_output(). The _parse_raja_output function only parses the LLM
+    output, while run_raja_chat validates the drink ID after parsing.
+    """
+
+    def test_get_all_drink_ids_returns_set(self):
+        """_get_all_drink_ids should return a set of drink IDs."""
+        # This tests the actual function with real data
+        result = _get_all_drink_ids()
+
+        assert isinstance(result, set)
+        assert len(result) > 0  # Should have drinks in the database
+        # Check some known drinks exist
+        assert (
+            "old-fashioned" in result or len(result) > 50
+        )  # Either specific drink or many drinks
+
+    def test_parse_output_returns_drink_id_as_is(self):
+        """_parse_raja_output should return drink ID without validation (validation happens later)."""
+        mock_result = MagicMock()
+        mock_result.pydantic = RajaChatOutput(
+            response="Try the Fancy Drink!",
+            detected_intent=MessageIntent.RECOMMENDATION_REQUEST,
+            recommendation_made=True,
+            recommended_drink_id="any-drink-id",  # This should pass through
+        )
+
+        result = _parse_raja_output(mock_result)
+
+        # _parse_raja_output just parses - validation happens in run_raja_chat
+        assert result.recommended_drink_id == "any-drink-id"
+
+    def test_parse_output_handles_none_drink_id(self):
+        """Should handle None recommended_drink_id gracefully."""
+        mock_result = MagicMock()
+        mock_result.pydantic = RajaChatOutput(
+            response="Nice chatting!",
+            detected_intent=MessageIntent.GENERAL_CHAT,
+            recommendation_made=False,
+            recommended_drink_id=None,  # No recommendation
+        )
+
+        result = _parse_raja_output(mock_result)
+
+        # Should remain None
+        assert result.recommended_drink_id is None
+
+    @patch("src.app.crews.raja_chat_crew.load_all_drinks")
+    def test_crew_task_includes_all_drink_ids(self, mock_load):
+        """Task description should include ALL drink IDs for validation."""
+        # Create mock drinks
+        mock_drinks = []
+        for i in range(5):
+            mock_drink = MagicMock()
+            mock_drink.id = f"drink-{i}"
+            mock_drink.name = f"Drink {i}"
+            mock_drink.tagline = f"Tagline {i}"
+            mock_drink.difficulty = "easy"
+            mock_drink.is_mocktail = False
+            mock_drink.ingredients = []
+            mock_drinks.append(mock_drink)
+        mock_load.return_value = mock_drinks
+
+        session = ChatSession(
+            session_id=str(uuid.uuid4()),
+            cabinet=[],
+        )
+
+        crew = create_raja_chat_crew(session, "What can I make?")
+        task = crew.tasks[0]
+
+        # All drink IDs should be in the task description
+        for i in range(5):
+            assert f"drink-{i}" in task.description
+
+    def test_all_drink_ids_in_prompt_matches_database(self):
+        """All drink IDs in the prompt should match what's in the database."""
+        # This ensures the prompt includes all drinks for accurate LLM validation
+        all_ids = _get_all_drink_ids()
+
+        session = ChatSession(
+            session_id=str(uuid.uuid4()),
+            cabinet=[],
+        )
+
+        crew = create_raja_chat_crew(session, "What drinks can I make?")
+        task_description = crew.tasks[0].description
+
+        # Count how many drink IDs appear in the task description
+        ids_in_prompt = sum(1 for drink_id in all_ids if drink_id in task_description)
+
+        # All drink IDs should be mentioned in the prompt (for validation)
+        assert ids_in_prompt == len(all_ids), (
+            f"Expected all {len(all_ids)} drink IDs in prompt, found {ids_in_prompt}"
+        )
 
 
 class TestTaskDescriptionContent:

@@ -252,6 +252,7 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', path='js/cabinet-state.js') }}"></script>
+<script src="{{ url_for('static', path='js/chat-state.js') }}"></script>
 <script src="{{ url_for('static', path='js/tab-manager.js') }}"></script>
 <script src="{{ url_for('static', path='js/browse-panel.js') }}"></script>
 <script src="{{ url_for('static', path='js/suggest-panel.js') }}"></script>
@@ -343,7 +344,18 @@ async function init() {
     window.addEventListener('tab-changed', handleTabChange);
     // Update cabinet count badge
     updateCabinetCount();
-    showWelcome();
+
+    // Restore chat state from sessionStorage if available
+    const { messagesHtml, sessionId } = loadChatState();
+    if (messagesHtml && messagesHtml.length > 0) {
+        chatMessages.innerHTML = messagesHtml;
+        state.chatSessionId = sessionId;
+        state.step = 'chatting';
+        showChatInput();
+        scrollToBottom();
+    } else {
+        showWelcome();
+    }
 }
 
 // Handle tab changes from TabManager
@@ -701,6 +713,8 @@ function resetChat(clearSavedCabinet = false) {
     state.skillLevel = 'intermediate';
     state.drinkType = 'both';
     chatMessages.innerHTML = '';
+    // Clear saved chat state
+    clearChatState();
     showWelcome();
 }
 
@@ -847,6 +861,9 @@ async function sendChatMessage() {
         addBotMessage("Arrey, something went wrong! Let me try again, yaar.");
     }
 
+    // Save chat state after each interaction
+    saveChatState(chatMessages.innerHTML, state.chatSessionId);
+
     input.disabled = false;
     input.focus();
     showChatInput();
@@ -942,6 +959,8 @@ function showWelcome() {
                 addBotMessage("Ask me anything about cocktails, or check the Cabinet tab to tell me what you have!");
                 showChatInput();
             }
+            // Save initial welcome state
+            saveChatState(chatMessages.innerHTML, state.chatSessionId);
         }, 600);
     }, 300);
 }
