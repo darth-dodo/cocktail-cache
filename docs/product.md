@@ -332,99 +332,93 @@ The original spec proposed 3 crews with 7+ agents. This creates:
 - `include_bottle_advice` (default: True): When False, skips the bottle advisor for faster responses
 - `PARALLEL_CREWS` (default: True): When enabled, runs Recipe Writer and Bottle Advisor concurrently, reducing latency by ~40%
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        USER INPUT                               │
-│  Cabinet + Mood + Constraints                                   │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    PRE-COMPUTED DATA                            │
-│  • Cocktail DB with ingredients                                 │
-│  • Flavor profiles (static)                                     │
-│  • Ingredient categories                                        │
-│  • Substitution mappings                                        │
-│  • Unlock scores (computed at build time)                       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  CREW 1: ANALYSIS CREW                          │
-│                                                                 │
-│  Fast Mode (default):                                           │
-│  ┌──────────────────────────────────────────┐                  │
-│  │        Drink Recommender (unified)       │                  │
-│  │              (1 LLM call)                │                  │
-│  └──────────────────────────────────────────┘                  │
-│                                                                 │
-│  Full Mode (fast_mode=False):                                   │
-│  ┌──────────────────┐    ┌──────────────────┐                  │
-│  │  Cabinet Analyst │ →  │   Mood Matcher   │                  │
-│  │  (1 LLM call)    │    │   (1 LLM call)   │                  │
-│  └──────────────────┘    └──────────────────┘                  │
-│                                                                 │
-│  Output: Ranked candidate cocktails (from pre-computed matches) │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  CREW 2: RECIPE CREW                            │
-│                                                                 │
-│  Parallel Mode (default, PARALLEL_CREWS=true):                  │
-│  ┌──────────────────┐    ┌──────────────────┐                  │
-│  │  Recipe Writer   │    │  Bottle Advisor  │ ← CONCURRENT     │
-│  │  (1 LLM call)    │    │  (1 LLM call)    │                  │
-│  └──────────────────┘    └──────────────────┘                  │
-│                                                                 │
-│  Sequential Mode (PARALLEL_CREWS=false):                        │
-│  ┌──────────────────┐    ┌──────────────────┐                  │
-│  │  Recipe Writer   │ →  │  Bottle Advisor  │ (optional)       │
-│  │  (1 LLM call)    │    │  (1 LLM call)    │                  │
-│  └──────────────────┘    └──────────────────┘                  │
-│                                                                 │
-│  Output: Full recipe + technique tips + next bottle (optional)  │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       RESPONSE                                  │
-│  Recipe + Flavor Profile + Substitutions + Next Bottle          │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Input["USER INPUT"]
+        UI["Cabinet + Mood + Constraints"]
+    end
+
+    subgraph PreComputed["PRE-COMPUTED DATA"]
+        PC1["Cocktail DB with ingredients"]
+        PC2["Flavor profiles (static)"]
+        PC3["Ingredient categories"]
+        PC4["Substitution mappings"]
+        PC5["Unlock scores"]
+    end
+
+    subgraph Crew1["CREW 1: ANALYSIS CREW"]
+        subgraph FastMode["Fast Mode (default)"]
+            DR["Drink Recommender (unified)<br/>(1 LLM call)"]
+        end
+
+        subgraph FullMode["Full Mode"]
+            CA["Cabinet Analyst<br/>(1 LLM call)"]
+            MM["Mood Matcher<br/>(1 LLM call)"]
+            CA --> MM
+        end
+
+        Output1["Output: Ranked candidate cocktails"]
+    end
+
+    subgraph Crew2["CREW 2: RECIPE CREW"]
+        subgraph ParallelMode["Parallel Mode (default)"]
+            direction LR
+            RW["Recipe Writer<br/>(1 LLM call)"]
+            BA["Bottle Advisor<br/>(1 LLM call)"]
+        end
+
+        Output2["Output: Recipe + Tips + Next Bottle"]
+    end
+
+    subgraph Response["RESPONSE"]
+        R["Recipe + Flavor Profile + Substitutions + Next Bottle"]
+    end
+
+    Input --> PreComputed
+    PreComputed --> Crew1
+    Crew1 --> Crew2
+    Crew2 --> Response
 ```
 
 **Key Optimization**: Heavy pre-computation reduces LLM calls from ~10 to 2-4 depending on mode.
 
 ### Data Layer
 
-```
-data/
-├── cocktails.json          # 103 classic cocktails
-│   ├── name
-│   ├── ingredients[]
-│   ├── method
-│   ├── flavor_profile{}
-│   └── tags[]
-│
-├── mocktails.json          # 39 non-alcoholic drinks
-│   ├── name
-│   ├── ingredients[]
-│   ├── method
-│   ├── flavor_profile{}
-│   └── tags[]
-│
-├── ingredients.json        # Categorized ingredient list
-│   ├── spirits[]
-│   ├── modifiers[]
-│   ├── bitters_syrups[]
-│   ├── fresh[]
-│   └── mixers[]
-│
-├── substitutions.json      # Ingredient swap mappings
-│   └── {ingredient: [{sub, quality, ratio_adjust}]}
-│
-└── unlock_scores.json      # Pre-computed at build time
-    └── {bottle: {unlocks: [], score: int}}
+```mermaid
+graph TB
+    subgraph DataLayer["data/"]
+        subgraph Cocktails["cocktails.json<br/>103 classic cocktails"]
+            C1["name"]
+            C2["ingredients[]"]
+            C3["method"]
+            C4["flavor_profile{}"]
+            C5["tags[]"]
+        end
+
+        subgraph Mocktails["mocktails.json<br/>39 non-alcoholic drinks"]
+            M1["name"]
+            M2["ingredients[]"]
+            M3["method"]
+            M4["flavor_profile{}"]
+            M5["tags[]"]
+        end
+
+        subgraph Ingredients["ingredients.json<br/>Categorized ingredient list"]
+            I1["spirits[]"]
+            I2["modifiers[]"]
+            I3["bitters_syrups[]"]
+            I4["fresh[]"]
+            I5["mixers[]"]
+        end
+
+        subgraph Substitutions["substitutions.json<br/>Ingredient swap mappings"]
+            S1["{ingredient: [{sub, quality, ratio}]}"]
+        end
+
+        subgraph UnlockScores["unlock_scores.json<br/>Pre-computed at build time"]
+            U1["{bottle: {unlocks: [], score: int}}"]
+        end
+    end
 ```
 
 **Total Drink Database**: 142 drinks (103 cocktails + 39 mocktails)
@@ -470,40 +464,55 @@ Since this is also a learning project, the architecture should demonstrate:
 ### Mobile-First Design
 
 **Main Interface - Tabbed Navigation**
-```
-┌─────────────────────────┐
-│  🍸 Raja                │
-│  Your AI Mixologist     │
-├─────────────────────────┤
-│ [ Chat ] [ Cabinet ] [ Browse ]
-├─────────────────────────┤
-│                         │
-│  Chat messages area     │
-│  or Cabinet panel       │
-│                         │
-├─────────────────────────┤
-│  Input controls         │
-└─────────────────────────┘
+
+```mermaid
+flowchart TB
+    subgraph MainUI["Mobile Chat Interface"]
+        Header["🍸 Raja<br/>Your AI Mixologist"]
+
+        subgraph Tabs["Tab Navigation"]
+            direction LR
+            Chat["Chat"]
+            Cabinet["Cabinet"]
+            Browse["Browse"]
+        end
+
+        Content["Chat messages area<br/>or Cabinet panel"]
+        Input["Input controls"]
+    end
+
+    Header --> Tabs
+    Tabs --> Content
+    Content --> Input
 ```
 
 **Browse Page**
-```
-┌─────────────────────────┐
-│  Browse Drinks          │
-├─────────────────────────┤
-│ [🔍 Search drinks...   ]│
-│ [All][Cocktails][Mocktails]
-│ Difficulty: [Any][Easy]...
-├─────────────────────────┤
-│  142 drinks found       │
-│ ┌───────────────────┐  │
-│ │ Drink Card        │  │
-│ │ Name + Tagline    │  │
-│ │ Type | Difficulty │  │
-│ └───────────────────┘  │
-├─────────────────────────┤
-│ [Ask AI Instead →]      │
-└─────────────────────────┘
+
+```mermaid
+flowchart TB
+    subgraph BrowsePage["Browse Drinks"]
+        Search["🔍 Search drinks..."]
+
+        subgraph Filters["Filters"]
+            direction LR
+            Type["All | Cocktails | Mocktails"]
+            Difficulty["Any | Easy | Medium | Hard"]
+        end
+
+        Results["142 drinks found"]
+
+        subgraph Card["Drink Card"]
+            Name["Name + Tagline"]
+            Meta["Type | Difficulty"]
+        end
+
+        AskAI["Ask AI Instead →"]
+    end
+
+    Search --> Filters
+    Filters --> Results
+    Results --> Card
+    Card --> AskAI
 ```
 
 **Key UX Decisions:**
@@ -520,42 +529,101 @@ Since this is also a learning project, the architecture should demonstrate:
 ### Critical Flows
 
 **Flow 1: First-Time User (AI Chat)**
-1. Land on page → See chat interface with Raja (AI Mixologist)
-2. Switch to Cabinet tab → Select ingredients with autocomplete
-3. Return to Chat tab → Select mood/vibe
-4. Tap "Make Me Something"
-5. See recipe in <8 seconds
-6. Cabinet saved automatically to localStorage
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Chat as Chat Tab
+    participant Cabinet as Cabinet Tab
+    participant AI as Raja AI
+    participant Storage as LocalStorage
+
+    User->>Chat: Land on page
+    Chat-->>User: Welcome message from Raja
+    User->>Cabinet: Switch to Cabinet tab
+    User->>Cabinet: Add ingredients (autocomplete)
+    Cabinet->>Storage: Save cabinet
+    User->>Chat: Return to Chat tab
+    User->>Chat: Select mood/vibe
+    Chat->>AI: Request recommendation
+    AI-->>Chat: Recipe in <8 seconds
+    Chat-->>User: Display recipe
+```
 
 **Flow 2: Return User (AI Chat)**
-1. Land on page → Cabinet pre-filled from local storage
-2. Adjust mood if needed in Chat tab
-3. Tap "Make Me Something"
-4. Total time: <10 seconds to recommendation
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Chat as Chat Tab
+    participant Storage as LocalStorage
+    participant AI as Raja AI
+
+    User->>Chat: Land on page
+    Storage-->>Chat: Load saved cabinet
+    Chat-->>User: Cabinet pre-filled
+    User->>Chat: Adjust mood if needed
+    User->>Chat: Tap "Make Me Something"
+    Chat->>AI: Request recommendation
+    AI-->>Chat: Recipe in <8 seconds
+    Note over User,Chat: Total time: <10 seconds
+```
 
 **Flow 3: "Show Me Something Else"**
-1. View recommendation
-2. Tap "Show Me Something Else"
-3. New recommendation appears (excluding previous)
-4. Repeat as needed
 
-**Flow 4: Browse and Search (New in Session 6)**
-1. Navigate to Browse tab or /browse page
-2. Browse full catalog of 142 drinks
-3. Use search to filter by name
-4. Filter by type (Cocktail/Mocktail) or difficulty
-5. Tap drink card → View full recipe on /drink/{id}
-6. Option: "Ask AI Instead" to get personalized recommendation
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as Recipe View
+    participant AI as Raja AI
+    participant Session as Session State
+
+    User->>UI: View recommendation
+    User->>UI: Tap "Show Me Something Else"
+    UI->>Session: Add drink to rejected list
+    UI->>AI: Request new recommendation
+    AI-->>UI: New recipe (excluding rejected)
+    UI-->>User: Display new recommendation
+    Note over User,Session: Repeat as needed
+```
+
+**Flow 4: Browse and Search**
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browse as Browse Page
+    participant API as FastAPI
+    participant Detail as Drink Detail
+
+    User->>Browse: Navigate to Browse tab
+    Browse->>API: Load all drinks
+    API-->>Browse: 142 drinks
+    User->>Browse: Search by name
+    Browse-->>User: Filtered results
+    User->>Browse: Filter by type/difficulty
+    Browse-->>User: Refined results
+    User->>Browse: Tap drink card
+    Browse->>Detail: Navigate to /drink/{id}
+    Detail-->>User: Full recipe display
+```
 
 **Flow 5: Direct Drink Access**
-1. Access /drink/{drink-id} directly (shareable URL)
-2. View complete recipe with:
-   - Ingredients list with amounts
-   - Step-by-step method
-   - Flavor profile visualization
-   - Timing and difficulty
-   - Garnish instructions
-3. Navigate back to Browse or Chat as needed
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant URL as Shareable URL
+    participant Detail as Drink Detail
+    participant Browse as Browse Page
+
+    User->>URL: Access /drink/{drink-id}
+    URL->>Detail: Load drink detail
+    Detail-->>User: Complete recipe display
+    Note over Detail: Ingredients, Method, Flavor Profile, Timing, Garnish
+    User->>Browse: Navigate back to Browse
+    Browse-->>User: Full catalog
+```
 
 ---
 
