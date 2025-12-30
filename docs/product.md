@@ -712,8 +712,67 @@ Since this is also a learning project, the architecture should demonstrate:
 
 ---
 
-*Document Version: 1.3*
+## Session 7: Raja Conversational Chat Interface
+
+### FR-14: Raja Chat (Conversational AI)
+
+Raja is now a fully conversational bartender persona from Bombay who users can chat with naturally. This feature transforms the existing recommendation flow into an interactive dialogue experience.
+
+| ID | Requirement | Priority | Status | Notes |
+|----|-------------|----------|--------|-------|
+| FR-14.1 | Conversational chat interface with Raja | P0 | In Progress | Natural language chat replacing structured forms |
+| FR-14.2 | Raja personality from Bombay (Hindi phrases, cultural references) | P0 | In Progress | "Arrey bhai!", Bollywood references, monsoon mentions |
+| FR-14.3 | Chat history persistence within session | P0 | In Progress | In-memory session storage |
+| FR-14.4 | Context-aware responses based on cabinet | P0 | In Progress | Raja knows what user can make |
+| FR-14.5 | Intent detection (recommendation, recipe question, general chat) | P1 | Planned | Route to appropriate response type |
+| FR-14.6 | Mood extraction from conversation | P1 | Planned | Detect mood without explicit form |
+| FR-14.7 | Drink mentions as clickable links | P1 | Planned | Navigate to drink detail pages |
+| FR-14.8 | Session restoration after page refresh | P2 | Planned | localStorage + API integration |
+
+**Raja's Personality**:
+- 20-year bartender veteran from Colaba, Bombay (now Mumbai)
+- Uses Hindi phrases naturally ("Arrey bhai!", "Ekdum first class!", "Kya baat hai!")
+- Shares stories about Leopold Cafe and Bombay's bar scene
+- References Bollywood, cricket, and monsoon season when describing drinks
+- Asks about mood, dinner, and music to find the perfect drink
+- Patient with beginners, technical with enthusiasts
+
+### User Story: Chat with Raja
+
+```
+As a home cocktail enthusiast,
+I want to chat naturally with Raja about drinks
+So that I get personalized recommendations through conversation rather than forms.
+
+As a user exploring drinks,
+I want Raja to remember our conversation
+So that I don't have to repeat my preferences.
+
+As a curious user,
+I want Raja to share stories and history about cocktails
+So that I learn while I discover new drinks.
+```
+
+### Technical Implementation
+
+**New Components**:
+- `raja_bartender` agent with conversational backstory
+- `raja_chat_crew.py` for chat session management
+- Chat Pydantic models (`ChatMessage`, `ChatSession`, `RajaChatOutput`)
+- `/api/chat` endpoints for message handling
+- `chat.html` template for chat interface
+- `raja-chat.js` for frontend chat logic
+
+**Architecture Pattern**:
+- Single-agent crew optimized for conversation
+- Higher temperature (0.85) for personality variation
+- Context injection via formatted conversation history
+- Structured Pydantic output with fallback parsing
+
+---
+
+*Document Version: 1.4*
 *Created: 2025-12-27*
-*Updated: 2025-12-28*
+*Updated: 2025-12-30*
 *Status: In Production*
-*Changes: Session 6 UX improvements - added browse/search functionality (FR-12), tabbed navigation (FR-13), individual drink detail pages, ingredient autocomplete, updated drink counts (142 total: 103 cocktails + 39 mocktails), revised user flows*
+*Changes: Session 7 Raja Chat feature - conversational AI interface with Raja persona from Bombay (FR-14)*

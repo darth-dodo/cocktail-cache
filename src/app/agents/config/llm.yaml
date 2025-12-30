@@ -21,3 +21,8 @@ precise:
   model: "anthropic/claude-3-5-haiku-20241022"
   max_tokens: 4096
   temperature: 0.3
+
+conversational:
+  model: "anthropic/claude-3-5-haiku-20241022"
+  max_tokens: 1024
+  temperature: 0.85  # Higher for more personality variation

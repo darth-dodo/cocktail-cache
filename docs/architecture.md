@@ -1224,7 +1224,228 @@ export PARALLEL_CREWS=false
 
 ---
 
-*Document Version: 1.4*
-*Last Updated: 2025-12-28*
+## Raja Conversational Chat Architecture
+
+### Overview
+
+Raja Chat introduces a conversational AI interface where users interact with Raja, a bartender persona from Bombay, through natural language chat. This supplements the existing recommendation flow with a more engaging, personality-rich experience.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         RAJA CHAT ARCHITECTURE                           │
+│                                                                         │
+│   "Arrey bhai! Welcome to my bar. What's your mood today?"              │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
+┌───────────────────────────────┐   ┌───────────────────────────────────┐
+│       FRONTEND CHAT           │   │        SESSION MANAGEMENT          │
+│       (raja-chat.js)          │   │        (In-Memory Store)          │
+├───────────────────────────────┤   ├───────────────────────────────────┤
+│ • Message input/display       │   │ • ChatSession with history        │
+│ • Typing indicators           │   │ • User context (cabinet, prefs)   │
+│ • Drink link rendering        │   │ • Mentioned drinks/ingredients    │
+│ • LocalStorage session ID     │   │ • Mood extraction state           │
+└───────────────────────────────┘   └───────────────────────────────────┘
+                    │                               │
+                    └───────────────┬───────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         RAJA CHAT CREW                                   │
+│                                                                         │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                    RAJA BARTENDER AGENT                         │   │
+│   │                                                                 │   │
+│   │   Role: "Raja - Your Bombay Bartender"                         │   │
+│   │   LLM: Claude Haiku (temperature: 0.85)                        │   │
+│   │                                                                 │   │
+│   │   Personality Traits:                                          │   │
+│   │   • 20 years bartending in Colaba, Bombay                      │   │
+│   │   • Hindi phrases ("Arrey bhai!", "Ekdum first class!")        │   │
+│   │   • Bollywood, cricket, monsoon references                     │   │
+│   │   • Storytelling about drink history                           │   │
+│   │   • Asks about mood, dinner, music for context                 │   │
+│   │                                                                 │   │
+│   │   Context Injection:                                           │   │
+│   │   • Conversation history (last 8 messages)                     │   │
+│   │   • User's cabinet and makeable drinks                         │   │
+│   │   • Skill level and preferences                                │   │
+│   │   • Current detected mood                                      │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+│   Output: RajaChatOutput (Pydantic structured response)                 │
+│   • response: Raja's message with personality                           │
+│   • detected_intent: greeting | recommendation | recipe_question | ...  │
+│   • detected_mood: relaxed | celebratory | contemplative | ...          │
+│   • drinks_mentioned: ["manhattan", "negroni"]                          │
+│   • recommendation_made: true/false                                     │
+│   • recommended_drink_id: "manhattan"                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Chat Pydantic Models
+
+```python
+# src/app/models/chat.py
+
+class MessageRole(str, Enum):
+    USER = "user"
+    RAJA = "raja"
+    SYSTEM = "system"
+
+class MessageIntent(str, Enum):
+    GREETING = "greeting"
+    RECOMMENDATION_REQUEST = "recommendation_request"
+    RECIPE_QUESTION = "recipe_question"
+    TECHNIQUE_QUESTION = "technique_question"
+    INGREDIENT_QUESTION = "ingredient_question"
+    GENERAL_CHAT = "general_chat"
+    CABINET_UPDATE = "cabinet_update"
+    FEEDBACK = "feedback"
+    GOODBYE = "goodbye"
+
+class ChatMessage(BaseModel):
+    id: str
+    role: MessageRole
+    content: str
+    timestamp: datetime
+    intent: MessageIntent | None
+    metadata: dict[str, Any]
+
+class ChatSession(BaseModel):
+    session_id: str
+    history: ChatHistory  # List of ChatMessage
+    cabinet: list[str]
+    skill_level: str
+    current_mood: str | None
+    last_recommended_drink: str | None
+    mentioned_drinks: list[str]
+
+class ChatRequest(BaseModel):
+    session_id: str | None
+    message: str
+    cabinet: list[str] | None
+    skill_level: str | None
+    drink_type: str | None
+
+class ChatResponse(BaseModel):
+    session_id: str
+    message_id: str
+    content: str
+    drinks_mentioned: list[DrinkReference]
+    suggested_action: str | None
+    recommendation_offered: bool
+    recommended_drink_id: str | None
+```
+
+### Agent Configuration
+
+```yaml
+# src/app/agents/config/agents.yaml
+
+raja_bartender:
+  role: "Raja - Your Bombay Bartender"
+  goal: "Have natural, personality-rich conversations about cocktails while providing expert mixology advice"
+  backstory: >
+    You are Raja, a charismatic bartender from Colaba, Bombay (now Mumbai). You've been
+    behind the bar for 20 years, starting at Leopold Cafe and now running your own
+    speakeasy. You speak with warmth and occasional Hindi phrases ("Arrey bhai!",
+    "Ekdum first class!", "Kya baat hai!"). You have strong opinions about cocktails -
+    you believe a good drink tells a story. You love sharing the history behind drinks
+    and often relate them to your experiences in Bombay's bar scene. You're patient
+    with beginners but can go deep with enthusiasts. You occasionally reference Bollywood,
+    cricket, and monsoon season when describing drinks. When someone asks for a
+    recommendation, you ask about their mood, what they had for dinner, or what music
+    they're listening to - because context matters for the perfect drink.
+  verbose: false
+  allow_delegation: false
+```
+
+### LLM Configuration for Conversation
+
+```yaml
+# src/app/agents/config/llm.yaml
+
+conversational:
+  model: "anthropic/claude-3-5-haiku-20241022"
+  max_tokens: 1024
+  temperature: 0.85  # Higher for personality variation
+```
+
+### API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/chat` | POST | Send message, get Raja's response |
+| `/api/chat/{session_id}/history` | GET | Retrieve conversation history |
+| `/api/chat/{session_id}` | DELETE | End session, cleanup resources |
+
+### Request Flow
+
+```
+1. User sends message via POST /api/chat
+   │
+   ├── First message: session_id=null, cabinet=[], skill_level="intermediate"
+   │   → Create new ChatSession with greeting
+   │
+   └── Follow-up: session_id="abc123"
+       → Retrieve existing session, update context
+       │
+       ▼
+2. Add user message to session history
+       │
+       ▼
+3. Build crew inputs:
+   • Format conversation history (last 8 messages)
+   • Get makeable drinks from cabinet
+   • Include user preferences
+       │
+       ▼
+4. Run Raja Chat Crew (single agent, 1 LLM call)
+       │
+       ▼
+5. Parse RajaChatOutput (Pydantic with JSON fallback)
+       │
+       ▼
+6. Update session state:
+   • Add Raja's response to history
+   • Update detected mood
+   • Track mentioned drinks
+       │
+       ▼
+7. Return ChatResponse with:
+   • Raja's message
+   • Drink references (clickable)
+   • Suggested action (view_recipe, update_cabinet)
+   • Recommendation metadata
+```
+
+### Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| Separate agent from recommendation flow | Different LLM settings (higher temp), distinct context management |
+| Server-side session storage | Maintains continuity, limits context to last N messages |
+| Context window of 8 messages | Balance between context and token usage |
+| Higher temperature (0.85) | More personality variation in responses |
+| Single-agent crew | Simpler, faster for conversational use case |
+| Personality in YAML | Easy to tune without code changes |
+
+### Integration with Existing Flow
+
+Raja Chat integrates with but does not replace the existing recommendation flow:
+
+1. **Cabinet Sharing**: Uses same cabinet data from localStorage
+2. **Drink Links**: Recommended drinks link to `/drink/{id}` detail pages
+3. **Session Context**: Stores `recommended_drink_id` for follow-up questions
+4. **Fallback**: Users can still use traditional recommendation UI
+
+---
+
+*Document Version: 1.5*
+*Last Updated: 2025-12-30*
 *Principles: KISS + YAGNI*
-*Changes: Added Frontend Architecture section (tabbed navigation, browse page, drink details), updated data counts (142 drinks, 180 ingredients)*
+*Changes: Added Raja Conversational Chat Architecture section with agent config, Pydantic models, API endpoints, and design rationale*

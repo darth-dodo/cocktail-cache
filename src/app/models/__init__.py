@@ -1,6 +1,17 @@
 """Pydantic models for the Cocktail Cache application."""
 
 from src.app.models.cabinet import Cabinet
+from src.app.models.chat import (
+    ChatHistory,
+    ChatMessage,
+    ChatRequest,
+    ChatResponse,
+    ChatSession,
+    DrinkReference,
+    MessageIntent,
+    MessageRole,
+    RajaChatOutput,
+)
 from src.app.models.cocktail import CocktailMatch
 from src.app.models.config import AgentConfig, LLMConfig, TaskConfig
 from src.app.models.crew_io import (
@@ -34,6 +45,16 @@ from src.app.models.user_prefs import DrinkType, SkillLevel, UserPreferences
 __all__ = [
     # Cabinet
     "Cabinet",
+    # Chat Models
+    "ChatHistory",
+    "ChatMessage",
+    "ChatRequest",
+    "ChatResponse",
+    "ChatSession",
+    "DrinkReference",
+    "MessageIntent",
+    "MessageRole",
+    "RajaChatOutput",
     # Config Models
     "AgentConfig",
     "LLMConfig",
