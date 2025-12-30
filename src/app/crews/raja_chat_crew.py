@@ -80,14 +80,9 @@ def get_or_create_session(
         id=str(uuid.uuid4()),
         role=MessageRole.RAJA,
         content=(
-            "Arrey, welcome, welcome! I'm Raja - 35 years behind the bar now, "
-            "learned my craft from the best in the business. I've seen "
-            "a lot of drinks come and go, yaar, but the good ones? They stay with "
-            "you like old friends. So tell me, what brings you to my corner tonight? "
-            "A celebration? A quiet moment? Let this old bartender help you find "
-            "the perfect glass.\n\n"
-            "⚠️ *Disclaimer: I'm an AI assistant. Please verify any drink recipes "
-            "and recommendations with reliable sources before preparing.*"
+            "Arrey yaar, welcome! Raja here - 35 years mixing drinks. "
+            "Tell me, what's the mood today? Celebrating something or just relaxing?\n\n"
+            "⚠️ *Quick note: I'm an AI - please verify recipes before mixing!*"
         ),
         intent=None,
     )
@@ -219,13 +214,12 @@ CUSTOMER INFO:
 - Current Mood: {session.current_mood or "not yet determined"}
 
 INSTRUCTIONS:
-1. Respond naturally as Raja - use your personality, Hindi phrases, Bombay references, and storytelling
-2. If they're asking for a recommendation, consider their mood, cabinet, and skill level
-3. If discussing a specific drink, share its history or a personal story
-4. Ask follow-up questions to understand their preferences better
-5. Be encouraging to beginners, more technical with adventurous bartenders
-6. If they mention ingredients they don't have, suggest alternatives or what to buy next
-7. Keep responses conversational - not too long, but full of personality
+1. BE SNAPPY! 2-3 sentences max. Get to the point with warmth. No long monologues.
+2. Use respectful Hindi: "yaar", "bhai", "acha", "bilkul", "zaroor", "kya baat hai". Keep it friendly.
+3. For recommendations: Quick mood check if needed, then your pick. No rambling.
+4. Drop quick references to '80s Bombay, Amitabh, cricket - but keep it brief.
+5. Be encouraging but concise. Warm and wise, not lengthy lectures.
+6. If they need ingredients, tell them kindly - "Yaar, grab some X and you're all set."
 
 IMPORTANT: Return a JSON object matching the RajaChatOutput schema.""",
         expected_output="""A JSON object with structure:

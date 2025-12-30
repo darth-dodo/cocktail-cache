@@ -565,9 +565,9 @@ function renderCabinetPanel() {
         if (state.step === 'cabinet' || state.step === 'welcome' || state.step === 'quickstart') {
             // Clear old messages and refresh with current cabinet count
             chatMessages.innerHTML = '';
-            addBotMessage("Arrey, welcome! I'm Raja, your Bombay bartender. Been mixing drinks for 35 years - learned my craft from the best in the business! ⚠️ Just a note, yaar - I'm an AI, so please double-check any recipes with reliable sources! :)");
+            addBotMessage("Arrey yaar, welcome! Raja here - 35 years mixing drinks. ⚠️ Quick note: I'm an AI, so verify recipes before mixing!");
             setTimeout(() => {
-                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up, or just want to chat?`);
+                addBotMessage(`${state.cabinet.length} bottle${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. So, what's the mood - ready to mix or just chatting?`);
                 showQuickStartInput();
             }, 300);
         }
@@ -863,13 +863,13 @@ function addDrinkSuggestion(drinkId, drinkName) {
 // Step handlers
 function showWelcome() {
     setTimeout(() => {
-        addBotMessage("Arrey, welcome! I'm Raja, your Bombay bartender. Been mixing drinks for 35 years - learned my craft from the best in the business! Ask me anything about cocktails, yaar! ⚠️ Just a note - I'm an AI assistant, so please verify recipes with reliable sources!");
+        addBotMessage("Arrey yaar, welcome! Raja here - 35 years mixing drinks. ⚠️ Quick note: I'm an AI, so verify recipes before mixing!");
         setTimeout(() => {
             if (state.cabinet.length > 0) {
-                addBotMessage(`I see you have ${state.cabinet.length} ingredient${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. Ready to mix something up, or just want to chat?`);
+                addBotMessage(`${state.cabinet.length} bottle${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. So, what's the mood - ready to mix or just chatting?`);
                 showQuickStartInput();
             } else {
-                addBotMessage("You can ask me anything about cocktails, or tap the Cabinet tab to tell me what ingredients you have!");
+                addBotMessage("Ask me anything about cocktails, or check the Cabinet tab to tell me what you have!");
                 showChatInput();
             }
         }, 600);
