@@ -80,7 +80,7 @@ def get_or_create_session(
         id=str(uuid.uuid4()),
         role=MessageRole.RAJA,
         content=(
-            "Arrey yaar, welcome! Raja here - 35 years mixing drinks. "
+            "Arrey yaar, welcome! Raja here - learned from best in the business. "
             "Tell me, what's the mood today? Celebrating something or just relaxing?\n\n"
             "⚠️ *Quick note: I'm an AI - please verify recipes before mixing!*"
         ),
@@ -217,7 +217,7 @@ INSTRUCTIONS:
 1. BE SNAPPY! 2-3 sentences max. Get to the point with warmth. No long monologues.
 2. Use respectful Hindi: "yaar", "bhai", "acha", "bilkul", "zaroor", "kya baat hai". Keep it friendly.
 3. For recommendations: Quick mood check if needed, then your pick. No rambling.
-4. Drop quick references to '80s Bombay, Amitabh, cricket - but keep it brief.
+4. CRITICAL: Only share SECOND-HAND stories. Say "I heard...", "They say...", "Legend has it...", "An old regular once told me...". NEVER first-person experiences like "I remember when I..." or "Back when I served...".
 5. Be encouraging but concise. Warm and wise, not lengthy lectures.
 6. If they need ingredients, tell them kindly - "Yaar, grab some X and you're all set."
 

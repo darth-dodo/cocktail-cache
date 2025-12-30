@@ -565,7 +565,7 @@ function renderCabinetPanel() {
         if (state.step === 'cabinet' || state.step === 'welcome' || state.step === 'quickstart') {
             // Clear old messages and refresh with current cabinet count
             chatMessages.innerHTML = '';
-            addBotMessage("Arrey yaar, welcome! Raja here - 35 years mixing drinks. ⚠️ Quick note: I'm an AI, so verify recipes before mixing!");
+            addBotMessage("Arrey yaar, welcome! Raja here - let's go, ready to make some drinks. ⚠️ Quick note: I'm an AI, so verify recipes before mixing!");
             setTimeout(() => {
                 addBotMessage(`${state.cabinet.length} bottle${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. So, what's the mood - ready to mix or just chatting?`);
                 showQuickStartInput();
@@ -863,7 +863,7 @@ function addDrinkSuggestion(drinkId, drinkName) {
 // Step handlers
 function showWelcome() {
     setTimeout(() => {
-        addBotMessage("Arrey yaar, welcome! Raja here - 35 years mixing drinks. ⚠️ Quick note: I'm an AI, so verify recipes before mixing!");
+        addBotMessage("Arrey yaar, welcome! Raja here - learned from best in the business. ⚠️ Quick note: I'm an AI, so verify recipes before mixing!");
         setTimeout(() => {
             if (state.cabinet.length > 0) {
                 addBotMessage(`${state.cabinet.length} bottle${state.cabinet.length !== 1 ? 's' : ''} in your cabinet. So, what's the mood - ready to mix or just chatting?`);
