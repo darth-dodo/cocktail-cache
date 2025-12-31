@@ -61,20 +61,35 @@ This crash course documents everything about **Cocktail Cache** — an AI-powere
 
 ### High-Level Flow
 
-```
-┌──────────────┐     HTMX      ┌──────────────┐     CrewAI     ┌──────────────┐
-│              │ ────────────► │              │ ─────────────► │              │
-│   Browser    │               │   FastAPI    │                │   Claude     │
-│  (Tailwind)  │ ◄──────────── │   Backend    │ ◄───────────── │   Haiku/     │
-│              │     HTML      │              │    Pydantic    │   Sonnet     │
-└──────────────┘               └──────────────┘                └──────────────┘
-                                      │
-                    ┌─────────────────┼─────────────────┐
-                    ▼                 ▼                 ▼
-             ┌──────────┐      ┌──────────┐      ┌──────────┐
-             │ Sessions │      │ Services │      │  142     │
-             │ (dict)   │      │ (cached) │      │ Drinks   │
-             └──────────┘      └──────────┘      └──────────┘
+```mermaid
+flowchart TB
+    subgraph Client
+        Browser["Browser<br/>(HTMX + Tailwind)"]
+    end
+
+    subgraph Server["FastAPI Backend"]
+        API[API Routes]
+        Sessions[(Sessions<br/>dict)]
+        Services[Services<br/>cached]
+    end
+
+    subgraph AI["CrewAI System"]
+        Crews[Crews]
+        Claude["Claude<br/>Haiku/Sonnet"]
+    end
+
+    subgraph Data
+        Drinks[(142 Drinks)]
+    end
+
+    Browser -->|HTMX| API
+    API -->|HTML| Browser
+    API --> Sessions
+    API --> Services
+    API --> Crews
+    Crews -->|Pydantic| Claude
+    Claude --> Crews
+    Services --> Drinks
 ```
 
 ### Multi-Agent Pipeline
@@ -372,6 +387,29 @@ def create_analysis_crew() -> Crew:
 
 ### Crew Inventory
 
+```mermaid
+graph LR
+    subgraph AnalysisCrew["Analysis Crew (Sequential)"]
+        DR[Drink Recommender]
+    end
+
+    subgraph RecipeCrew["Recipe Crew (Parallel)"]
+        RW[Recipe Writer]
+        BA[Bottle Advisor]
+    end
+
+    subgraph RajaCrew["Raja Chat Crew"]
+        Raja[Raja Bartender]
+    end
+
+    subgraph BarGrowth["Bar Growth Crew"]
+        BGA[Bar Growth Advisor]
+    end
+
+    DR --> RW
+    DR --> BA
+```
+
 | Crew | Agents | Purpose | Execution |
 |------|--------|---------|-----------|
 | `AnalysisCrew` | drink_recommender | Find makeable drinks, rank by mood | Sequential |
@@ -403,6 +441,24 @@ result = crew.kickoff(inputs={
 ## 6. Flow Pipeline
 
 ### CocktailFlow Architecture
+
+```mermaid
+stateDiagram-v2
+    [*] --> receive_input: kickoff_async()
+    receive_input --> analyze: valid input
+    receive_input --> Error: empty cabinet
+    analyze --> generate_recipe: candidates found
+    analyze --> Error: no matches
+    generate_recipe --> [*]: recipe + bottle advice
+
+    state generate_recipe {
+        [*] --> parallel_check
+        parallel_check --> parallel: PARALLEL_CREWS=true
+        parallel_check --> sequential: PARALLEL_CREWS=false
+        parallel --> [*]
+        sequential --> [*]
+    }
+```
 
 The flow orchestrates multiple crews with state management:
 
@@ -566,6 +622,36 @@ def get_makeable_drinks(
 
 ## 8. API Design
 
+### Request Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as FastAPI
+    participant F as CocktailFlow
+    participant AC as AnalysisCrew
+    participant RC as RecipeCrew
+    participant LLM as Claude
+
+    C->>A: POST /api/flow {cabinet, mood}
+    A->>F: run_cocktail_flow()
+    F->>AC: kickoff(inputs)
+    AC->>LLM: analyze drinks
+    LLM-->>AC: AnalysisOutput
+    AC-->>F: candidates[]
+
+    par Parallel Execution
+        F->>RC: recipe_crew.kickoff_async()
+        F->>RC: bottle_crew.kickoff_async()
+    end
+
+    RC->>LLM: generate recipe
+    LLM-->>RC: RecipeOutput
+    RC-->>F: recipe + bottle_advice
+    F-->>A: CocktailFlowState
+    A-->>C: FlowResponse
+```
+
 ### Endpoints Summary
 
 | Method | Endpoint | Purpose |
@@ -634,6 +720,25 @@ class ChatResponse(BaseModel):
 ## 9. Session Management
 
 ### Chat Session Architecture
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant API as FastAPI
+    participant SM as Session Manager
+    participant RC as Raja Crew
+    participant LLM as Claude Sonnet
+
+    U->>API: POST /api/chat {message}
+    API->>SM: get_or_create_session()
+    SM-->>API: session + history
+    API->>RC: create_raja_chat_crew()
+    RC->>LLM: Task with context
+    LLM-->>RC: RajaChatOutput (Pydantic)
+    RC-->>API: parsed response
+    API->>SM: update history
+    API-->>U: ChatResponse
+```
 
 ```python
 # src/app/crews/raja_chat_crew.py
@@ -777,14 +882,12 @@ def format_for_prompt(self, last_n: int = 8) -> str:
 
 ### Test Pyramid
 
-```
-              /\
-             /  \   Integration (10%)
-            /────\  API, flows, crews
-           /      \
-          /────────\   Unit Tests (90%)
-         /          \  Models, services, tools
-        /────────────\
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '14px'}}}%%
+pie showData
+    title Test Distribution
+    "Unit Tests (Models, Services, Tools)" : 90
+    "Integration Tests (API, Flows, Crews)" : 10
 ```
 
 ### Test Categories
@@ -859,6 +962,17 @@ make docker-run       # Run container
 ```
 
 ### TDD Cycle
+
+```mermaid
+graph LR
+    RED["🔴 RED<br/>Write failing test"] --> GREEN["🟢 GREEN<br/>Minimal impl"]
+    GREEN --> REFACTOR["🔵 REFACTOR<br/>Clean up"]
+    REFACTOR --> RED
+
+    style RED fill:#ffcccc
+    style GREEN fill:#ccffcc
+    style REFACTOR fill:#ccccff
+```
 
 ```bash
 # 1. RED: Write failing test
