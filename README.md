@@ -19,7 +19,9 @@
 
 ---
 
-An AI-powered home bar advisor that helps you craft great cocktails with whatever bottles you have. Chat with Raja, your AI mixologist, to get personalized drink recommendations, technique guidance, and smart suggestions for your next bottle purchase.
+An AI-powered drink advisor that helps you craft great mocktails and cocktails with whatever ingredients you have. Chat with Raja, your AI mixologist, to get personalized drink recommendations, technique guidance, and smart suggestions for your next purchase.
+
+Whether you are mixing spirits or skipping them entirely — designated drivers, health-conscious choices, Dry January, or simply in the mood for something refreshing without alcohol, Raja has you covered.
 
 ---
 
@@ -29,7 +31,7 @@ An AI-powered home bar advisor that helps you craft great cocktails with whateve
   <img src=".playwright-mcp/chat-full-conversation.png" alt="Raja Chat Interface" width="300">
 </p>
 
-**Raja** is a 20-year bartender veteran from Colaba, Bombay. He knows his craft, tells great stories, and speaks with warmth:
+**Raja** personifies bartender veterans from Bombay. He knows his craft, tells great stories, and speaks with warmth:
 
 > *"Arrey bhai! Feeling relaxed after a long day? With your bourbon and lemons, let me suggest a Gold Rush — ekdum first class for unwinding!"*
 
@@ -40,7 +42,7 @@ Just tell Raja what you have and how you're feeling. He'll find the perfect drin
 ## How It Works
 
 ### 1. Tell Raja What You Have
-Add your bottles to your cabinet — spirits, mixers, bitters, fresh ingredients. Your cabinet is saved automatically.
+Add your ingredients to your cabinet — spirits, mixers, bitters, juices, syrups, and fresh ingredients. Whether you stock a full bar or just have some citrus and ginger beer, your cabinet is saved automatically.
 
 ### 2. Describe Your Mood
 "Celebrating a promotion" • "Quiet evening alone" • "Cocktail nights with friends" • "Sunday afternoon vibes"
@@ -49,7 +51,7 @@ Add your bottles to your cabinet — spirits, mixers, bitters, fresh ingredients
 Raja recommends drinks you can actually make, with step-by-step instructions adapted to your skill level.
 
 ### 4. Know What to Buy Next
-Raja tells you which single bottle will unlock the most new drinks — maximum impact for your next purchase.
+Raja tells you which single ingredient will unlock the most new drinks — maximum impact for your next purchase.
 
 ---
 
@@ -60,7 +62,7 @@ Raja tells you which single bottle will unlock the most new drinks — maximum i
 | **142 Drinks** | 103 cocktails + 39 mocktails with detailed recipes |
 | **Smart Matching** | Only shows drinks you can make with your cabinet |
 | **Skill Adaptation** | Beginner-friendly to adventurous techniques |
-| **Next Bottle Advice** | ROI-based suggestions for cabinet expansion |
+| **Next Purchase Advice** | ROI-based suggestions for cabinet expansion |
 | **Browse & Search** | Explore the full catalog with filters |
 | **Mobile-First** | Designed for use in the kitchen |
 
