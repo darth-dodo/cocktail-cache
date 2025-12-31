@@ -1,25 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="glass" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.9"/>
-      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1"/>
+    <linearGradient id="cosmo" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f472b6;stop-opacity:0.9"/>
+      <stop offset="50%" style="stop-color:#ec4899;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#be185d;stop-opacity:1"/>
     </linearGradient>
-    <linearGradient id="liquid" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.8"/>
-      <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1"/>
+    <linearGradient id="glass-shine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3"/>
+      <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0"/>
     </linearGradient>
   </defs>
-  <!-- Martini glass bowl -->
-  <polygon points="15,15 85,15 50,60" fill="url(#glass)" stroke="#d97706" stroke-width="2"/>
-  <!-- Liquid in glass -->
-  <polygon points="22,22 78,22 50,52" fill="url(#liquid)"/>
+
+  <!-- Martini glass bowl outline -->
+  <polygon points="12,12 88,12 50,62" fill="none" stroke="#a1a1aa" stroke-width="2.5"/>
+
+  <!-- Cosmopolitan pink liquid -->
+  <polygon points="18,18 82,18 50,56" fill="url(#cosmo)"/>
+
+  <!-- Glass shine effect -->
+  <polygon points="18,18 35,18 50,40 50,56" fill="url(#glass-shine)"/>
+
   <!-- Glass stem -->
-  <rect x="47" y="60" width="6" height="25" fill="#d97706"/>
+  <rect x="47" y="62" width="6" height="22" fill="#a1a1aa"/>
+
   <!-- Glass base -->
-  <ellipse cx="50" cy="88" rx="18" ry="5" fill="#d97706"/>
-  <!-- Olive -->
-  <circle cx="50" cy="35" r="8" fill="#84cc16"/>
-  <circle cx="50" cy="35" r="3" fill="#dc2626"/>
-  <!-- Olive stick -->
-  <line x1="42" y1="28" x2="58" y2="42" stroke="#78716c" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="50" cy="88" rx="16" ry="4" fill="#a1a1aa"/>
+
+  <!-- Lime wheel garnish on rim -->
+  <circle cx="78" cy="15" r="10" fill="#84cc16" stroke="#65a30d" stroke-width="1.5"/>
+  <circle cx="78" cy="15" r="4" fill="#a3e635"/>
+  <!-- Lime segments -->
+  <line x1="78" y1="6" x2="78" y2="24" stroke="#65a30d" stroke-width="0.8"/>
+  <line x1="69" y1="15" x2="87" y2="15" stroke="#65a30d" stroke-width="0.8"/>
+  <line x1="71" y1="8" x2="85" y2="22" stroke="#65a30d" stroke-width="0.8"/>
+  <line x1="71" y1="22" x2="85" y2="8" stroke="#65a30d" stroke-width="0.8"/>
 </svg>
