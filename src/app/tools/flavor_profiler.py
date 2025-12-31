@@ -1,10 +1,9 @@
 """Flavor profiler tool for analyzing and comparing drink flavor profiles.
 
-This tool provides deterministic flavor analysis functionality,
-allowing agents to understand and compare the taste characteristics of drinks.
+This tool provides deterministic flavor analysis functionality with Raja's
+conversational personality, allowing agents to understand and compare
+the taste characteristics of drinks in an engaging, bartender-friendly way.
 """
-
-import json
 
 from crewai.tools import BaseTool
 
@@ -15,16 +14,17 @@ from src.app.services.data_loader import load_all_drinks
 class FlavorProfilerTool(BaseTool):
     """Analyze and compare flavor profiles of cocktails and mocktails.
 
-    This tool retrieves flavor profile data for specified drinks and can
-    provide comparison analysis between multiple drinks.
+    This tool retrieves flavor profile data for specified drinks and provides
+    Raja-style conversational analysis with flavor descriptions, comparisons,
+    and recommendations based on taste similarities.
     """
 
     name: str = "flavor_profiler"
     description: str = (
-        "Analyze and compare flavor profiles of drinks. "
-        "Provide a list of cocktail/mocktail IDs to get their flavor profiles "
-        "(sweet, sour, bitter, spirit intensity on 0-100 scales). "
-        "Returns individual profiles and comparison statistics."
+        "Raja's flavor analysis tool - get personality-rich flavor profiles "
+        "and comparisons for cocktails and mocktails. Provide drink IDs to hear "
+        "Raja describe their sweet, sour, bitter, and spirit characteristics "
+        "with vivid comparisons and pairing recommendations."
     )
 
     def _run(self, cocktail_ids: list[str]) -> str:
@@ -34,7 +34,8 @@ class FlavorProfilerTool(BaseTool):
             cocktail_ids: List of drink IDs to analyze.
 
         Returns:
-            JSON string with flavor profiles and comparison data.
+            Conversational flavor analysis with Raja's personality,
+            including individual profiles and comparison insights.
         """
         # Normalize IDs
         normalized_ids = [cid.lower().strip() for cid in cocktail_ids]
@@ -59,18 +60,228 @@ class FlavorProfilerTool(BaseTool):
         if len(profiles) >= 2:
             comparison = self._calculate_comparison(profiles)
 
-        result = {
-            "query": {"cocktail_ids": normalized_ids},
-            "found": len(profiles),
-            "not_found": not_found if not_found else None,
-            "profiles": profiles,
-            "comparison": comparison,
+        # Build conversational output with Raja's personality
+        return self._format_conversational_output(profiles, not_found, comparison)
+
+    def _format_conversational_output(
+        self,
+        profiles: list[dict],
+        not_found: list[str],
+        comparison: dict | None,
+    ) -> str:
+        """Format flavor profiles as conversational Raja-style output.
+
+        Args:
+            profiles: List of extracted drink profiles.
+            not_found: List of drink IDs that were not found.
+            comparison: Comparison statistics if multiple drinks.
+
+        Returns:
+            Conversational string with Raja's personality.
+        """
+        lines = []
+
+        # Handle empty input
+        if not profiles and not not_found:
+            return "Arrey yaar, give me some drink IDs to analyze! I can't tell you about flavors without knowing which drinks you're curious about."
+
+        # Opening line with Raja's warmth
+        if profiles:
+            if len(profiles) == 1:
+                lines.append("Acha, let me tell you about this drink, yaar:\n")
+            else:
+                lines.append("Let me tell you about these flavors, yaar:\n")
+
+        # Individual drink descriptions
+        for profile in profiles:
+            drink_line = self._format_drink_description(profile)
+            lines.append(drink_line)
+
+        # Handle not found drinks
+        if not_found:
+            not_found_str = ", ".join(not_found)
+            lines.append(
+                f"\nArrey, I couldn't find these in my collection: {not_found_str}. "
+                "Maybe check the spelling, bhai?"
+            )
+
+        # Add comparison insights if multiple drinks
+        if comparison and len(profiles) >= 2:
+            lines.append(self._format_comparison_insights(profiles, comparison))
+
+        # Add recommendation based on similarity
+        if len(profiles) >= 2:
+            lines.append(self._format_pairing_recommendation(profiles))
+
+        return "\n".join(lines)
+
+    def _format_drink_description(self, profile: dict) -> str:
+        """Format a single drink's flavor profile as a conversational description.
+
+        Args:
+            profile: Extracted profile dictionary for a drink.
+
+        Returns:
+            Formatted drink description line.
+        """
+        name = profile["name"]
+        fp = profile["flavor_profile"]
+        analysis = profile["analysis"]
+
+        # Build flavor description
+        flavor_parts = []
+
+        # Dominant flavor with intensity descriptor
+        dominant = analysis["dominant_flavor"]
+        dominant_value = fp[dominant]
+        intensity = self._get_intensity_word(dominant_value)
+
+        if dominant == "sweet":
+            flavor_parts.append(f"{intensity} sweet")
+        elif dominant == "sour":
+            flavor_parts.append(f"{intensity} citrus-forward")
+        elif dominant == "bitter":
+            flavor_parts.append(f"{intensity} bitter notes")
+
+        # Add secondary characteristics
+        if fp["sour"] >= 30 and dominant != "sour":
+            flavor_parts.append("tangy brightness")
+        if fp["sweet"] >= 30 and dominant != "sweet":
+            flavor_parts.append("smooth sweetness")
+        if fp["bitter"] >= 25 and dominant != "bitter":
+            flavor_parts.append("subtle bitter edge")
+
+        # Spirit description
+        spirit_desc = self._get_spirit_description(fp["spirit"], profile["is_mocktail"])
+
+        # Style descriptor
+        style = analysis["style"]
+        style_desc = self._get_style_vibe(style)
+
+        # Compose the line
+        flavor_str = (
+            " with ".join(flavor_parts[:2])
+            if len(flavor_parts) > 1
+            else flavor_parts[0]
+            if flavor_parts
+            else "balanced"
+        )
+
+        return f"  {name} - {flavor_str.capitalize()}, {spirit_desc}. {style_desc}"
+
+    def _get_intensity_word(self, value: int) -> str:
+        """Convert a 0-100 intensity value to a descriptive word."""
+        if value >= 70:
+            return "boldly"
+        elif value >= 50:
+            return "nicely"
+        elif value >= 30:
+            return "gently"
+        else:
+            return "subtly"
+
+    def _get_spirit_description(self, spirit: int, is_mocktail: bool) -> str:
+        """Get a description of the spirit intensity."""
+        if is_mocktail or spirit == 0:
+            return "refreshing and alcohol-free"
+        elif spirit >= 70:
+            return "that spirit really hits you"
+        elif spirit >= 50:
+            return "nicely boozy"
+        elif spirit >= 30:
+            return "light and easy-drinking"
+        else:
+            return "very sessionable"
+
+    def _get_style_vibe(self, style: str) -> str:
+        """Get a conversational vibe description for a style."""
+        style_vibes = {
+            "refreshing/mocktail": "Perfect for when you want something fresh, bhai!",
+            "spirit-forward": "This one's for the serious drinkers, yaar.",
+            "sour": "A proper sour classic!",
+            "bitter/aperitivo": "That Italian aperitivo vibe, first class!",
+            "sweet/dessert": "Like dessert in a glass, kya baat hai!",
+            "balanced": "Beautifully balanced, smooth as silk.",
         }
+        return style_vibes.get(style, "A solid choice!")
 
-        # Remove None values for cleaner output
-        result = {k: v for k, v in result.items() if v is not None}
+    def _format_comparison_insights(
+        self, profiles: list[dict], comparison: dict
+    ) -> str:
+        """Format comparison insights in Raja's voice.
 
-        return json.dumps(result, indent=2)
+        Args:
+            profiles: List of drink profiles.
+            comparison: Comparison statistics.
+
+        Returns:
+            Conversational comparison string.
+        """
+        lines = ["\n**Comparison Notes:**"]
+
+        extremes = comparison["extremes"]
+
+        # Highlight interesting contrasts
+        sweet_range = comparison["sweet"]["range"]
+        sour_range = comparison["sour"]["range"]
+        spirit_range = comparison["spirit"]["range"]
+
+        if sweet_range >= 30:
+            sweetest = extremes["sweetest"]["id"]
+            lines.append(
+                f"  - {sweetest.replace('-', ' ').title()} is noticeably sweeter than the others"
+            )
+
+        if sour_range >= 30:
+            sourest = extremes["sourest"]["id"]
+            lines.append(
+                f"  - {sourest.replace('-', ' ').title()} brings more citrus punch"
+            )
+
+        if spirit_range >= 30:
+            strongest = extremes["strongest"]["id"]
+            lines.append(
+                f"  - {strongest.replace('-', ' ').title()} has more kick, yaar"
+            )
+
+        if len(lines) == 1:
+            lines.append("  - These drinks have pretty similar profiles, actually!")
+
+        return "\n".join(lines)
+
+    def _format_pairing_recommendation(self, profiles: list[dict]) -> str:
+        """Generate pairing recommendation based on flavor similarity.
+
+        Args:
+            profiles: List of drink profiles to compare.
+
+        Returns:
+            Recommendation string with Raja's personality.
+        """
+        # Check if drinks share similar styles
+        styles = [p["analysis"]["style"] for p in profiles]
+        dominants = [p["analysis"]["dominant_flavor"] for p in profiles]
+
+        # Find common ground
+        if len(set(styles)) == 1:
+            names = " and ".join(p["name"] for p in profiles)
+            return (
+                f"\nBilkul, {names} are from the same family! "
+                f"If you like one, you'll love the other, bhai!"
+            )
+        elif len(set(dominants)) == 1:
+            dominant = dominants[0]
+            names = " and ".join(p["name"] for p in profiles)
+            return (
+                f"\nBoth have that {dominant} character - "
+                f"great picks for someone who enjoys {dominant} drinks, yaar!"
+            )
+        else:
+            # Different profiles - note the variety
+            return (
+                "\nNice variety here! Different vibes for different moods. "
+                "That's the beauty of a good bar, yaar!"
+            )
 
     def _extract_profile(self, drink: Drink) -> dict:
         """Extract flavor profile data from a drink."""
