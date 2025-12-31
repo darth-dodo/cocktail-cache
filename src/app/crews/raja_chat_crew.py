@@ -304,7 +304,7 @@ def _parse_raja_output(result) -> RajaChatOutput:
     return RajaChatOutput(
         response=raw_output
         if raw_output
-        else "Arrey, something went wrong! Let me try again, yaar.",
+        else "Arrey, something went wrong! Can you please try again, yaar.",
         detected_intent=MessageIntent.GENERAL_CHAT,
     )
 
