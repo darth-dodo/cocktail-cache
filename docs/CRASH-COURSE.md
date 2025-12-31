@@ -221,8 +221,15 @@ cocktail-cache/
 │   │   ├── data_loader.py         # load_all_drinks(), load_cocktails()
 │   │   └── drink_data.py          # get_makeable_drinks(), format helpers
 │   │
-│   ├── routers/
-│   │   └── api.py                 # /api/flow, /api/chat, /api/drinks
+│   ├── routers/                   # Modular API endpoints
+│   │   ├── api.py                 # Router aggregation + health check
+│   │   ├── flow.py                # /api/flow recommendation pipeline
+│   │   ├── chat.py                # /api/chat Raja conversation
+│   │   ├── drinks.py              # /api/drinks catalog endpoints
+│   │   └── bottles.py             # /api/suggest-bottles recommendations
+│   │
+│   ├── utils/                     # Shared utilities
+│   │   └── parsing.py             # Common request/response parsing
 │   │
 │   ├── templates/                 # Jinja2 templates
 │   │   ├── base.html
@@ -1178,12 +1185,17 @@ make format       # Auto-fix code style
 ### Key Files
 
 ```
-src/app/main.py              # FastAPI app + page routes
-src/app/routers/api.py       # API endpoints
-src/app/flows/cocktail_flow.py  # Main recommendation pipeline
-src/app/crews/raja_chat_crew.py # Chat with Raja
+src/app/main.py                    # FastAPI app + page routes
+src/app/routers/api.py             # Router aggregation + health
+src/app/routers/flow.py            # Recommendation flow endpoints
+src/app/routers/chat.py            # Chat with Raja endpoints
+src/app/routers/drinks.py          # Drink catalog endpoints
+src/app/routers/bottles.py         # Bottle suggestion endpoints
+src/app/utils/parsing.py           # Common parsing utilities
+src/app/flows/cocktail_flow.py     # Main recommendation pipeline
+src/app/crews/raja_chat_crew.py    # Chat with Raja
 src/app/agents/config/agents.yaml  # Agent personalities
-src/app/models/crew_io.py    # Pydantic I/O models
+src/app/models/crew_io.py          # Pydantic I/O models
 ```
 
 ### API Quick Reference

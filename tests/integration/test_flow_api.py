@@ -24,7 +24,9 @@ from src.app.models import (
     SkillLevel,
 )
 from src.app.models.recipe import RecipeIngredient, RecipeStep
-from src.app.routers.api import _sessions
+
+# Import from the new flow router location
+from src.app.routers.flow import _sessions
 
 # =============================================================================
 # Helper Functions
@@ -193,7 +195,7 @@ def mock_error_state() -> CocktailFlowState:
 class TestStartFlowAction:
     """Tests for the START action of the /flow endpoint."""
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_success(
         self,
         mock_run_flow: MagicMock,
@@ -273,7 +275,7 @@ class TestStartFlowAction:
         data = response.json()
         assert "cabinet" in data["detail"].lower()
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_with_mood(
         self,
         mock_run_flow: MagicMock,
@@ -307,7 +309,7 @@ class TestStartFlowAction:
             ("adventurous", SkillLevel.ADVENTUROUS),
         ],
     )
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_with_skill_level(
         self,
         mock_run_flow: MagicMock,
@@ -343,7 +345,7 @@ class TestStartFlowAction:
             ("both", DrinkType.BOTH),
         ],
     )
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_with_drink_type(
         self,
         mock_run_flow: MagicMock,
@@ -371,7 +373,7 @@ class TestStartFlowAction:
         call_args = mock_run_flow.call_args
         assert call_args.kwargs["drink_type"] == expected_value
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_with_recent_history(
         self,
         mock_run_flow: MagicMock,
@@ -397,7 +399,7 @@ class TestStartFlowAction:
         call_args = mock_run_flow.call_args
         assert call_args.kwargs["recent_history"] == ["old-fashioned", "manhattan"]
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_with_constraints(
         self,
         mock_run_flow: MagicMock,
@@ -423,7 +425,7 @@ class TestStartFlowAction:
         call_args = mock_run_flow.call_args
         assert call_args.kwargs["constraints"] == ["not too sweet", "low alcohol"]
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_error_state(
         self,
         mock_run_flow: MagicMock,
@@ -450,7 +452,7 @@ class TestStartFlowAction:
         assert "cabinet" in data["error"].lower()
         assert data["recipe"] is None
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_flow_stores_session(
         self,
         mock_run_flow: MagicMock,
@@ -485,7 +487,7 @@ class TestStartFlowAction:
 class TestAnotherFlowAction:
     """Tests for the ANOTHER action of the /flow endpoint."""
 
-    @patch("src.app.routers.api.request_another")
+    @patch("src.app.routers.flow.request_another")
     def test_another_success(
         self,
         mock_request_another: MagicMock,
@@ -546,7 +548,7 @@ class TestAnotherFlowAction:
         assert "session" in data["detail"].lower()
         assert "not found" in data["detail"].lower()
 
-    @patch("src.app.routers.api.request_another")
+    @patch("src.app.routers.flow.request_another")
     def test_another_updates_session_state(
         self,
         mock_request_another: MagicMock,
@@ -711,8 +713,8 @@ class TestMadeFlowAction:
 class TestCompleteFlowIntegration:
     """Tests for complete START -> ANOTHER -> MADE flow sequences."""
 
-    @patch("src.app.routers.api.request_another")
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.request_another")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_complete_flow_sequence(
         self,
         mock_run_flow: MagicMock,
@@ -777,7 +779,7 @@ class TestCompleteFlowIntegration:
         final_state = _sessions[session_id]
         assert "old-fashioned" in final_state.recent_history
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_then_made_without_another(
         self,
         mock_run_flow: MagicMock,
@@ -812,8 +814,8 @@ class TestCompleteFlowIntegration:
         assert made_response.status_code == 200
         assert made_response.json()["success"] is True
 
-    @patch("src.app.routers.api.request_another")
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.request_another")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_multiple_another_requests(
         self,
         mock_run_flow: MagicMock,
@@ -897,7 +899,7 @@ class TestFlowEdgeCases:
         data = response.json()
         assert "detail" in data
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_with_all_optional_params(
         self,
         mock_run_flow: MagicMock,
@@ -934,7 +936,7 @@ class TestFlowEdgeCases:
             "stirred not shaken",
         ]
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_start_with_single_ingredient_cabinet(
         self,
         mock_run_flow: MagicMock,
@@ -955,7 +957,7 @@ class TestFlowEdgeCases:
         assert response.status_code == 200
         mock_run_flow.assert_called_once()
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_recipe_structured_output(
         self, mock_run_flow: MagicMock, api_client: TestClient
     ):
@@ -985,7 +987,7 @@ class TestFlowEdgeCases:
         assert data["recipe"]["name"] == "Custom Drink"
         assert data["recipe"]["tagline"] == "A simple test drink"
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_response_without_next_bottle(
         self, mock_run_flow: MagicMock, api_client: TestClient
     ):
@@ -1011,7 +1013,7 @@ class TestFlowEdgeCases:
         data = response.json()
         assert data["next_bottle"] is None
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_response_without_alternatives(
         self, mock_run_flow: MagicMock, api_client: TestClient
     ):
@@ -1047,7 +1049,7 @@ class TestFlowEdgeCases:
 class TestSessionManagement:
     """Tests for session storage and lifecycle."""
 
-    @patch("src.app.routers.api.run_cocktail_flow")
+    @patch("src.app.routers.flow.run_cocktail_flow")
     def test_multiple_sessions_are_independent(
         self, mock_run_flow: MagicMock, api_client: TestClient
     ):

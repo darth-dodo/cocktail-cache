@@ -100,9 +100,16 @@ cocktail-cache/
 │       ├── flows/               # ✅ Complete
 │       │   ├── __init__.py      # Flow exports
 │       │   └── cocktail_flow.py # Main orchestration with state
-│       ├── routers/             # ✅ Complete
+│       ├── routers/             # ✅ Complete (modular)
 │       │   ├── __init__.py
-│       │   └── api.py           # /recommend, /drinks, /ingredients endpoints
+│       │   ├── api.py           # Router aggregation + health check
+│       │   ├── flow.py          # /api/flow recommendation pipeline
+│       │   ├── chat.py          # /api/chat Raja conversation
+│       │   ├── drinks.py        # /api/drinks catalog endpoints
+│       │   └── bottles.py       # /api/suggest-bottles recommendations
+│       ├── utils/               # ✅ Complete
+│       │   ├── __init__.py
+│       │   └── parsing.py       # Common request/response parsing
 │       ├── templates/           # ✅ Complete (Jinja2)
 │       │   ├── base.html        # Base layout with shared styles
 │       │   ├── index.html       # Chat interface with tabbed navigation
@@ -1136,9 +1143,17 @@ cocktail-cache/
 │   │   ├── recipe.py             # Recipe, Step, Tip
 │   │   └── recommendation.py     # Recommendation, NextBottle
 │   │
-│   ├── routers/                  # FastAPI routes
+│   ├── routers/                  # Modular FastAPI routes
 │   │   ├── __init__.py
-│   │   └── api.py                # /recommend, /another, /recipe
+│   │   ├── api.py                # Router aggregation + health
+│   │   ├── flow.py               # /api/flow recommendation pipeline
+│   │   ├── chat.py               # /api/chat Raja conversation
+│   │   ├── drinks.py             # /api/drinks catalog endpoints
+│   │   └── bottles.py            # /api/suggest-bottles
+│   │
+│   ├── utils/                    # Shared utilities
+│   │   ├── __init__.py
+│   │   └── parsing.py            # Common parsing functions
 │   │
 │   ├── templates/                # Jinja2 templates
 │   │   ├── base.html             # Base layout with Tailwind
@@ -1199,6 +1214,8 @@ cocktail-cache/
 | `tools/` | One file per tool | Easy to test |
 | `flows/` | One flow file | We only have one flow |
 | `models/` | Pydantic models | Type safety, validation |
+| `routers/` | Domain-focused API modules | Separation of concerns |
+| `utils/` | Shared parsing utilities | DRY principle |
 | `data/` | JSON files (142 drinks) | No database needed |
 | `tests/features/` | BDD feature files | Executable specs |
 | `templates/` | Page templates (index, browse, drink) | Server-rendered, no build step |
@@ -1429,7 +1446,7 @@ class ChatResponse(BaseModel):
 
 ---
 
-*Document Version: 1.6*
-*Last Updated: 2025-12-30*
+*Document Version: 1.7*
+*Last Updated: 2025-12-31*
 *Principles: KISS + YAGNI*
-*Changes: Added privacy-first rate limiting, Raja Chat architecture*
+*Changes: Refactored routers into domain-focused modules, added utils for shared parsing*
