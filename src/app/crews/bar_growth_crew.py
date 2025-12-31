@@ -6,15 +6,14 @@ data about makeable drinks and bottle unlock potential.
 Uses structured Pydantic models for reliable, typed outputs.
 """
 
-import json
 import logging
-import re
 import time
 
 from crewai import Crew, Process, Task
 
 from src.app.agents.bar_growth_advisor import create_bar_growth_advisor
 from src.app.models.crew_io import BarGrowthOutput, BarGrowthRecommendation
+from src.app.utils.parsing import parse_json_from_llm_output
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,6 @@ def create_bar_growth_crew() -> Crew:
 
     # Create agent without tools - data is injected directly into prompts
     bar_growth_advisor = create_bar_growth_advisor(tools=[])
-    logger.debug("Bar Growth Advisor agent created")
 
     # Single task for bar growth advice
     advise_task = Task(
@@ -145,8 +143,6 @@ def run_bar_growth_crew(
 
     crew = create_bar_growth_crew()
 
-    crew_start = time.perf_counter()
-    logger.debug("Kicking off bar growth crew")
     result = crew.kickoff(
         inputs={
             "cabinet_contents": cabinet_contents,
@@ -155,9 +151,6 @@ def run_bar_growth_crew(
             "essentials_status": essentials_status,
         }
     )
-    crew_elapsed_ms = (time.perf_counter() - crew_start) * 1000
-    logger.debug(f"Crew execution completed in {crew_elapsed_ms:.2f}ms")
-
     # Return the structured pydantic output if available
     if (
         hasattr(result, "pydantic")
@@ -170,18 +163,15 @@ def run_bar_growth_crew(
 
     # Fallback: parse from raw output if pydantic output unavailable
     logger.warning("Pydantic output unavailable, attempting to parse from raw output")
-    try:
-        json_match = re.search(r"\{[\s\S]*\}", str(result))
-        if json_match:
-            data = json.loads(json_match.group())
-            parsed_output = BarGrowthOutput(**data)
-            total_elapsed_ms = (time.perf_counter() - start_time) * 1000
-            logger.info(
-                f"run_bar_growth_crew completed (fallback parse) in {total_elapsed_ms:.2f}ms"
-            )
-            return parsed_output
-    except (json.JSONDecodeError, ValueError) as e:
-        logger.error(f"Failed to parse bar growth output: {e}")
+    parsed_output = parse_json_from_llm_output(
+        str(result), BarGrowthOutput, logger, "bar growth output"
+    )
+    if parsed_output:
+        total_elapsed_ms = (time.perf_counter() - start_time) * 1000
+        logger.info(
+            f"run_bar_growth_crew completed (fallback parse) in {total_elapsed_ms:.2f}ms"
+        )
+        return parsed_output
 
     # Return fallback result if parsing fails
     total_elapsed_ms = (time.perf_counter() - start_time) * 1000

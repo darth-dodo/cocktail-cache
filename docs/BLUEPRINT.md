@@ -37,7 +37,8 @@ key_paths:
   flows: src/app/flows/             # Multi-step flow orchestration
   models: src/app/models/           # Pydantic models (crew_io.py critical)
   services: src/app/services/       # Data loading, drink database
-  routers: src/app/routers/         # FastAPI endpoints
+  routers: src/app/routers/         # Modular FastAPI endpoints (api, flow, chat, drinks, bottles)
+  utils: src/app/utils/             # Shared utilities (parsing.py)
   tests: tests/                     # Mirrored structure
 
 commands:
@@ -238,7 +239,14 @@ my-ai-service/
 │   │   └── domain.py              # Domain entities
 │   │
 │   ├── services/                  # Data loading, caching
-│   └── routers/                   # FastAPI endpoints
+│   ├── routers/                   # Modular FastAPI endpoints
+│   │   ├── api.py                 # Router aggregation + health
+│   │   ├── flow.py                # Recommendation pipeline
+│   │   ├── chat.py                # Raja conversation
+│   │   ├── drinks.py              # Drink catalog
+│   │   └── bottles.py             # Bottle suggestions
+│   └── utils/                     # Shared utilities
+│       └── parsing.py             # Request/response parsing
 │
 ├── tests/                         # Mirror src/ structure
 │   ├── conftest.py                # Shared fixtures, mocks

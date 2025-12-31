@@ -2,7 +2,7 @@
 
 > **⚠️ SINGLE SOURCE OF TRUTH**: This file is the authoritative reference for all implementation tasks, session progress, and feature status. All agents should read, reference, and update this file.
 
-> **Status**: Session 9 Complete - Documentation Audit & Playwright Testing
+> **Status**: Session 10 Complete - Codebase Simplification
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI -> UX Polish
 >
@@ -10,7 +10,23 @@
 >
 > **Live Demo**: https://cocktail-cache.onrender.com | **GitHub**: https://github.com/darth-dodo/cocktail-cache
 
-## Recent Changes (Session 9 - Documentation Audit & Playwright Testing)
+## Recent Changes (Session 10 - Codebase Simplification)
+
+- **Router Modularization**: Split monolithic api.py (~850 lines) into domain-focused modules
+  - `drinks.py`: Drink listing endpoints (get_drinks, get_drink_by_id, get_ingredients)
+  - `flow.py`: Recommendation flow endpoints (flow_endpoint, _handle_start, etc.)
+  - `chat.py`: Raja chat endpoints (chat_with_raja, get_chat_history, end_chat_session)
+  - `bottles.py`: Bottle suggestion endpoint (suggest_bottles)
+  - `api.py`: Main router (~40 lines) that includes sub-routers
+- **Common JSON Parsing Utility**: Extracted repeated JSON parsing pattern from 4 crew files into `src/app/utils/parsing.py`
+  - `parse_json_from_llm_output()`: Generic function for LLM output extraction
+  - Eliminates code duplication across crews
+- **Reduced Verbose Logging**: Cleaned up crew files
+  - Removed all logger.debug() calls
+  - Kept only ERROR/WARNING/INFO for key operations
+  - Cleaner logs for production use
+
+## Previous Changes (Session 9 - Documentation Audit & Playwright Testing)
 
 - **Documentation Discrepancy Fixes**: Cross-checked all documentation claims against codebase
 - **Fixed 7 Documentation Issues**:
@@ -837,6 +853,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Session 7 | Raja Chat | Conversational AI bartender with Bombay personality | PASSED |
 | Session 8 | Chat & UX | Unit toggle, error pages, chat persistence (751 tests) | PASSED |
 | Session 9 | Docs & E2E | Documentation audit, Playwright testing guide | PASSED |
+| Session 10 | Simplification | Router split, utils extraction, logging cleanup | PASSED |
 
 ### Session 6 UX Progress
 

@@ -6,7 +6,7 @@ Tests for:
 - GET /api/drinks/{drink_id} - individual drink details
 - POST /api/suggest-bottles - bottle recommendations based on cabinet
 - Helper functions: _smart_title_case, _format_ingredient_name,
-  _get_ingredient_display_name, _is_bottle_ingredient
+  _get_ingredient_display_name, _is_core_bottle
 """
 
 import os
@@ -19,12 +19,16 @@ os.environ.setdefault("OPENAI_API_KEY", "test-key-not-used-for-actual-calls")
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key-not-used-for-actual-calls")
 
 from src.app.main import app
-from src.app.routers.api import (
+from src.app.routers.bottles import (
+    _get_ingredient_display_name,
+    _is_core_bottle,
+)
+
+# Import from the new sub-router locations
+from src.app.routers.drinks import (
     CATEGORY_CONFIG,
     INGREDIENT_EMOJIS,
     _format_ingredient_name,
-    _get_ingredient_display_name,
-    _is_bottle_ingredient,
     _smart_title_case,
 )
 
@@ -138,41 +142,48 @@ class TestGetIngredientDisplayName:
 
 
 # =============================================================================
-# Helper Function Tests: _is_bottle_ingredient
+# Helper Function Tests: _is_core_bottle
 # =============================================================================
 
 
-class TestIsBottleIngredient:
-    """Tests for the _is_bottle_ingredient helper function."""
+class TestIsCoreBottle:
+    """Tests for the _is_core_bottle helper function.
 
-    def test_spirit_is_bottle(self):
-        """Spirits are identified as bottles."""
-        assert _is_bottle_ingredient("bourbon") is True
-        assert _is_bottle_ingredient("gin") is True
-        assert _is_bottle_ingredient("vodka") is True
+    Core Bottles are spirits, modifiers, and non-alcoholic spirits.
+    """
 
-    def test_modifier_is_bottle(self):
-        """Modifiers/liqueurs are identified as bottles."""
-        assert _is_bottle_ingredient("sweet-vermouth") is True
-        assert _is_bottle_ingredient("dry-vermouth") is True
+    def test_spirit_is_core_bottle(self):
+        """Spirits are identified as Core Bottles."""
+        assert _is_core_bottle("bourbon") is True
+        assert _is_core_bottle("gin") is True
+        assert _is_core_bottle("vodka") is True
 
-    def test_fresh_is_not_bottle(self):
-        """Fresh ingredients are not bottles."""
-        assert _is_bottle_ingredient("mint") is False
-        assert _is_bottle_ingredient("lime-juice") is False
+    def test_modifier_is_core_bottle(self):
+        """Modifiers/liqueurs are identified as Core Bottles."""
+        assert _is_core_bottle("sweet-vermouth") is True
+        assert _is_core_bottle("dry-vermouth") is True
 
-    def test_mixer_is_not_bottle(self):
-        """Mixers are not bottles."""
-        assert _is_bottle_ingredient("soda-water") is False
-        assert _is_bottle_ingredient("tonic-water") is False
+    def test_fresh_is_not_core_bottle(self):
+        """Fresh ingredients are not Core Bottles."""
+        assert _is_core_bottle("mint") is False
+        assert _is_core_bottle("lime-juice") is False
 
-    def test_syrup_is_not_bottle(self):
-        """Syrups are not bottles."""
-        assert _is_bottle_ingredient("simple-syrup") is False
+    def test_mixer_is_not_core_bottle(self):
+        """Mixers are not Core Bottles."""
+        assert _is_core_bottle("soda-water") is False
+        assert _is_core_bottle("tonic-water") is False
 
-    def test_unknown_ingredient_is_not_bottle(self):
-        """Unknown ingredients are not bottles."""
-        assert _is_bottle_ingredient("unknown-ingredient-xyz") is False
+    def test_syrup_is_not_core_bottle(self):
+        """Syrups (Essentials) are not Core Bottles."""
+        assert _is_core_bottle("simple-syrup") is False
+
+    def test_bitters_is_not_core_bottle(self):
+        """Bitters (Essentials) are not Core Bottles."""
+        assert _is_core_bottle("angostura") is False
+
+    def test_unknown_ingredient_is_not_core_bottle(self):
+        """Unknown ingredients are not Core Bottles."""
+        assert _is_core_bottle("unknown-ingredient-xyz") is False
 
 
 # =============================================================================
@@ -542,7 +553,7 @@ class TestSuggestBottles:
         # All recommendations should be Core Bottles (spirits, modifiers, or non-alcoholic spirits)
         for rec in data["recommendations"]:
             ingredient_id = rec["ingredient_id"]
-            assert _is_bottle_ingredient(ingredient_id), (
+            assert _is_core_bottle(ingredient_id), (
                 f"{ingredient_id} should be a Core Bottle ingredient"
             )
 

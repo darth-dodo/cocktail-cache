@@ -28,6 +28,7 @@ from src.app.services.drink_data import (
     get_substitutions_for_ingredients,
     get_unlock_recommendations,
 )
+from src.app.utils.parsing import parse_json_from_llm_output
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +69,6 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
 
     # Create agents without tools - data is injected directly into prompts
     recipe_writer = create_recipe_writer(tools=[])
-    logger.debug("Recipe Writer agent created")
 
     # Build agents and tasks lists based on configuration
     agents = [recipe_writer]
@@ -131,7 +131,6 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
     if include_bottle_advice:
         # Create bottle advisor without tools - data is injected directly into prompts
         bottle_advisor = create_bottle_advisor(tools=[])
-        logger.debug("Bottle Advisor agent created")
         agents.append(bottle_advisor)
 
         bottle_task = Task(
@@ -181,9 +180,6 @@ def create_recipe_crew(include_bottle_advice: bool = True) -> Crew:
         verbose=False,
     )
 
-    logger.debug(
-        f"Recipe crew created with {len(agents)} agents and {len(tasks)} tasks"
-    )
     return crew
 
 
@@ -238,7 +234,6 @@ def run_recipe_crew(
     drink = get_drink_by_id(cocktail_id)
     if drink:
         recipe_data = format_recipe_for_prompt(drink)
-        logger.debug(f"Recipe data loaded for '{drink.get('name', cocktail_id)}'")
     else:
         recipe_data = f"Recipe not found for ID: {cocktail_id}"
         logger.warning(f"Recipe not found for cocktail_id={cocktail_id}")
@@ -252,10 +247,8 @@ def run_recipe_crew(
             for ing, subs in substitutions.items():
                 subs_lines.append(f"- {ing}: {', '.join(subs)}")
             substitutions_data = "\n".join(subs_lines)
-            logger.debug(f"Found substitutions for {len(substitutions)} ingredients")
         else:
             substitutions_data = "No substitutions available for the ingredients."
-            logger.debug("No substitutions found for recipe ingredients")
     else:
         substitutions_data = "No substitutions available (recipe not found)."
 
@@ -274,18 +267,14 @@ def run_recipe_crew(
         bottle_recommendations = format_bottle_recommendations_for_prompt(
             recommendations
         )
-        logger.debug(f"Generated {len(recommendations)} bottle recommendations")
     else:
         bottle_recommendations = ""
-        logger.debug("Bottle advice skipped (include_bottle_advice=False)")
 
     data_elapsed_ms = (time.perf_counter() - data_start) * 1000
-    logger.debug(f"Data pre-computation completed in {data_elapsed_ms:.2f}ms")
 
     crew = create_recipe_crew(include_bottle_advice=include_bottle_advice)
 
     crew_start = time.perf_counter()
-    logger.debug("Kicking off recipe crew")
     result = crew.kickoff(
         inputs={
             "cocktail_id": cocktail_id,
@@ -298,7 +287,6 @@ def run_recipe_crew(
         }
     )
     crew_elapsed_ms = (time.perf_counter() - crew_start) * 1000
-    logger.debug(f"Crew execution completed in {crew_elapsed_ms:.2f}ms")
 
     # Extract structured outputs from tasks_output
     recipe_output: RecipeOutput | None = None
@@ -312,9 +300,6 @@ def run_recipe_crew(
                 task_0.pydantic, RecipeOutput
             ):
                 recipe_output = task_0.pydantic
-                logger.debug(
-                    f"Recipe output extracted from pydantic: {recipe_output.name}"
-                )
             else:
                 # Try to parse from raw
                 logger.warning(
@@ -329,9 +314,6 @@ def run_recipe_crew(
                 task_1.pydantic, BottleAdvisorOutput
             ):
                 bottle_output = task_1.pydantic
-                logger.debug(
-                    f"Bottle output extracted from pydantic: {len(bottle_output.recommendations)} recommendations"
-                )
             else:
                 # Try to parse from raw
                 logger.warning(
@@ -343,10 +325,8 @@ def run_recipe_crew(
     if recipe_output is None and hasattr(result, "pydantic") and result.pydantic:
         if isinstance(result.pydantic, RecipeOutput):
             recipe_output = result.pydantic
-            logger.debug("Recipe output extracted from final result pydantic")
         elif isinstance(result.pydantic, BottleAdvisorOutput):
             bottle_output = result.pydantic
-            logger.debug("Bottle output extracted from final result pydantic")
 
     # Create default recipe if still None
     if recipe_output is None:
@@ -372,41 +352,23 @@ def run_recipe_crew(
 
 def _parse_recipe_output(raw: str, cocktail_id: str) -> RecipeOutput:
     """Parse recipe output from raw text."""
-    import json
-    import re
+    parsed = parse_json_from_llm_output(raw, RecipeOutput, logger, "recipe output")
+    if parsed:
+        return parsed
 
-    try:
-        json_match = re.search(r"\{[\s\S]*\}", raw)
-        if json_match:
-            data = json.loads(json_match.group())
-            parsed = RecipeOutput(**data)
-            logger.debug(f"Successfully parsed recipe from raw output: {parsed.name}")
-            return parsed
-    except (json.JSONDecodeError, ValueError) as e:
-        logger.error(f"Failed to parse recipe output: {e}")
-
-    logger.warning(f"Returning default recipe for {cocktail_id}")
+    logger.warning(f"Fallback to default recipe for {cocktail_id}")
     return _create_default_recipe(cocktail_id, raw)
 
 
 def _parse_bottle_output(raw: str) -> BottleAdvisorOutput:
     """Parse bottle advisor output from raw text."""
-    import json
-    import re
+    parsed = parse_json_from_llm_output(
+        raw, BottleAdvisorOutput, logger, "bottle output"
+    )
+    if parsed:
+        return parsed
 
-    try:
-        json_match = re.search(r"\{[\s\S]*\}", raw)
-        if json_match:
-            data = json.loads(json_match.group())
-            parsed = BottleAdvisorOutput(**data)
-            logger.debug(
-                f"Successfully parsed bottle output: {len(parsed.recommendations)} recommendations"
-            )
-            return parsed
-    except (json.JSONDecodeError, ValueError) as e:
-        logger.error(f"Failed to parse bottle output: {e}")
-
-    logger.warning("Returning empty bottle recommendations")
+    logger.warning("Fallback to empty bottle recommendations")
     return BottleAdvisorOutput(recommendations=[], total_new_drinks=0)
 
 
@@ -415,7 +377,6 @@ def _create_default_recipe(cocktail_id: str, raw_content: str) -> RecipeOutput:
     from src.app.models import FlavorProfile
     from src.app.models.recipe import RecipeIngredient, RecipeStep
 
-    logger.warning(f"Creating default recipe for {cocktail_id} due to parsing failure")
     return RecipeOutput(
         id=cocktail_id,
         name=cocktail_id.replace("-", " ").title(),
@@ -459,7 +420,6 @@ def create_recipe_only_crew() -> Crew:
 
     # Create recipe writer without tools - data is injected directly into prompts
     recipe_writer = create_recipe_writer(tools=[])
-    logger.debug("Recipe Writer agent created")
 
     # Create the recipe task (same as in create_recipe_crew)
     recipe_task = Task(
@@ -519,7 +479,7 @@ def create_recipe_only_crew() -> Crew:
         process=Process.sequential,
         verbose=False,
     )
-    logger.debug("Recipe-only crew created with 1 agent and 1 task")
+
     return crew
 
 
@@ -545,7 +505,6 @@ def create_bottle_only_crew() -> Crew:
 
     # Create bottle advisor without tools - data is injected directly into prompts
     bottle_advisor = create_bottle_advisor(tools=[])
-    logger.debug("Bottle Advisor agent created")
 
     # Create the bottle task WITHOUT context dependency on recipe_task
     bottle_task = Task(
@@ -592,5 +551,5 @@ def create_bottle_only_crew() -> Crew:
         process=Process.sequential,
         verbose=False,
     )
-    logger.debug("Bottle-only crew created with 1 agent and 1 task")
+
     return crew
