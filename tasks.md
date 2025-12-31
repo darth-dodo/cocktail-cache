@@ -2,7 +2,7 @@
 
 > **⚠️ SINGLE SOURCE OF TRUTH**: This file is the authoritative reference for all implementation tasks, session progress, and feature status. All agents should read, reference, and update this file.
 
-> **Status**: Session 8 Complete - Chat Improvements & Unit Toggle
+> **Status**: Session 9 Complete - Documentation Audit & Playwright Testing
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI -> UX Polish
 >
@@ -10,7 +10,34 @@
 >
 > **Live Demo**: https://cocktail-cache.onrender.com | **GitHub**: https://github.com/darth-dodo/cocktail-cache
 
-## Recent Changes (Session 8 - Chat Improvements & Unit Toggle)
+## Recent Changes (Session 9 - Documentation Audit & Playwright Testing)
+
+- **Documentation Discrepancy Fixes**: Cross-checked all documentation claims against codebase
+- **Fixed 7 Documentation Issues**:
+  - README.md: Test count 714 → 751
+  - BLUEPRINT.md: Factory pattern `create_*_agent()` → `create_*()`
+  - CRASH-COURSE.md: Added missing agents (cabinet_analyst, mood_matcher)
+  - CRASH-COURSE.md: Documented all 5 LLM profiles (added fast: 0.5, precise: 0.3)
+  - architecture.md: Unlock scores count 110 → 90
+  - api.md: Rate limiting section updated (LLM: 10/min, COMPUTE: 30/min)
+- **Raja Chat Improvements**:
+  - Changed "zaroor" → "of course" in vocabulary
+  - Changed measurements from oz to ml (60ml, 30ml, 20ml)
+- **Playwright Testing Guide**: Created comprehensive `docs/playwright.md`
+  - Test report with all flows verified passing
+  - User flows with step-by-step instructions
+  - Element reference guide for automation
+  - Known issues and workarounds documented
+- **E2E Test Results**:
+  - Homepage & Navigation: ✅ Pass
+  - Browse (142 drinks): ✅ Pass
+  - Chat with Raja: ✅ Pass
+  - Drink Detail Pages: ✅ Pass
+  - Cabinet Selection: ✅ Pass
+  - Suggest/Grow Your Bar: ✅ Pass
+- **Favicon**: Added SVG cocktail glass favicon to all pages
+
+## Previous Changes (Session 8 - Chat Improvements & Unit Toggle)
 
 - **oz/ml Unit Toggle**: Drink detail page now has toggle to switch between imperial (oz) and metric (ml) measurements
 - **Unit Preference Persistence**: User's unit preference saved to localStorage across sessions
@@ -809,6 +836,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Session 6 | UX Polish | Navigation, discovery, browse, drink details | PASSED |
 | Session 7 | Raja Chat | Conversational AI bartender with Bombay personality | PASSED |
 | Session 8 | Chat & UX | Unit toggle, error pages, chat persistence (751 tests) | PASSED |
+| Session 9 | Docs & E2E | Documentation audit, Playwright testing guide | PASSED |
 
 ### Session 6 UX Progress
 

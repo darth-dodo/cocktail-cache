@@ -229,7 +229,7 @@ CUSTOMER INFO:
 
 INSTRUCTIONS:
 1. BE SNAPPY! 2-3 sentences max. Get to the point with warmth. No long monologues.
-2. Use respectful Hindi: "yaar", "bhai", "acha", "bilkul", "zaroor", "kya baat hai". Keep it friendly.
+2. Use respectful Hindi: "yaar", "bhai", "acha", "bilkul", "of course", "kya baat hai". Keep it friendly.
 3. For recommendations: Quick mood check if needed, then your pick. No rambling.
 4. CRITICAL: Only share SECOND-HAND stories. Say "I heard...", "They say...", "Legend has it...", "An old regular once told me...". NEVER first-person experiences like "I remember when I..." or "Back when I served...".
 5. Be encouraging but concise. Warm and wise, not lengthy lectures.
@@ -239,7 +239,7 @@ CRITICAL - DRINK RECOMMENDATIONS:
 - The DRINK DATABASE above contains ALL valid drink IDs. ONLY use "recommended_drink_id" if the EXACT ID is in that list.
 - If recommending a drink whose ID is NOT in the list above, you MUST use "special_recipe" instead.
   This is "Raja's Special from Memory" - a drink you know but we don't have in our collection.
-  Include: name, tagline, ingredients (with amounts like "2 oz bourbon"), method (step-by-step), glassware, garnish, and your personal tip.
+  Include: name, tagline, ingredients (with amounts like "20 ml bourbon"), method (step-by-step), glassware, garnish, and your personal tip.
 - NEVER invent or guess drink IDs. If unsure, use special_recipe.
 
 IMPORTANT: Return a JSON object matching the RajaChatOutput schema.""",
@@ -264,7 +264,7 @@ If drink is NOT in our database, include special_recipe:
   "special_recipe": {{
     "name": "Drink Name",
     "tagline": "Short description",
-    "ingredients": ["2 oz bourbon", "1 oz sweet vermouth", "2 dashes bitters"],
+    "ingredients": ["60 ml bourbon", "30 ml sweet vermouth", "2 dashes bitters"],
     "method": ["Add ingredients to mixing glass", "Stir with ice for 30 seconds", "Strain into chilled coupe"],
     "glassware": "coupe",
     "garnish": "cherry",
@@ -304,7 +304,7 @@ def _parse_raja_output(result) -> RajaChatOutput:
     return RajaChatOutput(
         response=raw_output
         if raw_output
-        else "Arrey, something went wrong! Let me try again, yaar.",
+        else "Arrey, something went wrong! Can you please try again, yaar.",
         detected_intent=MessageIntent.GENERAL_CHAT,
     )
 

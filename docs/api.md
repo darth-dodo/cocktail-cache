@@ -64,7 +64,7 @@ flowchart LR
 
 ## Authentication
 
-The API is currently **open** and does not require authentication. Rate limiting may be applied in the future.
+The API is currently **open** and does not require authentication. Rate limiting is active (see [Rate Limiting](#rate-limiting) section).
 
 ---
 
@@ -523,7 +523,14 @@ All errors return a JSON response with the following structure:
 
 ## Rate Limiting
 
-Currently no rate limiting is enforced. This may change in the future.
+Rate limiting is active on all endpoints to ensure fair usage and system stability.
+
+| Tier | Limit | Endpoints |
+|------|-------|-----------|
+| **LLM** | 10 requests/minute | `/api/flow`, `/api/chat`, `/api/suggest-bottles` |
+| **COMPUTE** | 30 requests/minute | `/api/drinks`, `/api/ingredients` |
+
+When rate limits are exceeded, the API returns a `429 Too Many Requests` response.
 
 ---
 

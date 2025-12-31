@@ -56,7 +56,7 @@
 | `mocktails.json` | 39 drinks | Pydantic validated |
 | `ingredients.json` | 180 ingredients | 6 categories |
 | `substitutions.json` | 118 rules | 7 substitution maps |
-| `unlock_scores.json` | 110 entries | Pre-computed ROI |
+| `unlock_scores.json` | 90 entries | Pre-computed ROI |
 
 ### Actual Project Structure (Session 6)
 
@@ -118,7 +118,7 @@ cocktail-cache/
 │   ├── mocktails.json           # 39 non-alcoholic recipes
 │   ├── ingredients.json         # 180 categorized ingredients
 │   ├── substitutions.json       # 118 ingredient swap rules
-│   └── unlock_scores.json       # Pre-computed bottle ROI (110 entries)
+│   └── unlock_scores.json       # Pre-computed bottle ROI (90 entries)
 ├── scripts/                     # ✅ Complete
 │   ├── compute_unlock_scores.py # Generate bottle recommendations
 │   └── validate_data.py         # Pydantic data validation

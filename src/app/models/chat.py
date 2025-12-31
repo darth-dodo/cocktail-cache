@@ -161,7 +161,7 @@ class SpecialRecipe(BaseModel):
     name: str = Field(..., description="Name of the drink")
     tagline: str = Field(default="", description="Short description of the drink")
     ingredients: list[str] = Field(
-        ..., description="List of ingredients with amounts (e.g., '2 oz bourbon')"
+        ..., description="List of ingredients with amounts (e.g., '30 ml bourbon')"
     )
     method: list[str] = Field(..., description="Step-by-step preparation instructions")
     glassware: str = Field(default="", description="Recommended glass type")
