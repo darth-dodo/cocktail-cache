@@ -8,9 +8,7 @@ The crew maintains conversation context and integrates with the
 existing drink data services for accurate recommendations.
 """
 
-import json
 import logging
-import re
 import time
 import uuid
 from datetime import datetime
@@ -29,6 +27,7 @@ from src.app.models.chat import (
     RajaChatOutput,
 )
 from src.app.services.data_loader import load_all_drinks
+from src.app.utils.parsing import parse_json_from_llm_output
 
 logger = logging.getLogger(__name__)
 
@@ -292,13 +291,11 @@ def _parse_raja_output(result) -> RajaChatOutput:
     # Fallback: parse from raw
     raw_output = str(result.raw) if hasattr(result, "raw") else str(result)
 
-    try:
-        json_match = re.search(r"\{[\s\S]*\}", raw_output)
-        if json_match:
-            data = json.loads(json_match.group())
-            return RajaChatOutput(**data)
-    except (json.JSONDecodeError, ValueError) as e:
-        logger.error(f"Failed to parse Raja output: {e}")
+    parsed = parse_json_from_llm_output(
+        raw_output, RajaChatOutput, logger, "Raja output"
+    )
+    if parsed:
+        return parsed
 
     # Final fallback
     return RajaChatOutput(
@@ -362,10 +359,7 @@ def run_raja_chat(request: ChatRequest) -> ChatResponse:
     # Create and run crew
     crew = create_raja_chat_crew(session, request.message)
 
-    crew_start = time.perf_counter()
     result = crew.kickoff()
-    crew_elapsed_ms = (time.perf_counter() - crew_start) * 1000
-    logger.debug(f"Raja crew completed in {crew_elapsed_ms:.2f}ms")
 
     # Parse output
     raja_output = _parse_raja_output(result)

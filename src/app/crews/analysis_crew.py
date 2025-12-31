@@ -26,6 +26,7 @@ from src.app.services.drink_data import (
     format_drinks_for_prompt,
     get_makeable_drinks,
 )
+from src.app.utils.parsing import parse_json_from_llm_output
 
 logger = logging.getLogger(__name__)
 
@@ -73,10 +74,8 @@ def create_analysis_crew(fast_mode: bool = True) -> Crew:
 
     if fast_mode:
         crew = _create_fast_crew()
-        logger.debug("Fast crew created with single Drink Recommender agent")
     else:
         crew = _create_full_crew()
-        logger.debug("Full crew created with Cabinet Analyst and Mood Matcher agents")
 
     return crew
 
@@ -270,9 +269,6 @@ def run_analysis_crew(
         for candidate in result.candidates:
             print(f"{candidate.name}: {candidate.mood_score}")
     """
-    import json
-    import re
-
     start_time = time.perf_counter()
     logger.info(
         f"run_analysis_crew started: mood='{mood}', skill_level={skill_level}, "
@@ -303,12 +299,10 @@ def run_analysis_crew(
     )
     available_drinks_text = format_drinks_for_prompt(makeable_drinks)
     data_elapsed_ms = (time.perf_counter() - data_start) * 1000
-    logger.debug(f"Data pre-computation completed in {data_elapsed_ms:.2f}ms")
 
     crew = create_analysis_crew(fast_mode=fast_mode)
 
     crew_start = time.perf_counter()
-    logger.debug("Kicking off analysis crew")
     result = crew.kickoff(
         inputs={
             "cabinet": cabinet,
@@ -320,7 +314,6 @@ def run_analysis_crew(
         }
     )
     crew_elapsed_ms = (time.perf_counter() - crew_start) * 1000
-    logger.debug(f"Crew execution completed in {crew_elapsed_ms:.2f}ms")
 
     # Return the structured pydantic output if available
     if (
@@ -337,19 +330,16 @@ def run_analysis_crew(
 
     # Fallback: parse from raw output if pydantic output unavailable
     logger.warning("Pydantic output unavailable, attempting to parse from raw output")
-    try:
-        json_match = re.search(r"\{[\s\S]*\}", str(result))
-        if json_match:
-            data = json.loads(json_match.group())
-            parsed_output = AnalysisOutput(**data)
-            total_elapsed_ms = (time.perf_counter() - start_time) * 1000
-            logger.info(
-                f"run_analysis_crew completed (fallback parse): {len(parsed_output.candidates)} candidates "
-                f"found in {total_elapsed_ms:.2f}ms"
-            )
-            return parsed_output
-    except (json.JSONDecodeError, ValueError) as e:
-        logger.error(f"Failed to parse analysis output: {e}")
+    parsed_output = parse_json_from_llm_output(
+        str(result), AnalysisOutput, logger, "analysis output"
+    )
+    if parsed_output:
+        total_elapsed_ms = (time.perf_counter() - start_time) * 1000
+        logger.info(
+            f"run_analysis_crew completed (fallback parse): {len(parsed_output.candidates)} candidates "
+            f"found in {total_elapsed_ms:.2f}ms"
+        )
+        return parsed_output
 
     # Return empty result if parsing fails
     total_elapsed_ms = (time.perf_counter() - start_time) * 1000
