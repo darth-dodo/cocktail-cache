@@ -1,6 +1,6 @@
 # Cocktail Cache: Crash Course
 
-**Version**: 2.0 | **Tests**: 751 | **Coverage**: 78% | **Date**: December 2025
+**Version**: 2.1 | **Tests**: 761 | **Coverage**: 78% | **Date**: December 2025
 
 ---
 
@@ -33,7 +33,8 @@ This crash course documents everything about **Cocktail Cache** — an AI-powere
 - ✅ "Next bottle" recommendations with ROI calculations
 - ✅ Session-based chat with conversation history
 - ✅ Mobile-first glassmorphic UI with tab navigation
-- ✅ 751 tests with 78% coverage, strict typing
+- ✅ 761 tests with 78% coverage, strict typing
+- ✅ Tool-based architecture: Raja uses 4 cocktail tools dynamically
 
 ---
 
@@ -436,9 +437,32 @@ graph LR
 | `RajaChatCrew` | raja_bartender | Conversational interaction | Sequential |
 | `BarGrowthCrew` | bar_growth_advisor | Strategic bar recommendations | Sequential |
 
-### Data Injection Pattern
+### Tool-Based Architecture (Raja Chat)
 
-Instead of tool calls, we pre-compute data and inject into prompts:
+Raja now uses 4 cocktail tools for dynamic data access:
+
+```python
+# Raja agent is created with default tools
+raja = create_raja_bartender()  # Has 4 tools by default
+
+# Tools available:
+# - recipe_database: Search drinks by cabinet ingredients
+# - substitution_finder: Find ingredient alternatives
+# - unlock_calculator: Calculate best bottles to buy
+# - flavor_profiler: Compare drink flavor profiles
+
+# Raja dynamically calls tools during conversation
+# No need to pre-inject full drink database
+```
+
+**Benefits**:
+- Smaller prompts (~1000 vs ~4000 tokens per message)
+- Dynamic data: Raja queries only what's needed
+- More natural UX: "Let me check..." feels authentic
+
+### Data Injection Pattern (Other Crews)
+
+For non-chat crews, we still pre-compute data and inject into prompts:
 
 ```python
 # Pre-compute before crew kickoff
@@ -453,7 +477,7 @@ result = crew.kickoff(inputs={
 })
 ```
 
-**Why**: Eliminates tool call overhead (500ms+ per call), reduces latency by 40%.
+**Why**: Eliminates tool call overhead for batch operations.
 
 ---
 
@@ -571,70 +595,63 @@ async def _generate_parallel(self) -> None:
 
 ## 7. Tool System
 
-### Tool Pattern
+### Tool-Based Architecture
 
-Tools provide deterministic data operations for agents:
+All 4 cocktail tools are now integrated with Raja's agent for dynamic data access:
 
 ```python
-# src/app/tools/recipe_db.py
-from crewai.tools import BaseTool
-from typing import Literal
+# src/app/agents/raja_bartender.py
+DEFAULT_RAJA_TOOLS = [
+    RecipeDBTool(),           # Search drinks by ingredients
+    SubstitutionFinderTool(), # Find ingredient alternatives
+    UnlockCalculatorTool(),   # Calculate best bottles to buy
+    FlavorProfilerTool(),     # Analyze/compare drink flavors
+]
 
-class RecipeDBTool(BaseTool):
-    """Query drinks database based on available ingredients."""
-
-    name: str = "recipe_database"
-    description: str = (
-        "Search and retrieve cocktail/mocktail recipes by ingredients. "
-        "Returns matching drinks with completeness scores."
-    )
-
-    def _run(
-        self,
-        cabinet: list[str],
-        drink_type: Literal["cocktails", "mocktails", "both"] = "both",
-    ) -> str:
-        """Search for drinks matching cabinet ingredients."""
-        cabinet_set = {ing.lower().strip() for ing in cabinet}
-        drinks = self._load_drinks_by_type(drink_type)
-
-        matches = []
-        for drink in drinks:
-            match_info = self._calculate_match(drink, cabinet_set)
-            if match_info["score"] > 0:
-                matches.append(match_info)
-
-        return json.dumps({"matches": matches})
+def create_raja_bartender(include_default_tools: bool = True) -> Agent:
+    all_tools = DEFAULT_RAJA_TOOLS if include_default_tools else []
+    return Agent(tools=all_tools, ...)
 ```
 
 ### Tool Inventory
 
-| Tool | Purpose | Input | Output |
-|------|---------|-------|--------|
-| `RecipeDBTool` | Find makeable drinks | cabinet, drink_type | Matching drinks with scores |
-| `UnlockCalculatorTool` | Calculate unlock value | cabinet, ingredient | Drinks unlocked count |
-| `FlavorProfilerTool` | Analyze drink flavors | drink_id | Flavor wheel data |
-| `SubstitutionFinderTool` | Find ingredient swaps | ingredient | Possible substitutes |
+| Tool | Purpose | Raja Uses For |
+|------|---------|---------------|
+| `RecipeDBTool` | Find makeable drinks | "What can I make with my cabinet?" |
+| `SubstitutionFinderTool` | Find ingredient swaps | "I don't have bourbon, what can I use?" |
+| `UnlockCalculatorTool` | Calculate unlock value | "What bottle should I buy next?" |
+| `FlavorProfilerTool` | Analyze drink flavors | "How does a Negroni taste?" |
 
-### Data Service Pattern
+### Tool Output Formatting
 
-For performance, we prefer direct data injection over tool calls:
+Tools return Raja-friendly conversational responses:
+
+```python
+# src/app/tools/recipe_db.py
+class RecipeDBTool(BaseTool):
+    name: str = "recipe_database"
+    description: str = (
+        "Search Raja's drink database. Returns drinks with match scores."
+    )
+
+    def _run(self, cabinet: list[str], drink_type: str = "both") -> str:
+        matches = self._find_matches(cabinet, drink_type)
+        # Returns structured JSON that Raja can interpret
+        return json.dumps({"matches": matches[:10], "total": len(matches)})
+```
+
+### Data Service Pattern (Non-Chat)
+
+For batch operations in other crews, we still use direct data injection:
 
 ```python
 # src/app/services/drink_data.py
 def get_makeable_drinks(
     cabinet: list[str],
     drink_type: DrinkTypeFilter = "both",
-    exclude: list[str] | None = None,
 ) -> list[dict]:
     """Get drinks makeable with cabinet (for prompt injection)."""
-    cabinet_set = {ing.lower().strip() for ing in cabinet}
-    drinks = load_drinks_by_type(drink_type)
-
-    return [
-        drink_to_dict(d) for d in drinks
-        if all_ingredients_available(d, cabinet_set)
-    ]
+    return [drink for drink in load_drinks() if matches_cabinet(drink, cabinet)]
 ```
 
 ---
@@ -1233,4 +1250,4 @@ PARALLEL_CREWS=true
 
 ---
 
-*Crash Course v2.0 — Cocktail Cache (751 tests, 78% coverage)*
+*Crash Course v2.1 — Cocktail Cache (761 tests, 78% coverage, Tool-Based Architecture)*

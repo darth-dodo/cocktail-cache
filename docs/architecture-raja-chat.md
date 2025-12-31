@@ -1,8 +1,12 @@
 # Architecture: Raja Conversational Chat Interface
 
+> **Last Updated**: December 2025 (Tool-Based Architecture)
+> **Status**: Implemented
+> **Tests**: 761 passing
+
 ## Executive Summary
 
-This document outlines the architecture for implementing a conversational chat interface featuring Raja, a bartender from Bombay, as an AI-powered cocktail advisor. The design integrates with the existing CrewAI patterns while introducing a dedicated conversationalist agent with personality persistence, chat history management, and seamless recommendation flow integration.
+This document outlines the architecture for the conversational chat interface featuring Raja, a bartender from Bombay, as an AI-powered cocktail advisor. The design integrates with CrewAI patterns using a **tool-based architecture** where Raja dynamically accesses drink data through 4 specialized tools rather than static prompt injection.
 
 ---
 
@@ -17,14 +21,26 @@ This document outlines the architecture for implementing a conversational chat i
          |                        v                         v
          |                +----------------+        +------------------+
          |                | Chat Session   |        | Raja Bartender   |
-         |                |   Manager      |        |     Agent        |
+         |                |   Manager      |        |  Agent + Tools   |
          |                +----------------+        +------------------+
          |                        |                         |
          v                        v                         v
 +-------------------+     +-------------------+     +-------------------+
-|  Chat History     |     |   Redis/Memory    |     |  Drink Data      |
-|    Display        |     |    Session Store  |     |   Services       |
+|  Chat History     |     |   Memory Store    |     |  4 Cocktail      |
+|    Display        |     |   (dict)          |     |    Tools         |
 +-------------------+     +-------------------+     +-------------------+
+                                                            |
+                                                    +-------+-------+
+                                                    |               |
+                                              +----------+    +----------+
+                                              | Recipe   |    | Substit- |
+                                              | DBTool   |    | ution    |
+                                              +----------+    +----------+
+                                                    |               |
+                                              +----------+    +----------+
+                                              | Unlock   |    | Flavor   |
+                                              | Calc     |    | Profiler |
+                                              +----------+    +----------+
 ```
 
 ### Component Responsibilities
@@ -32,11 +48,11 @@ This document outlines the architecture for implementing a conversational chat i
 | Component | Responsibility |
 |-----------|---------------|
 | Frontend Chat | Message input, history display, typing indicators |
-| FastAPI Endpoint | Request validation, session management, response streaming |
+| FastAPI Endpoint | Request validation, session management, response handling |
 | Chat Session Manager | History persistence, context window management, session lifecycle |
-| Raja Chat Crew | Orchestrates Raja agent with context injection |
-| Raja Bartender Agent | Personality-consistent conversational responses |
-| Drink Data Services | Cabinet analysis, recipe lookup, substitutions |
+| Raja Chat Crew | Orchestrates Raja agent with minimal context + tool access |
+| Raja Bartender Agent | Personality-consistent responses with dynamic tool usage |
+| 4 Cocktail Tools | Dynamic data access: recipes, substitutions, unlocks, flavors |
 
 ---
 
@@ -325,415 +341,207 @@ class RajaChatOutput(BaseModel):
 
 ---
 
-## 4. Raja Chat Crew Implementation
+## 4. Raja Chat Crew Implementation (Tool-Based)
 
-Create new file: `/Users/abhishek/stuff/ai-adventures/cocktail-cache/src/app/crews/raja_chat_crew.py`
+The current implementation uses a **tool-based architecture** where Raja dynamically queries drink data through CrewAI tools.
+
+**File**: `src/app/crews/raja_chat_crew.py`
+
+### Key Architecture Change: Tools vs Data Injection
+
+```
+BEFORE (Data Injection - DEPRECATED):
+┌─────────────────────────────────────────────────────┐
+│ User Message                                        │
+│ + Full Drink Database (injected ~4000 tokens)      │
+│ + Cabinet Contents (injected)                       │
+│ + Substitutions (injected)                          │
+└─────────────────────┬───────────────────────────────┘
+                      ▼
+              ┌───────────────┐
+              │  Raja Agent   │
+              │  (no tools)   │
+              └───────────────┘
+
+AFTER (Tool-Based - CURRENT):
+┌─────────────────────────────────────────────────────┐
+│ User Message + Cabinet Context (minimal ~1000 tokens)│
+└─────────────────────┬───────────────────────────────┘
+                      ▼
+              ┌───────────────┐
+              │  Raja Agent   │◄────┐
+              │ (with 4 tools)│     │
+              └───────┬───────┘     │
+                      │             │
+        ┌─────────────┼─────────────┼─────────────┐
+        ▼             ▼             ▼             ▼
+   ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐
+   │ Recipe  │  │ Substi-  │  │ Unlock   │  │ Flavor  │
+   │ DBTool  │  │ tution   │  │ Calc     │  │ Profiler│
+   └─────────┘  └──────────┘  └──────────┘  └─────────┘
+```
+
+### Benefits of Tool-Based Architecture
+- **Smaller prompts**: ~1000 tokens vs ~4000 tokens per message
+- **Dynamic data**: Raja queries only what's needed for the conversation
+- **More natural UX**: "Let me check what you can make..." feels authentic
+- **Accurate recommendations**: Uses actual database IDs, validated post-response
+
+### Current Implementation
 
 ```python
-"""Raja Chat Crew for conversational cocktail interactions.
+def create_raja_chat_crew(session: ChatSession, user_message: str) -> Crew:
+    """Create the Raja Chat Crew with tool access."""
 
-This crew provides a personality-rich chat experience with Raja,
-a bartender from Bombay who offers cocktail advice through natural
-conversation.
+    # Create Raja with RecipeDBTool for dynamic drink lookup
+    # Raja also has 3 default tools: substitution_finder, unlock_calculator, flavor_profiler
+    recipe_tool = RecipeDBTool()
+    raja = create_raja_bartender(tools=[recipe_tool])  # Gets 4 tools total
 
-The crew maintains conversation context and integrates with the
-existing drink data services for accurate recommendations.
-"""
+    # Minimal context - just cabinet summary, not full drink list
+    cabinet_text = f"{len(session.cabinet)} bottles: {', '.join(session.cabinet[:20])}"
 
-import json
-import logging
-import re
-import time
-import uuid
-from datetime import datetime
-
-from crewai import Crew, Process, Task
-
-from src.app.agents.raja_bartender import create_raja_bartender
-from src.app.models.chat import (
-    ChatHistory,
-    ChatMessage,
-    ChatRequest,
-    ChatResponse,
-    ChatSession,
-    DrinkReference,
-    MessageIntent,
-    MessageRole,
-    RajaChatOutput,
-)
-from src.app.services.drink_data import (
-    format_drinks_for_prompt,
-    get_drink_by_id,
-    get_makeable_drinks,
-)
-
-logger = logging.getLogger(__name__)
-
-# In-memory session store (use Redis in production)
-_chat_sessions: dict[str, ChatSession] = {}
-
-
-def get_or_create_session(
-    session_id: str | None,
-    cabinet: list[str] | None = None,
-    skill_level: str | None = None,
-    drink_type: str | None = None,
-) -> ChatSession:
-    """Get existing session or create a new one.
-
-    Args:
-        session_id: Existing session ID or None for new session.
-        cabinet: User's cabinet ingredients (for new/update).
-        skill_level: User's skill level (for new/update).
-        drink_type: Preferred drink type (for new/update).
-
-    Returns:
-        ChatSession instance.
-    """
-    if session_id and session_id in _chat_sessions:
-        session = _chat_sessions[session_id]
-        session.last_active = datetime.utcnow()
-
-        # Update context if provided
-        if cabinet is not None:
-            session.cabinet = cabinet
-        if skill_level is not None:
-            session.skill_level = skill_level
-        if drink_type is not None:
-            session.drink_type_preference = drink_type
-
-        return session
-
-    # Create new session
-    new_session = ChatSession(
-        session_id=str(uuid.uuid4()),
-        cabinet=cabinet or [],
-        skill_level=skill_level or "intermediate",
-        drink_type_preference=drink_type or "cocktail",
-    )
-
-    # Add Raja's greeting as first message
-    greeting = ChatMessage(
-        id=str(uuid.uuid4()),
-        role=MessageRole.RAJA,
-        content=(
-            "Arrey, welcome to my bar! I'm Raja, been mixing drinks in Bombay for "
-            "20 years now. What brings you here tonight? Looking for something "
-            "special, or just want to chat about drinks? Tell me about your mood, "
-            "yaar - that's how we find the perfect drink!"
-        ),
-        intent=None,
-    )
-    new_session.history.add_message(greeting)
-
-    _chat_sessions[new_session.session_id] = new_session
-    logger.info(f"Created new chat session: {new_session.session_id}")
-
-    return new_session
-
-
-def create_raja_chat_crew(session: ChatSession) -> Crew:
-    """Create the Raja Chat Crew for conversational interactions.
-
-    The crew uses a single Raja Bartender agent that receives:
-    - Conversation history for context
-    - User's cabinet and preferences
-    - Available drink data for recommendations
-
-    Args:
-        session: The chat session with history and user context.
-
-    Returns:
-        A configured CrewAI Crew instance.
-    """
-    logger.info(f"Creating Raja chat crew for session {session.session_id}")
-
-    # Create Raja agent without tools - data is injected via prompts
-    raja = create_raja_bartender(tools=[])
-
-    # Get available drinks for context
-    makeable_drinks = []
-    available_drinks_text = "No cabinet set up yet."
-    if session.cabinet:
-        makeable_drinks = get_makeable_drinks(
-            cabinet=session.cabinet,
-            drink_type="both",
-            exclude=None,
-        )
-        if makeable_drinks:
-            available_drinks_text = format_drinks_for_prompt(makeable_drinks[:10])
-
-    # Format conversation history
-    history_text = session.history.format_for_prompt(last_n=8)
-
-    # Build the chat task
     chat_task = Task(
-        description=(
-            "You are Raja, responding to a customer in your bar. Stay in character!\n\n"
-            "CONVERSATION SO FAR:\n"
-            "{conversation_history}\n\n"
-            "CUSTOMER'S LATEST MESSAGE:\n"
-            "{user_message}\n\n"
-            "CUSTOMER'S BAR CABINET:\n"
-            "{cabinet_info}\n\n"
-            "DRINKS THEY CAN MAKE:\n"
-            "{available_drinks}\n\n"
-            "CUSTOMER INFO:\n"
-            "- Skill Level: {skill_level}\n"
-            "- Drink Preference: {drink_type}\n"
-            "- Current Mood: {current_mood}\n\n"
-            "INSTRUCTIONS:\n"
-            "1. Respond naturally as Raja - use your personality, Hindi phrases, "
-            "   Bombay references, and storytelling\n"
-            "2. If they're asking for a recommendation, consider their mood, cabinet, "
-            "   and skill level\n"
-            "3. If discussing a specific drink, share its history or a personal story\n"
-            "4. Ask follow-up questions to understand their preferences better\n"
-            "5. Be encouraging to beginners, more technical with adventurous bartenders\n"
-            "6. If they mention ingredients they don't have, suggest alternatives or "
-            "   what to buy next\n"
-            "7. Keep responses conversational - not too long, but full of personality\n\n"
-            "IMPORTANT: Return a JSON object matching the RajaChatOutput schema."
-        ),
-        expected_output=(
-            "A JSON object with structure:\n"
-            "{\n"
-            '  "response": "Raja\'s conversational response with personality",\n'
-            '  "detected_intent": "recommendation_request|recipe_question|general_chat|...",\n'
-            '  "detected_mood": "relaxed|celebratory|contemplative|...",\n'
-            '  "drinks_mentioned": ["drink-id-1", "drink-id-2"],\n'
-            '  "ingredients_mentioned": ["bourbon", "sweet-vermouth"],\n'
-            '  "recommendation_made": true,\n'
-            '  "recommended_drink_id": "manhattan",\n'
-            '  "suggested_follow_up": "Shall I tell you the story of how the Manhattan was invented?"\n'
-            "}"
-        ),
+        description=f"""You are Raja, responding to a customer in your bar.
+
+CUSTOMER'S BAR CABINET: {cabinet_text}
+CUSTOMER INFO: Skill={session.skill_level}, Preference={session.drink_type_preference}
+
+TOOL USAGE:
+When recommending drinks, USE the recipe_database tool to search for drinks.
+- Pass cabinet ingredients and drink_type preference
+- Tool returns drinks with match scores (1.0 = all ingredients available)
+- Only recommend drinks from tool results with EXACT IDs
+
+INSTRUCTIONS:
+1. BE SNAPPY! 2-3 sentences max.
+2. Use respectful Hindi: "yaar", "bhai", "bilkul"
+3. For recommendations: Use recipe_database tool first
+4. CRITICAL: Only SECOND-HAND stories ("I heard...", "Legend has it...")
+5. If drink NOT in tool results, use special_recipe field instead
+""",
         agent=raja,
         output_pydantic=RajaChatOutput,
     )
 
-    return Crew(
-        agents=[raja],
-        tasks=[chat_task],
-        process=Process.sequential,
-        verbose=False,
-    )
+    return Crew(agents=[raja], tasks=[chat_task], process=Process.sequential)
+```
 
+### Drink ID Validation
 
+The system validates recommended drink IDs against the database:
+
+```python
 def run_raja_chat(request: ChatRequest) -> ChatResponse:
-    """Process a chat message and get Raja's response.
-
-    This function:
-    1. Gets or creates the chat session
-    2. Adds the user message to history
-    3. Runs the Raja crew to generate response
-    4. Updates session with Raja's response
-    5. Returns structured response with metadata
-
-    Args:
-        request: The chat request with message and context.
-
-    Returns:
-        ChatResponse with Raja's message and extracted entities.
-    """
-    start_time = time.perf_counter()
-
-    # Get or create session
-    session = get_or_create_session(
-        session_id=request.session_id,
-        cabinet=request.cabinet,
-        skill_level=request.skill_level,
-        drink_type=request.drink_type,
-    )
-
-    logger.info(
-        f"Processing chat for session {session.session_id}: "
-        f"message_length={len(request.message)}"
-    )
-
-    # Add user message to history
-    user_message = ChatMessage(
-        id=str(uuid.uuid4()),
-        role=MessageRole.USER,
-        content=request.message,
-    )
-    session.history.add_message(user_message)
-
-    # Prepare crew inputs
-    cabinet_info = (
-        f"{len(session.cabinet)} bottles: {', '.join(session.cabinet[:10])}"
-        if session.cabinet
-        else "No cabinet set up yet - help them get started!"
-    )
-
-    # Get available drinks
-    available_drinks_text = "Customer hasn't set up their cabinet yet."
-    if session.cabinet:
-        makeable = get_makeable_drinks(session.cabinet, "both", None)
-        if makeable:
-            available_drinks_text = format_drinks_for_prompt(makeable[:8])
-        else:
-            available_drinks_text = "No drinks makeable with current cabinet."
-
-    # Create and run crew
-    crew = create_raja_chat_crew(session)
-
-    crew_start = time.perf_counter()
-    result = crew.kickoff(
-        inputs={
-            "conversation_history": session.history.format_for_prompt(last_n=8),
-            "user_message": request.message,
-            "cabinet_info": cabinet_info,
-            "available_drinks": available_drinks_text,
-            "skill_level": session.skill_level,
-            "drink_type": session.drink_type_preference,
-            "current_mood": session.current_mood or "not yet determined",
-        }
-    )
-    crew_elapsed_ms = (time.perf_counter() - crew_start) * 1000
-    logger.debug(f"Raja crew completed in {crew_elapsed_ms:.2f}ms")
-
-    # Parse output
+    # ... run crew ...
     raja_output = _parse_raja_output(result)
 
-    # Update session state
-    if raja_output.detected_mood:
-        session.current_mood = raja_output.detected_mood
+    # Validate recommended_drink_id against database
     if raja_output.recommended_drink_id:
-        session.last_recommended_drink = raja_output.recommended_drink_id
-    session.mentioned_drinks.extend(raja_output.drinks_mentioned)
-    session.mentioned_ingredients.extend(raja_output.ingredients_mentioned)
+        all_drink_ids = {drink.id for drink in load_all_drinks()}
+        if raja_output.recommended_drink_id not in all_drink_ids:
+            logger.warning(f"Raja recommended unknown drink: {raja_output.recommended_drink_id}")
+            raja_output.recommended_drink_id = None  # Clear invalid ID
 
-    # Add Raja's response to history
-    raja_message = ChatMessage(
-        id=str(uuid.uuid4()),
-        role=MessageRole.RAJA,
-        content=raja_output.response,
-        intent=raja_output.detected_intent,
-        metadata={
-            "drinks_mentioned": raja_output.drinks_mentioned,
-            "recommendation_made": raja_output.recommendation_made,
-        },
-    )
-    session.history.add_message(raja_message)
+    return ChatResponse(...)
+```
 
-    # Build drink references with names
-    drink_refs = []
-    for drink_id in raja_output.drinks_mentioned:
-        drink_data = get_drink_by_id(drink_id)
-        if drink_data:
-            drink_refs.append(
-                DrinkReference(
-                    id=drink_id,
-                    name=drink_data.get("name", drink_id.replace("-", " ").title()),
-                    mentioned_reason="",
-                )
-            )
+### Special Recipe Fallback
 
-    total_elapsed_ms = (time.perf_counter() - start_time) * 1000
-    logger.info(
-        f"run_raja_chat completed in {total_elapsed_ms:.2f}ms: "
-        f"intent={raja_output.detected_intent}, recommendation={raja_output.recommendation_made}"
-    )
+When Raja recommends a drink not in the database, the special_recipe field provides a complete recipe:
 
-    return ChatResponse(
-        session_id=session.session_id,
-        message_id=raja_message.id,
-        content=raja_output.response,
-        drinks_mentioned=drink_refs,
-        ingredients_mentioned=raja_output.ingredients_mentioned,
-        suggested_action=_get_suggested_action(raja_output),
-        recommendation_offered=raja_output.recommendation_made,
-        recommended_drink_id=raja_output.recommended_drink_id,
-    )
+```python
+class RajaChatOutput(BaseModel):
+    response: str
+    recommended_drink_id: str | None = None  # Only if in database
+    special_recipe: SpecialRecipe | None = None  # For "Raja's memory" drinks
 
-
-def _parse_raja_output(result) -> RajaChatOutput:
-    """Parse crew result into structured RajaChatOutput."""
-    # Try pydantic output first
-    if hasattr(result, "pydantic") and isinstance(result.pydantic, RajaChatOutput):
-        return result.pydantic
-
-    # Fallback: parse from raw
-    try:
-        json_match = re.search(r"\{[\s\S]*\}", str(result))
-        if json_match:
-            data = json.loads(json_match.group())
-            return RajaChatOutput(**data)
-    except (json.JSONDecodeError, ValueError) as e:
-        logger.error(f"Failed to parse Raja output: {e}")
-
-    # Final fallback
-    return RajaChatOutput(
-        response=str(result) if result else "Arrey, something went wrong! Let me try again, yaar.",
-        detected_intent=MessageIntent.GENERAL_CHAT,
-    )
-
-
-def _get_suggested_action(output: RajaChatOutput) -> str | None:
-    """Determine suggested UI action based on Raja's response."""
-    if output.recommendation_made and output.recommended_drink_id:
-        return "view_recipe"
-    if output.detected_intent == MessageIntent.CABINET_UPDATE:
-        return "update_cabinet"
-    if output.detected_intent == MessageIntent.RECOMMENDATION_REQUEST:
-        return "show_recommendations"
-    return None
+class SpecialRecipe(BaseModel):
+    name: str
+    tagline: str
+    ingredients: list[str]  # With amounts: "60 ml bourbon"
+    method: list[str]
+    glassware: str
+    garnish: str
+    tip: str  # Raja's personal tip
 ```
 
 ---
 
-## 5. Raja Bartender Agent Factory
+## 5. Raja Bartender Agent Factory (with Default Tools)
 
-Create new file: `/Users/abhishek/stuff/ai-adventures/cocktail-cache/src/app/agents/raja_bartender.py`
+**File**: `src/app/agents/raja_bartender.py`
+
+The agent factory now includes 4 default tools for dynamic data access:
 
 ```python
-"""Raja Bartender agent for conversational cocktail chat.
-
-Raja is a charismatic bartender from Bombay who provides
-personality-rich cocktail advice through natural conversation.
-"""
+"""Raja Bartender agent with integrated cocktail tools."""
 
 from crewai import LLM, Agent
 
 from src.app.agents.config import get_agent_config
 from src.app.agents.llm_config import get_llm
+from src.app.tools import (
+    FlavorProfilerTool,
+    RecipeDBTool,
+    SubstitutionFinderTool,
+    UnlockCalculatorTool,
+)
+
+# Default tools Raja uses for dynamic data access
+DEFAULT_RAJA_TOOLS = [
+    RecipeDBTool(),           # Search drinks by ingredients
+    SubstitutionFinderTool(), # Find ingredient alternatives
+    UnlockCalculatorTool(),   # Calculate best bottles to buy
+    FlavorProfilerTool(),     # Analyze/compare drink flavors
+]
 
 
 def create_raja_bartender(
     tools: list | None = None,
     llm: LLM | None = None,
+    include_default_tools: bool = True,
 ) -> Agent:
-    """Create the Raja Bartender conversational agent.
-
-    Raja is a personality-rich bartender from Colaba, Bombay who has
-    been mixing drinks for 20 years. He speaks with warmth, uses
-    Hindi phrases, and loves sharing stories about cocktails.
+    """Create Raja Bartender with cocktail tools.
 
     Args:
-        tools: List of tools the agent can use. Typically none needed
-            as data is injected via task description.
-        llm: Optional LLM configuration. Defaults to conversational profile
-            with higher temperature for personality variation.
+        tools: Additional tools beyond defaults.
+        llm: Custom LLM (defaults to conversational profile).
+        include_default_tools: Include 4 cocktail tools (default True).
 
     Returns:
-        A configured CrewAI Agent instance.
+        Configured Raja Agent with tools.
     """
     config = get_agent_config("raja_bartender")
 
-    # Use conversational LLM profile for more personality
-    default_llm = llm or get_llm("conversational")
+    # Combine default tools with any custom tools
+    all_tools = []
+    if include_default_tools:
+        all_tools.extend(DEFAULT_RAJA_TOOLS)
+    if tools:
+        all_tools.extend(tools)
 
     return Agent(
         role=config.role,
         goal=config.goal,
         backstory=config.backstory,
-        tools=tools or [],
-        llm=default_llm,
+        tools=all_tools,
+        llm=llm or get_llm("conversational"),
         verbose=config.verbose,
         allow_delegation=config.allow_delegation,
     )
 ```
+
+### Tool Descriptions (Raja-Optimized)
+
+Each tool has descriptions optimized for Raja's conversational style:
+
+| Tool | Description for Agent |
+|------|----------------------|
+| `recipe_database` | "Search Raja's drink database. Returns drinks with match scores." |
+| `substitution_finder` | "Find alternative ingredients. Arrey, no bourbon? Let me check!" |
+| `unlock_calculator` | "Calculate ROI for new bottles. Which purchase unlocks most drinks?" |
+| `flavor_profiler` | "Analyze drink flavor profiles for comparison recommendations." |
 
 ---
 
@@ -1138,17 +946,50 @@ src/app/
 
 ## 9. Key Design Decisions
 
-### 9.1 Separate Agent vs. Integrated
+### 9.1 Tool-Based vs Data Injection Architecture
 
-**Decision**: Create a dedicated `raja_bartender` agent separate from recommendation agents.
+**Decision**: Use CrewAI tools for dynamic data access instead of prompt injection.
 
 **Rationale**:
-- The conversational personality requires different LLM settings (higher temperature)
-- Chat context management is distinct from recommendation flow
-- Raja can mention multiple drinks without triggering full recommendation workflow
-- Allows incremental adoption - users can use chat OR traditional flow
+- **Token efficiency**: ~1000 tokens vs ~4000 tokens per message
+- **Dynamic data**: Raja queries only what's needed, when needed
+- **Natural UX**: "Let me check..." feels authentic for a bartender
+- **Accuracy**: Tool results provide exact drink IDs, validated post-response
 
-### 9.2 Chat History Management
+**Trade-offs**:
+- ⚠️ More LLM calls (tool use adds round-trips)
+- ⚠️ Slightly slower responses (tool execution time)
+- ✅ Smaller context = lower cost per message
+- ✅ More accurate recommendations
+
+### 9.2 Four Default Tools for Raja
+
+**Decision**: Raja has 4 default tools: RecipeDBTool, SubstitutionFinderTool, UnlockCalculatorTool, FlavorProfilerTool.
+
+**Rationale**:
+- Cover all common conversation intents (recommendations, substitutions, bar growth, flavor comparisons)
+- Tools have Raja-friendly descriptions for natural usage
+- `include_default_tools=False` option for testing or custom setups
+
+### 9.3 Drink ID Validation
+
+**Decision**: Validate `recommended_drink_id` against database after parsing.
+
+**Rationale**:
+- LLM may hallucinate drink IDs not in database
+- Invalid IDs would create dead links in UI
+- Validation clears invalid IDs, allowing fallback to `special_recipe`
+
+### 9.4 Special Recipe Fallback
+
+**Decision**: When Raja recommends a drink not in the database, use `special_recipe` field.
+
+**Rationale**:
+- Raja can share drinks from "memory" not in our 142-drink collection
+- Provides complete recipe with amounts, method, glassware
+- Maintains conversation flow without errors
+
+### 9.5 Chat History Management
 
 **Decision**: Server-side session storage with configurable context window.
 
@@ -1156,19 +997,8 @@ src/app/
 - Maintains conversation continuity across messages
 - Limits context injection to last N messages (default 8) to manage token usage
 - Session cleanup after inactivity prevents memory bloat
-- History can be restored for returning users
 
-### 9.3 Integration with Recommendation Flow
-
-**Decision**: Raja can offer recommendations that link to full recipe view.
-
-**Rationale**:
-- Natural handoff from chat to existing recipe infrastructure
-- `recommended_drink_id` in response enables "View Recipe" action
-- Session tracks `last_recommended_drink` for follow-up questions
-- Maintains consistency with existing data models
-
-### 9.4 Personality Persistence
+### 9.6 Personality Persistence
 
 **Decision**: Backstory and personality traits defined in YAML config.
 

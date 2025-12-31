@@ -282,6 +282,86 @@ Use this checklist for regression testing:
 
 ---
 
+## Raja Tools Testing
+
+### Tool Integration Overview
+Raja now has 4 integrated cocktail tools for dynamic data access during conversations:
+
+| Tool | Purpose | Test Scenario |
+|------|---------|---------------|
+| `recipe_database` | Search drinks by cabinet | Chat: "What can I make?" |
+| `substitution_finder` | Find ingredient alternatives | Chat: "I don't have bourbon" |
+| `unlock_calculator` | Recommend next bottles | Chat: "What should I buy?" |
+| `flavor_profiler` | Compare drink flavors | Chat: "How does Negroni taste?" |
+
+### Testing Raja's Tool Usage
+
+#### Flow 7: Tool-Assisted Recommendations
+```
+1. Add ingredients to Cabinet (e.g., Bourbon, Sweet Vermouth, Angostura Bitters)
+2. Go to Chat tab
+3. Ask: "What whiskey cocktails can I make with my cabinet?"
+4. Wait for Raja's response (may take 3-5 seconds for tool calls)
+5. Verify response mentions specific drinks from your cabinet
+6. Verify recommended drinks are actually makeable with your ingredients
+```
+
+**Expected Behavior**:
+- Raja uses `recipe_database` tool to search drinks
+- Response mentions drinks by their exact database IDs
+- Recommendations match cabinet contents accurately
+- Response includes Raja's personality (Hindi phrases)
+
+#### Flow 8: Substitution Queries
+```
+1. Set up Cabinet with some ingredients
+2. Ask Raja: "I don't have sweet vermouth, what can I use instead?"
+3. Verify Raja uses substitution_finder tool
+4. Verify response includes alternative ingredients
+```
+
+**Expected Output Contains**:
+- Alternative ingredients (e.g., "dry vermouth", "Lillet Blanc")
+- Raja's explanation of flavor differences
+- Hindi-English phrases ("yaar", "bhai", "bilkul")
+
+#### Flow 9: Bar Growth Recommendations
+```
+1. Add minimal cabinet (e.g., just "Bourbon")
+2. Ask Raja: "What bottle should I buy next?"
+3. Verify Raja uses unlock_calculator tool
+4. Verify response shows drinks that would be unlocked
+```
+
+**Expected Response**:
+- Specific bottle recommendation with reasoning
+- Number of new drinks unlocked (e.g., "+8 drinks")
+- ROI-based suggestion
+
+### Testing Special Recipes
+Raja can provide "special recipes" for drinks not in the database:
+
+```
+1. Ask Raja about an obscure cocktail not in the 142-drink database
+2. Verify response includes special_recipe field if drink is from Raja's memory
+3. Special recipe should include: name, ingredients (with amounts), method, glassware
+```
+
+**Expected special_recipe Structure**:
+```json
+{
+  "name": "Drink Name",
+  "tagline": "Short description",
+  "ingredients": ["60 ml bourbon", "30 ml sweet vermouth"],
+  "method": ["Step 1", "Step 2"],
+  "glassware": "coupe",
+  "garnish": "cherry",
+  "tip": "Raja's personal tip"
+}
+```
+
+---
+
 ## Future Test Expansion
 
 ### Recommended Additional Tests
@@ -290,6 +370,8 @@ Use this checklist for regression testing:
 3. **Error states** - Invalid drink IDs, network failures
 4. **Edge cases** - Empty cabinet, no matching drinks
 5. **Performance** - Page load times, response times
+6. **Tool timeout handling** - Long-running tool calls
+7. **Invalid drink ID validation** - Raja recommending non-existent drinks
 
 ### Integration with CI/CD
 Consider adding Playwright tests to CI pipeline:
