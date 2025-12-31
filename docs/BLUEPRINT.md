@@ -2,7 +2,7 @@
 
 > **For Developers & AI Agents** — A practical guide to building production-ready multi-agent systems.
 >
-> Based on patterns from [Cocktail Cache](https://cocktail-cache.onrender.com) — 751 tests, 78% coverage, CrewAI + FastAPI + Claude.
+> Based on patterns from [Cocktail Cache](https://cocktail-cache.onrender.com) — 761 tests, 78% coverage, CrewAI + FastAPI + Claude.
 
 ---
 
@@ -57,7 +57,7 @@ conventions:
   - data_injection: context passed via task description, not agent memory
 
 test_coverage: 78%
-test_count: 751
+test_count: 761
 deployment: render.com
 ```
 
@@ -104,7 +104,7 @@ deployment: render.com
 
 - **No agent memory**: Context passed via task description, not persistent agent state
 - **No multi-turn planning**: Single-task agents, crew handles orchestration
-- **No tool sprawl**: 4 focused tools (recipe_db, unlock_calculator, flavor_profiler, substitution_finder)
+- **4 focused tools**: (recipe_db, unlock_calculator, flavor_profiler, substitution_finder) now integrated with Raja agent
 - **Flat hierarchy**: One level of crews, no nested sub-crews or agent delegation chains
 
 ---
@@ -550,4 +550,4 @@ class LLMCostTracker:
 
 ---
 
-*Blueprint v2.0 — Based on Cocktail Cache patterns (751 tests, 78% coverage)*
+*Blueprint v2.0 — Based on Cocktail Cache patterns (761 tests, 78% coverage)*

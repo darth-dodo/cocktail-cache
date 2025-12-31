@@ -1,15 +1,38 @@
 """Substitution finder tool for ingredient replacements.
 
-This tool provides deterministic substitution lookups,
-allowing agents to find alternatives for missing ingredients.
+This tool provides deterministic substitution lookups with Raja's
+conversational personality, helping users find alternatives for
+missing ingredients in a friendly, bartender-style format.
 """
-
-import json
 
 from crewai.tools import BaseTool
 
 from src.app.models.ingredients import IngredientsDatabase
 from src.app.services.data_loader import load_ingredients, load_substitutions
+
+# Raja's conversational phrases for substitution responses
+RAJA_PHRASES: dict[str, list[str] | str] = {
+    "found": [
+        "No problem, bhai! Here are some alternatives:",
+        "Don't worry yaar, I've got you covered! Try these:",
+        "Acha, no worries! Let me suggest some swaps:",
+        "Arrey, happens all the time! These work great instead:",
+    ],
+    "not_found": [
+        "Hmm yaar, I couldn't find that ingredient.",
+        "Arrey, that one's not ringing a bell, bhai.",
+    ],
+    "suggestions": [
+        "Did you maybe mean one of these?",
+        "Perhaps you're looking for one of these, yaar?",
+    ],
+    "no_substitutes": [
+        "Honestly yaar, this one's pretty unique - hard to substitute!",
+        "Acha bhai, this ingredient is special - no easy swaps I'm afraid.",
+    ],
+    "na_header": "And if you want to keep it non-alcoholic:",
+    "alc_header": "Or if you want to add some spirit to it:",
+}
 
 
 class SubstitutionFinderTool(BaseTool):
@@ -17,13 +40,15 @@ class SubstitutionFinderTool(BaseTool):
 
     This tool searches the substitutions database to find alternatives
     for missing ingredients, enabling users to make drinks with what they have.
+    Returns conversational output in Raja's friendly bartender style.
     """
 
     name: str = "substitution_finder"
     description: str = (
-        "Find substitutes for missing cocktail ingredients. "
-        "Provide an ingredient ID or name to get possible alternatives. "
-        "Includes both similar-category substitutes and NA/alcoholic swaps."
+        "Raja's ingredient swap finder - helps when you're missing something! "
+        "Give me an ingredient name and I'll suggest alternatives from my years "
+        "behind the bar. I'll tell you what works, what's close, and even "
+        "non-alcoholic or alcoholic crossovers if available."
     )
 
     def _run(self, ingredient: str) -> str:
@@ -33,8 +58,10 @@ class SubstitutionFinderTool(BaseTool):
             ingredient: Ingredient ID or name to find substitutes for.
 
         Returns:
-            JSON string with substitute options and their categories.
+            Conversational response with substitutes in Raja's friendly style.
         """
+        import random
+
         # Normalize the ingredient query
         query = ingredient.lower().strip()
 
@@ -49,24 +76,16 @@ class SubstitutionFinderTool(BaseTool):
             # If we cannot resolve the ID, try a partial match
             partial_matches = self._find_partial_matches(query, ingredients_db)
             if partial_matches:
-                return json.dumps(
-                    {
-                        "query": query,
-                        "found": False,
-                        "message": f"Ingredient '{query}' not found. Did you mean one of these?",
-                        "suggestions": partial_matches,
-                    },
-                    indent=2,
-                )
+                response = random.choice(RAJA_PHRASES["not_found"])
+                response += f" {random.choice(RAJA_PHRASES['suggestions'])}\n"
+                for match in partial_matches:
+                    primary_name = match["names"][0] if match["names"] else match["id"]
+                    response += f"  - **{primary_name}**\n"
+                return response
             else:
-                return json.dumps(
-                    {
-                        "query": query,
-                        "found": False,
-                        "message": f"No ingredient found matching '{query}'.",
-                        "substitutes": [],
-                    },
-                    indent=2,
+                return (
+                    f"{random.choice(RAJA_PHRASES['not_found'])} "
+                    f"'{query}' doesn't match anything in my collection."
                 )
 
         # Find substitutes
@@ -78,32 +97,149 @@ class SubstitutionFinderTool(BaseTool):
 
         # Get ingredient info
         ingredient_info = ingredients_db.find_by_id(ingredient_id)
-        ingredient_names = ingredient_info.names if ingredient_info else [ingredient_id]
+        ingredient_name = (
+            ingredient_info.names[0]
+            if ingredient_info and ingredient_info.names
+            else ingredient_id
+        )
 
         # Categorize substitutes
         categorized = self._categorize_substitutes(
             substitutes, na_to_alc, alc_to_na, ingredients_db
         )
 
-        result = {
-            "query": query,
-            "found": True,
-            "ingredient": {
-                "id": ingredient_id,
-                "names": ingredient_names,
-            },
-            "substitutes": categorized["same_category"],
-            "total_substitutes": len(categorized["same_category"]),
+        # Build conversational response
+        same_category = categorized["same_category"]
+        na_alternatives = categorized["na_alternatives"]
+        alc_alternatives = categorized["alcoholic_alternatives"]
+
+        # No substitutes at all
+        if not same_category and not na_alternatives and not alc_alternatives:
+            return (
+                f"No {ingredient_name}? {random.choice(RAJA_PHRASES['no_substitutes'])}"
+            )
+
+        # Build the response with Raja's personality
+        response_parts = []
+
+        # Header with ingredient name
+        if same_category:
+            header = random.choice(RAJA_PHRASES["found"])
+            response_parts.append(f"No {ingredient_name}? {header}")
+
+            # Add each substitute with taste/usage notes
+            for sub in same_category:
+                sub_name = sub["names"][0] if sub["names"] else sub["id"]
+                note = self._get_substitute_note(ingredient_id, sub["id"])
+                response_parts.append(f"  - **{sub_name}** - {note}")
+
+        # Non-alcoholic alternatives
+        if na_alternatives:
+            if response_parts:
+                response_parts.append("")  # blank line
+            response_parts.append(str(RAJA_PHRASES["na_header"]))
+            for sub in na_alternatives:
+                sub_name = sub["names"][0] if sub["names"] else sub["id"]
+                note = self._get_substitute_note(ingredient_id, sub["id"], is_na=True)
+                response_parts.append(f"  - **{sub_name}** - {note}")
+
+        # Alcoholic alternatives
+        if alc_alternatives:
+            if response_parts:
+                response_parts.append("")  # blank line
+            response_parts.append(str(RAJA_PHRASES["alc_header"]))
+            for sub in alc_alternatives:
+                sub_name = sub["names"][0] if sub["names"] else sub["id"]
+                note = self._get_substitute_note(ingredient_id, sub["id"], is_alc=True)
+                response_parts.append(f"  - **{sub_name}** - {note}")
+
+        return "\n".join(response_parts)
+
+    def _get_substitute_note(
+        self,
+        original_id: str,
+        substitute_id: str,
+        is_na: bool = False,
+        is_alc: bool = False,
+    ) -> str:
+        """Get a brief taste/usage note for a substitute.
+
+        Returns contextual notes based on ingredient categories and types.
+        """
+        # Common substitute patterns with notes
+        substitute_notes = {
+            # Whiskeys
+            (
+                "bourbon",
+                "rye_whiskey",
+            ): "Spicier kick but works perfectly in most recipes",
+            ("bourbon", "tennessee_whiskey"): "Smoother and sweeter, very close taste",
+            ("bourbon", "canadian_whisky"): "Lighter body, good for highballs",
+            ("rye_whiskey", "bourbon"): "Sweeter and rounder, classic swap",
+            # Rums
+            ("white_rum", "vodka"): "Neutral spirit, works in a pinch",
+            ("dark_rum", "aged_rum"): "Similar depth and caramel notes",
+            ("aged_rum", "dark_rum"): "Richer molasses flavor",
+            # Gins
+            ("gin", "vodka"): "Loses the botanicals but keeps the spirit",
+            ("london_dry_gin", "plymouth_gin"): "Slightly softer juniper",
+            # Vermouths
+            ("sweet_vermouth", "dry_vermouth"): "Much drier result, adjust accordingly",
+            ("dry_vermouth", "sweet_vermouth"): "Sweeter result, use less",
+            # Citrus
+            (
+                "lemon_juice",
+                "lime_juice",
+            ): "Different citrus profile but similar acidity",
+            ("lime_juice", "lemon_juice"): "Slightly sweeter citrus notes",
+            # Sweeteners
+            ("simple_syrup", "honey_syrup"): "Adds floral honey notes",
+            ("honey_syrup", "simple_syrup"): "Cleaner sweetness without honey flavor",
+            ("agave_syrup", "simple_syrup"): "Neutral sweetness, good substitute",
+            # Bitters
+            (
+                "angostura_bitters",
+                "orange_bitters",
+            ): "Different flavor profile, use carefully",
+            # Liqueurs
+            ("triple_sec", "cointreau"): "Premium orange flavor, same family",
+            ("cointreau", "triple_sec"): "More affordable, slightly sweeter",
+            ("triple_sec", "grand_marnier"): "Cognac base adds richness",
         }
 
-        # Add crossover options if available
-        if categorized["na_alternatives"]:
-            result["non_alcoholic_alternatives"] = categorized["na_alternatives"]
+        # Check for specific pairing
+        key = (original_id.lower(), substitute_id.lower())
+        if key in substitute_notes:
+            return substitute_notes[key]
 
-        if categorized["alcoholic_alternatives"]:
-            result["alcoholic_alternatives"] = categorized["alcoholic_alternatives"]
+        # Generic notes based on context
+        if is_na:
+            return "Non-alcoholic option, keeps the flavor spirit"
+        if is_alc:
+            return "Adds spirit to your drink"
 
-        return json.dumps(result, indent=2)
+        # Fallback generic notes based on ingredient category patterns
+        sub_lower = substitute_id.lower()
+        if "whiskey" in sub_lower or "whisky" in sub_lower or "bourbon" in sub_lower:
+            return "Similar whiskey family, adjust to taste"
+        if "rum" in sub_lower:
+            return "Rum family swap, flavor varies by age"
+        if "gin" in sub_lower:
+            return "Botanical profiles may differ"
+        if "vodka" in sub_lower:
+            return "Clean and neutral base spirit"
+        if "vermouth" in sub_lower:
+            return "Fortified wine, check sweetness level"
+        if "syrup" in sub_lower:
+            return "Sweetness similar, flavor may differ"
+        if "juice" in sub_lower:
+            return "Fresh is always best!"
+        if "bitters" in sub_lower:
+            return "Different flavor notes, use sparingly"
+        if "liqueur" in sub_lower:
+            return "Flavor profiles vary, taste as you go"
+
+        return "Good alternative, similar application"
 
     def _resolve_ingredient_id(
         self, query: str, ingredients_db: IngredientsDatabase

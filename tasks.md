@@ -2,15 +2,32 @@
 
 > **⚠️ SINGLE SOURCE OF TRUTH**: This file is the authoritative reference for all implementation tasks, session progress, and feature status. All agents should read, reference, and update this file.
 
-> **Status**: Session 10 Complete - Codebase Simplification
+> **Status**: Session 11 Complete - Raja Tools Integration
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI -> UX Polish
 >
-> **Test Coverage**: 751 tests passing, 78% coverage
+> **Test Coverage**: 761 tests passing, 78% coverage
 >
 > **Live Demo**: https://cocktail-cache.onrender.com | **GitHub**: https://github.com/darth-dodo/cocktail-cache
 
-## Recent Changes (Session 10 - Codebase Simplification)
+## Recent Changes (Session 11 - Raja Tools Integration)
+
+- **Tool-Based Architecture**: Integrated 4 cocktail tools directly with Raja bartender agent
+  - `recipe_database`: Search drinks by cabinet ingredients
+  - `substitution_finder`: Find ingredient alternatives with flavor context
+  - `unlock_calculator`: Recommend next bottles to buy (ROI-based)
+  - `flavor_profiler`: Compare and analyze drink flavor profiles
+- **Conversational Tool Output**: Refactored all 4 tools to return Raja-friendly conversational text
+  - Output includes Hindi-English phrases matching Raja's personality
+  - Token efficient (~1000 vs ~4000 tokens per message)
+- **DEFAULT_RAJA_TOOLS**: Added to `raja_bartender.py` for consistent tool assignment
+- **Documentation Updates**:
+  - Rewrote `architecture-raja-chat.md` for tool-based approach
+  - Added Raja tools testing flows (7-9) to `playwright.md`
+  - Updated test counts across BLUEPRINT.md and CRASH-COURSE.md
+- **Test Suite**: 761 tests passing (up from 751)
+
+## Previous Changes (Session 10 - Codebase Simplification)
 
 - **Router Modularization**: Split monolithic api.py (~850 lines) into domain-focused modules
   - `drinks.py`: Drink listing endpoints (get_drinks, get_drink_by_id, get_ingredients)
@@ -854,6 +871,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Session 8 | Chat & UX | Unit toggle, error pages, chat persistence (751 tests) | PASSED |
 | Session 9 | Docs & E2E | Documentation audit, Playwright testing guide | PASSED |
 | Session 10 | Simplification | Router split, utils extraction, logging cleanup | PASSED |
+| Session 11 | Tools Integration | Raja tools integration, 761 tests | PASSED |
 
 ### Session 6 UX Progress
 
@@ -906,7 +924,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Time to recommendation | <8s | ~5s (fast mode) | Single-agent analysis |
 | Cost per request | <$0.10 | ~$0.05 | 2-3 LLM calls in fast mode |
 | Mobile Lighthouse | 90+ | TBD | Vanilla JS, minimal deps |
-| Test coverage | 70%+ | 78% | 751 tests passing |
+| Test coverage | 70%+ | 78% | 761 tests passing |
 | LLM calls per request | 4 | 2-3 | Fast mode default |
 | Drinks in catalog | 100+ | 142 | Expanded dataset |
 | Browse page load | <1s | TBD | JSON API response |

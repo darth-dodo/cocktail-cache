@@ -13,6 +13,10 @@ os.environ.setdefault("ANTHROPIC_API_KEY", "test-key-not-used-for-actual-calls")
 from crewai import LLM, Agent
 
 from src.app.agents.raja_bartender import create_raja_bartender
+from src.app.tools.flavor_profiler import FlavorProfilerTool
+from src.app.tools.recipe_db import RecipeDBTool
+from src.app.tools.substitution_finder import SubstitutionFinderTool
+from src.app.tools.unlock_calculator import UnlockCalculatorTool
 
 
 class TestCreateRajaBartender:
@@ -78,19 +82,24 @@ class TestRajaBartenderBackstory:
 class TestRajaBartenderTools:
     """Tests for Raja Bartender tool configuration."""
 
-    def test_default_no_tools(self):
-        """Agent should have no tools by default."""
+    def test_default_has_four_tools(self):
+        """Agent should have 4 default tools by default."""
         agent = create_raja_bartender()
-        assert len(agent.tools) == 0
+        assert len(agent.tools) == 4
 
-    def test_empty_tools_list(self):
-        """Agent should accept empty tools list."""
+    def test_empty_tools_list_with_defaults(self):
+        """Agent should have default tools plus empty custom list."""
         agent = create_raja_bartender(tools=[])
-        assert len(agent.tools) == 0
+        assert len(agent.tools) == 4  # Default tools included
 
-    def test_none_tools_defaults_to_empty(self):
-        """Agent with tools=None should have empty tools list."""
+    def test_none_tools_includes_defaults(self):
+        """Agent with tools=None should have default tools."""
         agent = create_raja_bartender(tools=None)
+        assert len(agent.tools) == 4  # Default tools included
+
+    def test_no_default_tools_when_disabled(self):
+        """Agent should have no tools when include_default_tools=False."""
+        agent = create_raja_bartender(include_default_tools=False)
         assert len(agent.tools) == 0
 
 
@@ -145,3 +154,204 @@ class TestRajaBartenderConsistency:
 
         assert agent_none_tools.role == agent_empty_tools.role
         assert agent_none_tools.goal == agent_empty_tools.goal
+
+
+# =============================================================================
+# Tool Integration Tests - Raja with Default Tools
+# =============================================================================
+class TestRajaBartenderToolIntegration:
+    """Tests for Raja Bartender tool integration with default cocktail tools."""
+
+    def test_raja_has_four_tools_with_include_default(self):
+        """Raja agent should have 4 default tools when include_default_tools=True."""
+        agent = create_raja_bartender(include_default_tools=True)
+        assert len(agent.tools) == 4
+
+    def test_raja_tool_names_are_correct(self):
+        """Raja agent should have tools with correct names."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        tool_names = [tool.name for tool in agent.tools]
+
+        assert "recipe_database" in tool_names
+        assert "substitution_finder" in tool_names
+        assert "unlock_calculator" in tool_names
+        assert "flavor_profiler" in tool_names
+
+    def test_raja_has_recipe_db_tool(self):
+        """Raja agent should have RecipeDBTool instance."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        recipe_tools = [t for t in agent.tools if isinstance(t, RecipeDBTool)]
+        assert len(recipe_tools) == 1
+
+    def test_raja_has_substitution_finder_tool(self):
+        """Raja agent should have SubstitutionFinderTool instance."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        sub_tools = [t for t in agent.tools if isinstance(t, SubstitutionFinderTool)]
+        assert len(sub_tools) == 1
+
+    def test_raja_has_unlock_calculator_tool(self):
+        """Raja agent should have UnlockCalculatorTool instance."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        unlock_tools = [t for t in agent.tools if isinstance(t, UnlockCalculatorTool)]
+        assert len(unlock_tools) == 1
+
+    def test_raja_has_flavor_profiler_tool(self):
+        """Raja agent should have FlavorProfilerTool instance."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        flavor_tools = [t for t in agent.tools if isinstance(t, FlavorProfilerTool)]
+        assert len(flavor_tools) == 1
+
+    def test_raja_without_default_tools_has_empty_tools(self):
+        """Raja agent without default tools should have empty tools list."""
+        agent = create_raja_bartender(include_default_tools=False)
+        assert len(agent.tools) == 0
+
+    def test_raja_can_add_custom_tools_to_defaults(self):
+        """Raja agent can have custom tools added to defaults."""
+        from crewai.tools import BaseTool
+
+        # Create a mock custom tool
+        class MockTool(BaseTool):
+            name: str = "mock_tool"
+            description: str = "A mock tool for testing"
+
+            def _run(self) -> str:
+                return "mock result"
+
+        custom_tool = MockTool()
+        agent = create_raja_bartender(tools=[custom_tool], include_default_tools=True)
+
+        # Should have 4 default tools + 1 custom = 5 total
+        assert len(agent.tools) == 5
+        assert custom_tool in agent.tools
+
+    def test_raja_custom_tools_only_without_defaults(self):
+        """Raja agent can have only custom tools without defaults."""
+        from crewai.tools import BaseTool
+
+        class MockTool(BaseTool):
+            name: str = "mock_tool"
+            description: str = "A mock tool for testing"
+
+            def _run(self) -> str:
+                return "mock result"
+
+        custom_tool = MockTool()
+        agent = create_raja_bartender(tools=[custom_tool], include_default_tools=False)
+
+        # Should have only the custom tool
+        assert len(agent.tools) == 1
+        assert custom_tool in agent.tools
+
+
+class TestRajaBartenderToolDescriptions:
+    """Tests for tool descriptions that support Raja's personality."""
+
+    def test_recipe_db_tool_has_raja_description(self):
+        """RecipeDBTool description should mention Raja's style."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        recipe_tools = [t for t in agent.tools if isinstance(t, RecipeDBTool)]
+        assert len(recipe_tools) == 1
+
+        tool = recipe_tools[0]
+        # Description should mention Raja or conversational style
+        assert (
+            "raja" in tool.description.lower()
+            or "conversational" in tool.description.lower()
+        )
+
+    def test_unlock_calculator_has_roi_description(self):
+        """UnlockCalculatorTool description should mention ROI or value."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        unlock_tools = [t for t in agent.tools if isinstance(t, UnlockCalculatorTool)]
+        assert len(unlock_tools) == 1
+
+        tool = unlock_tools[0]
+        # Description should mention ROI or value proposition
+        desc_lower = tool.description.lower()
+        assert "roi" in desc_lower or "unlock" in desc_lower
+
+    def test_substitution_finder_has_alternative_description(self):
+        """SubstitutionFinderTool description should mention alternatives."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        sub_tools = [t for t in agent.tools if isinstance(t, SubstitutionFinderTool)]
+        assert len(sub_tools) == 1
+
+        tool = sub_tools[0]
+        desc_lower = tool.description.lower()
+        assert "substitute" in desc_lower or "alternative" in desc_lower
+
+    def test_flavor_profiler_has_comparison_description(self):
+        """FlavorProfilerTool description should mention comparison or analysis."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        flavor_tools = [t for t in agent.tools if isinstance(t, FlavorProfilerTool)]
+        assert len(flavor_tools) == 1
+
+        tool = flavor_tools[0]
+        desc_lower = tool.description.lower()
+        assert (
+            "compare" in desc_lower
+            or "profile" in desc_lower
+            or "analyze" in desc_lower
+        )
+
+
+class TestRajaBartenderToolExecution:
+    """Tests verifying that Raja's tools can be executed."""
+
+    def test_recipe_db_tool_is_callable(self):
+        """RecipeDBTool should be callable and return results."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        recipe_tools = [t for t in agent.tools if isinstance(t, RecipeDBTool)]
+        tool = recipe_tools[0]
+
+        # Tool should be callable
+        result = tool._run(cabinet=["bourbon", "simple-syrup"])
+        assert result is not None
+        assert len(result) > 0
+
+    def test_substitution_finder_tool_is_callable(self):
+        """SubstitutionFinderTool should be callable and return results."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        sub_tools = [t for t in agent.tools if isinstance(t, SubstitutionFinderTool)]
+        tool = sub_tools[0]
+
+        # Tool should be callable
+        result = tool._run(ingredient="bourbon")
+        assert result is not None
+        assert len(result) > 0
+
+    def test_unlock_calculator_tool_is_callable(self):
+        """UnlockCalculatorTool should be callable and return results."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        unlock_tools = [t for t in agent.tools if isinstance(t, UnlockCalculatorTool)]
+        tool = unlock_tools[0]
+
+        # Tool should be callable
+        result = tool._run(cabinet=["bourbon", "simple-syrup"])
+        assert result is not None
+        assert len(result) > 0
+
+    def test_flavor_profiler_tool_is_callable(self):
+        """FlavorProfilerTool should be callable and return results."""
+        agent = create_raja_bartender(include_default_tools=True)
+
+        flavor_tools = [t for t in agent.tools if isinstance(t, FlavorProfilerTool)]
+        tool = flavor_tools[0]
+
+        # Tool should be callable
+        result = tool._run(cocktail_ids=["old-fashioned"])
+        assert result is not None
+        assert len(result) > 0

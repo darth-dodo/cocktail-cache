@@ -27,6 +27,7 @@ from src.app.models.chat import (
     RajaChatOutput,
 )
 from src.app.services.data_loader import load_all_drinks
+from src.app.tools import RecipeDBTool
 from src.app.utils.parsing import parse_json_from_llm_output
 
 logger = logging.getLogger(__name__)
@@ -93,57 +94,6 @@ def get_or_create_session(
     return new_session
 
 
-def _get_makeable_drinks(cabinet: list[str], drink_type: str) -> list[dict]:
-    """Get drinks makeable with the user's cabinet.
-
-    Args:
-        cabinet: List of ingredient IDs.
-        drink_type: "cocktail", "mocktail", or "both".
-
-    Returns:
-        List of drink dictionaries with id, name, tagline.
-    """
-    all_drinks = load_all_drinks()
-    cabinet_set = {ing.lower() for ing in cabinet}
-
-    makeable = []
-    for drink in all_drinks:
-        # Filter by drink type
-        if drink_type == "cocktail" and drink.is_mocktail:
-            continue
-        if drink_type == "mocktail" and not drink.is_mocktail:
-            continue
-
-        # Check if all ingredients are available
-        drink_ingredients = {ing.item.lower() for ing in drink.ingredients}
-        if drink_ingredients.issubset(cabinet_set):
-            makeable.append(
-                {
-                    "id": drink.id,
-                    "name": drink.name,
-                    "tagline": drink.tagline,
-                    "difficulty": drink.difficulty,
-                }
-            )
-
-    return makeable
-
-
-def _format_drinks_for_prompt(drinks: list[dict], limit: int = 10) -> str:
-    """Format drinks list for inclusion in prompt."""
-    if not drinks:
-        return "No drinks currently makeable with their cabinet."
-
-    lines = []
-    for drink in drinks[:limit]:
-        lines.append(f"- {drink['name']}: {drink['tagline']} ({drink['difficulty']})")
-
-    if len(drinks) > limit:
-        lines.append(f"... and {len(drinks) - limit} more drinks")
-
-    return "\n".join(lines)
-
-
 def _get_drink_by_id(drink_id: str) -> dict | None:
     """Get a drink by its ID."""
     all_drinks = load_all_drinks()
@@ -157,19 +107,12 @@ def _get_drink_by_id(drink_id: str) -> dict | None:
     return None
 
 
-def _get_all_drink_ids() -> set[str]:
-    """Get a set of all drink IDs in our database."""
-    all_drinks = load_all_drinks()
-    return {drink.id for drink in all_drinks}
-
-
 def create_raja_chat_crew(session: ChatSession, user_message: str) -> Crew:
     """Create the Raja Chat Crew for conversational interactions.
 
-    The crew uses a single Raja Bartender agent that receives:
-    - Conversation history for context
-    - User's cabinet and preferences
-    - Available drink data for recommendations
+    The crew uses a single Raja Bartender agent that:
+    - Receives conversation history and user context
+    - Uses RecipeDBTool to dynamically look up drinks
 
     Args:
         session: The chat session with history and user context.
@@ -180,29 +123,19 @@ def create_raja_chat_crew(session: ChatSession, user_message: str) -> Crew:
     """
     logger.info(f"Creating Raja chat crew for session {session.session_id}")
 
-    # Create Raja agent without tools - data is injected via prompts
-    raja = create_raja_bartender(tools=[])
-
-    # Get available drinks for context
-    makeable_drinks = []
-    available_drinks_text = "No cabinet set up yet."
-    if session.cabinet:
-        makeable_drinks = _get_makeable_drinks(
-            cabinet=session.cabinet,
-            drink_type=session.drink_type_preference,
-        )
-        if makeable_drinks:
-            available_drinks_text = _format_drinks_for_prompt(makeable_drinks, limit=10)
+    # Create Raja agent with RecipeDBTool for dynamic drink lookup
+    recipe_tool = RecipeDBTool()
+    raja = create_raja_bartender(tools=[recipe_tool])
 
     # Format conversation history
     history_text = session.history.format_for_prompt(last_n=8)
 
-    # Get all drink IDs from our database for validation
-    all_drink_ids = _get_all_drink_ids()
-    # Include ALL drink IDs so Raja can accurately identify which drinks are in our DB
-    all_drink_ids_sorted = sorted(all_drink_ids)
+    # Format cabinet for display
+    cabinet_text = "No cabinet set up yet."
+    if session.cabinet:
+        cabinet_text = f"{len(session.cabinet)} bottles: {', '.join(session.cabinet[:20])}{'...' if len(session.cabinet) > 20 else ''}"
 
-    # Build the chat task
+    # Build the chat task with simplified context
     chat_task = Task(
         description=f"""You are Raja, responding to a customer in your bar. Stay in character!
 
@@ -213,30 +146,31 @@ CUSTOMER'S LATEST MESSAGE:
 {user_message}
 
 CUSTOMER'S BAR CABINET:
-{len(session.cabinet)} bottles: {", ".join(session.cabinet[:15])}{"..." if len(session.cabinet) > 15 else ""}
-
-DRINKS THEY CAN MAKE:
-{available_drinks_text}
-
-OUR DRINK DATABASE ({len(all_drink_ids)} drinks - ONLY these IDs are valid):
-{", ".join(all_drink_ids_sorted)}
+{cabinet_text}
 
 CUSTOMER INFO:
 - Skill Level: {session.skill_level}
 - Drink Preference: {session.drink_type_preference}
 - Current Mood: {session.current_mood or "not yet determined"}
 
+TOOL USAGE:
+When recommending drinks, USE the recipe_database tool to search for drinks the customer can make.
+- Pass their cabinet ingredients and drink_type preference to find matching drinks
+- The tool returns drinks with match scores (1.0 = all ingredients available)
+- Only recommend drinks that appear in the tool results with their EXACT IDs
+
 INSTRUCTIONS:
 1. BE SNAPPY! 2-3 sentences max. Get to the point with warmth. No long monologues.
 2. Use respectful Hindi: "yaar", "bhai", "acha", "bilkul", "of course", "kya baat hai". Keep it friendly.
-3. For recommendations: Quick mood check if needed, then your pick. No rambling.
+3. For recommendations: Use the recipe_database tool first, then make your pick based on the customer's mood and preferences.
 4. CRITICAL: Only share SECOND-HAND stories. Say "I heard...", "They say...", "Legend has it...", "An old regular once told me...". NEVER first-person experiences like "I remember when I..." or "Back when I served...".
 5. Be encouraging but concise. Warm and wise, not lengthy lectures.
 6. If they need ingredients, tell them kindly - "Yaar, grab some X and you're all set."
 
 CRITICAL - DRINK RECOMMENDATIONS:
-- The DRINK DATABASE above contains ALL valid drink IDs. ONLY use "recommended_drink_id" if the EXACT ID is in that list.
-- If recommending a drink whose ID is NOT in the list above, you MUST use "special_recipe" instead.
+- ALWAYS use the recipe_database tool to find drinks before recommending.
+- ONLY use "recommended_drink_id" if the drink appears in tool results with that exact ID.
+- If recommending a drink NOT in tool results, use "special_recipe" instead.
   This is "Raja's Special from Memory" - a drink you know but we don't have in our collection.
   Include: name, tagline, ingredients (with amounts like "20 ml bourbon"), method (step-by-step), glassware, garnish, and your personal tip.
 - NEVER invent or guess drink IDs. If unsure, use special_recipe.
@@ -255,7 +189,12 @@ IMPORTANT: Return a JSON object matching the RajaChatOutput schema.""",
   "special_recipe": null
 }}
 
-If drink is NOT in our database, include special_recipe:
+TOOL USAGE: For recommendations, call recipe_database tool with:
+- cabinet: list of customer's ingredients
+- drink_type: "cocktails", "mocktails", or "both"
+The tool returns drinks with match scores. Use IDs from results for recommended_drink_id.
+
+If drink is NOT in tool results, include special_recipe:
 {{
   "response": "Arrey yaar, let me share a special one from my memory...",
   "recommendation_made": true,
@@ -367,7 +306,7 @@ def run_raja_chat(request: ChatRequest) -> ChatResponse:
     # Validate recommended_drink_id against our database
     # If Raja recommends a drink not in our DB, clear the ID to prevent dead links
     if raja_output.recommended_drink_id:
-        all_drink_ids = _get_all_drink_ids()
+        all_drink_ids = {drink.id for drink in load_all_drinks()}
         if raja_output.recommended_drink_id not in all_drink_ids:
             logger.warning(
                 f"Raja recommended unknown drink: {raja_output.recommended_drink_id}, clearing ID"

@@ -1,10 +1,12 @@
 """Recipe database tool for querying cocktails and mocktails.
 
 This tool provides deterministic search functionality for the drinks database,
-allowing agents to find drinks based on available ingredients.
+allowing agents to find drinks based on available ingredients. Designed for
+Raja the bartender to provide friendly, conversational drink recommendations.
 """
 
 import json
+import random
 from typing import Literal
 
 from crewai.tools import BaseTool
@@ -17,32 +19,35 @@ class RecipeDBTool(BaseTool):
     """Query cocktails and mocktails database based on available ingredients.
 
     This tool searches the recipe database and returns drinks that can be made
-    with the provided cabinet ingredients. Each result includes a match score
-    indicating how complete the ingredient match is.
+    with the provided cabinet ingredients. Raja uses this to find perfect drink
+    matches and present them in his signature friendly style with Hindi phrases.
     """
 
     name: str = "recipe_database"
     description: str = (
-        "Search and retrieve cocktail/mocktail recipes by ingredients. "
-        "Provide a list of ingredients you have, and optionally filter by "
-        "drink type ('cocktails', 'mocktails', or 'both'). "
-        "Returns matching drinks with completeness scores."
+        "Raja's recipe lookup tool - search cocktails and mocktails by ingredients. "
+        "Give me the ingredients from your cabinet, and I'll find drinks you can make. "
+        "Optionally filter by 'cocktails', 'mocktails', or 'both'. "
+        "Returns conversational recommendations with drink details."
     )
 
     def _run(
         self,
         cabinet: list[str],
         drink_type: Literal["cocktails", "mocktails", "both"] = "both",
+        conversational: bool = True,
     ) -> str:
         """Search for drinks that can be made with the given ingredients.
 
         Args:
             cabinet: List of ingredient IDs the user has available.
             drink_type: Filter for 'cocktails', 'mocktails', or 'both'.
+            conversational: If True, return Raja-style friendly response.
+                           If False, return raw JSON data.
 
         Returns:
+            Conversational Raja-style recommendations (default) or
             JSON string with matching drinks and their match scores.
-            Score of 1.0 means all ingredients are available.
         """
         # Normalize cabinet ingredients to lowercase for matching
         cabinet_set = {ing.lower().strip() for ing in cabinet}
@@ -60,6 +65,11 @@ class RecipeDBTool(BaseTool):
         # Sort by score (highest first), then by name
         matches.sort(key=lambda x: (-x["score"], x["name"]))
 
+        # Return conversational format by default
+        if conversational:
+            return self._format_conversational(matches, drink_type)
+
+        # Return raw JSON for programmatic use
         result = {
             "query": {
                 "cabinet": list(cabinet_set),
@@ -119,3 +129,106 @@ class RecipeDBTool(BaseTool):
             "ingredients_missing": missing,
             "total_ingredients": total_required,
         }
+
+    def _format_conversational(
+        self,
+        matches: list[dict],
+        drink_type: Literal["cocktails", "mocktails", "both"],
+    ) -> str:
+        """Format matches in Raja's conversational style with Hindi phrases.
+
+        Args:
+            matches: List of drink match dictionaries.
+            drink_type: The type filter used for the query.
+
+        Returns:
+            Raja-style conversational string with drink recommendations.
+        """
+        # Raja's greeting phrases
+        greetings_with_matches = [
+            "Arrey yaar, with your cabinet I found these gems:",
+            "Bhai, check out what we can make together:",
+            "Arrey, your cabinet has some solid options:",
+            "Yaar, look at these beauties I found for you:",
+            "Bhai sahab, your ingredients unlock these drinks:",
+        ]
+
+        greetings_no_matches = [
+            "Arrey yaar, no luck with those ingredients. Try adding some basics like lime or simple syrup!",
+            "Bhai, nothing matched this time. Maybe stock up on a few essentials?",
+            "Yaar, the cabinet needs some love! Add vodka, rum, or gin to unlock more drinks.",
+            "Arrey, dry spell here! Consider getting some mixers or base spirits.",
+        ]
+
+        # Handle no matches
+        if not matches:
+            return random.choice(greetings_no_matches)
+
+        # Build conversational response
+        lines = [random.choice(greetings_with_matches), ""]
+
+        # Separate perfect matches from partial matches
+        perfect_matches = [m for m in matches if m["score"] == 1.0]
+        partial_matches = [m for m in matches if m["score"] < 1.0]
+
+        # Show perfect matches first (limit to top 5)
+        if perfect_matches:
+            for match in perfect_matches[:5]:
+                lines.append(self._format_drink_line(match, is_perfect=True))
+
+        # Show top partial matches if we have room
+        if partial_matches and len(perfect_matches) < 5:
+            remaining_slots = 5 - len(perfect_matches)
+            if perfect_matches:
+                lines.append("")
+                lines.append("Almost there with these (just missing a few things):")
+            for match in partial_matches[:remaining_slots]:
+                lines.append(self._format_drink_line(match, is_perfect=False))
+
+        # Add summary
+        total_perfect = len(perfect_matches)
+        total_partial = len(partial_matches)
+
+        lines.append("")
+        if total_perfect > 5:
+            lines.append(f"...and {total_perfect - 5} more perfect matches, yaar!")
+        elif (
+            total_partial > 0
+            and not partial_matches[: remaining_slots if partial_matches else 0]
+        ):
+            lines.append(
+                f"Plus {total_partial} more drinks if you grab a few extra ingredients!"
+            )
+
+        return "\n".join(lines)
+
+    def _format_drink_line(self, match: dict, is_perfect: bool) -> str:
+        """Format a single drink in Raja's style.
+
+        Args:
+            match: Drink match dictionary.
+            is_perfect: Whether all ingredients are available.
+
+        Returns:
+            Formatted drink line with emoji and description.
+        """
+        emoji = "🍹" if match.get("is_mocktail") else "🍸"
+        name = match["name"]
+        tagline = match.get("tagline", "")
+
+        # Build the drink line
+        line = f"{emoji} **{name}**"
+
+        if tagline:
+            line += f" - {tagline}"
+
+        # Add missing ingredients note for partial matches
+        if not is_perfect:
+            missing = match.get("ingredients_missing", [])
+            if missing:
+                missing_str = ", ".join(missing[:2])
+                if len(missing) > 2:
+                    missing_str += f" +{len(missing) - 2} more"
+                line += f" (need: {missing_str})"
+
+        return line
