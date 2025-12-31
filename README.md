@@ -109,7 +109,7 @@ No signup required. Just start chatting with Raja.
 
 | Metric | Value |
 |--------|-------|
-| **Test Suite** | 714 tests |
+| **Test Suite** | 751 tests |
 | **Code Coverage** | 78% |
 | **Models** | 100% covered |
 | **Services** | 96%+ covered |

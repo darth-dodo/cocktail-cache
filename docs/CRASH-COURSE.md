@@ -17,7 +17,7 @@ This crash course documents everything about **Cocktail Cache** — an AI-powere
 │  Frontend: HTMX + Jinja2 + Tailwind (glassmorphic UI)          │
 │  Backend: FastAPI with session management                       │
 │  AI System: CrewAI with 7 agents, 4 crews, 4 tools             │
-│  LLM: Anthropic Claude (Haiku for speed, Sonnet for quality)   │
+│  LLM: Anthropic Claude Haiku (all agents)                      │
 │  Config: YAML-based agent/task/LLM definitions                  │
 │  Data: 142 drinks (103 cocktails + 39 mocktails)               │
 │  Deployment: Docker + Render.com                                │
@@ -75,7 +75,7 @@ flowchart TB
 
     subgraph AI["CrewAI System"]
         Crews[Crews]
-        Claude["Claude<br/>Haiku/Sonnet"]
+        Claude["Claude Haiku"]
     end
 
     subgraph Data
@@ -132,7 +132,7 @@ flowchart LR
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Agent Framework | CrewAI | Native Claude support, typed I/O, flows |
-| LLM Strategy | Haiku default, Sonnet for chat | Cost vs quality balance |
+| LLM Strategy | Haiku for all agents | Fast, cost-effective |
 | Config System | YAML + Pydantic | Declarative + validated |
 | Session Storage | In-memory dict | MVP simplicity |
 | Frontend | HTMX + Jinja2 | No build step, server-driven |
@@ -300,7 +300,7 @@ raja_bartender:
   goal: "Have snappy, personality-rich conversations about cocktails"
   backstory: |
     You are Raja, a bartender from Colaba, Bombay. You speak warm Hindi-English
-    - use "yaar", "bhai", "acha", "bilkul", "zaroor".
+    - use "yaar", "bhai", "acha", "bilkul", "of course".
 
     IMPORTANT - STORYTELLING RULE: NEVER share first-person stories.
     Always share SECOND-HAND stories - "I heard from an old customer that..."
@@ -326,18 +326,28 @@ drink_recommender:
 # src/app/agents/config/llm.yaml
 default:
   model: "anthropic/claude-3-5-haiku-latest"
+  temperature: 0.7
+  max_tokens: 1024
+
+fast:
+  model: "anthropic/claude-3-5-haiku-latest"
+  temperature: 0.5
+  max_tokens: 1024
+
+creative:
+  model: "anthropic/claude-3-5-haiku-20241022"
+  temperature: 0.9
+  max_tokens: 2048
+
+precise:
+  model: "anthropic/claude-3-5-haiku-latest"
   temperature: 0.3
   max_tokens: 1024
 
 conversational:
-  model: "anthropic/claude-sonnet-4-20250514"
-  temperature: 0.7
+  model: "anthropic/claude-3-5-haiku-20241022"
+  temperature: 0.85
   max_tokens: 1024
-
-creative:
-  model: "anthropic/claude-sonnet-4-20250514"
-  temperature: 0.8
-  max_tokens: 2048
 ```
 
 ### Agent Inventory
@@ -345,9 +355,11 @@ creative:
 | Agent | Role | LLM Profile | Used In |
 |-------|------|-------------|---------|
 | `drink_recommender` | Find + rank drinks | default (Haiku) | AnalysisCrew |
+| `cabinet_analyst` | Identify makeable drinks | default (Haiku) | AnalysisCrew (full) |
+| `mood_matcher` | Rank drinks by mood fit | default (Haiku) | AnalysisCrew (full) |
 | `recipe_writer` | Generate recipes | default (Haiku) | RecipeCrew |
 | `bottle_advisor` | Next purchase advice | default (Haiku) | RecipeCrew |
-| `raja_bartender` | Conversational chat | conversational (Sonnet) | RajaChatCrew |
+| `raja_bartender` | Conversational chat | conversational (Haiku) | RajaChatCrew |
 | `bar_growth_advisor` | Strategic bar growth | default (Haiku) | BarGrowthCrew |
 
 ---
@@ -727,7 +739,7 @@ sequenceDiagram
     participant API as FastAPI
     participant SM as Session Manager
     participant RC as Raja Crew
-    participant LLM as Claude Sonnet
+    participant LLM as Claude Haiku
 
     U->>API: POST /api/chat {message}
     API->>SM: get_or_create_session()

@@ -49,7 +49,7 @@ commands:
   typecheck: make typecheck         # mypy strict
 
 conventions:
-  - agent_factories: create_*_agent() functions return configured Agent
+  - agent_factories: create_*() functions return configured Agent
   - yaml_configs: prompts in agents/config/agents.yaml, tasks in tasks.yaml
   - pydantic_io: AnalysisInput/Output, RecipeInput/Output for all crews
   - mock_llm_testing: tests use mock responses, no real API calls
