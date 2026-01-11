@@ -753,25 +753,21 @@ class CocktailFlowState(BaseModel):
 
 ### FastAPI Lifespan Management
 
-The application uses FastAPI's lifespan context manager to manage shared resources:
+The application uses FastAPI's lifespan context manager to manage background tasks:
 
 ```python
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create shared executor
-    app.state.executor = ThreadPoolExecutor(max_workers=4)
-
-    # Start background cleanup task
+    # Start background cleanup task for expired sessions
     cleanup_task = asyncio.create_task(session_cleanup_task())
 
     yield
 
-    # Shutdown: Clean up resources
+    # Shutdown: Cancel cleanup task
     cleanup_task.cancel()
-    app.state.executor.shutdown(wait=True)
 ```
 
-**Shared ThreadPoolExecutor**: A single executor is created at startup and shared across all requests that need to run blocking operations (like CrewAI crews). This avoids the overhead of creating new executors per request.
+**Native Async with CrewAI**: The application uses CrewAI's native `akickoff()` method for async execution. This eliminates the need for ThreadPoolExecutor and allows direct `await` calls to crew functions, providing better async performance and simpler code.
 
 ### Session TTL & Cleanup
 

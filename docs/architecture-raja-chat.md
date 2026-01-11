@@ -600,19 +600,10 @@ async def chat_with_raja(request: ChatRequest) -> ChatResponse:
             "message": "Something strong but not too sweet"
         }
     """
-    import asyncio
-    from concurrent.futures import ThreadPoolExecutor
-
     logger.info(f"Chat request: session={request.session_id}, message_len={len(request.message)}")
 
-    # Run the synchronous crew in a thread pool
-    loop = asyncio.get_event_loop()
-    with ThreadPoolExecutor() as executor:
-        response = await loop.run_in_executor(
-            executor,
-            run_raja_chat,
-            request,
-        )
+    # Native async execution with CrewAI's akickoff()
+    response = await run_raja_chat(request)
 
     return response
 
