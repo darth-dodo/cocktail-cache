@@ -289,13 +289,13 @@ def _get_suggested_action(output: RajaChatOutput) -> str | None:
     return None
 
 
-def run_raja_chat(request: ChatRequest) -> ChatResponse:
+async def run_raja_chat(request: ChatRequest) -> ChatResponse:
     """Process a chat message and get Raja's response.
 
     This function:
     1. Gets or creates the chat session
     2. Adds the user message to history
-    3. Runs the Raja crew to generate response
+    3. Runs the Raja crew to generate response (native async)
     4. Updates session with Raja's response
     5. Returns structured response with metadata
 
@@ -328,10 +328,10 @@ def run_raja_chat(request: ChatRequest) -> ChatResponse:
     )
     session.history.add_message(user_message)
 
-    # Create and run crew
+    # Create and run crew with native async
     crew = create_raja_chat_crew(session, request.message)
 
-    result = crew.kickoff()
+    result = await crew.akickoff()
 
     # Parse output
     raja_output = _parse_raja_output(result)

@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -78,13 +77,8 @@ async def session_cleanup_task() -> None:
 async def lifespan(app: FastAPI):
     """Manage application lifespan resources.
 
-    Creates a shared ThreadPoolExecutor for running blocking operations
-    without creating a new executor per request. Also starts background
-    cleanup task for expired sessions.
+    Starts background cleanup task for expired sessions.
     """
-    # Startup: Create shared executor
-    app.state.executor = ThreadPoolExecutor(max_workers=4)
-
     # Start background cleanup task
     cleanup_task = asyncio.create_task(session_cleanup_task())
 
@@ -92,14 +86,13 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown: Cancel cleanup task and clean up executor
+    # Shutdown: Cancel cleanup task
     cleanup_task.cancel()
     try:
         await cleanup_task
     except asyncio.CancelledError:
         pass
 
-    app.state.executor.shutdown(wait=True)
     logger.info("Application shutdown complete")
 
 

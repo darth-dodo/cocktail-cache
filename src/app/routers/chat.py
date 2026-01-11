@@ -7,7 +7,7 @@ the user's mood, cabinet, and preferences.
 
 import logging
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 
 from src.app.models import (
     ChatRequest,
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.post("", response_model=ChatResponse)
-async def chat_with_raja(chat_request: ChatRequest, request: Request) -> ChatResponse:
+async def chat_with_raja(chat_request: ChatRequest) -> ChatResponse:
     """Send a message to Raja and get a response.
 
     This is the main chat endpoint for conversational interaction with Raja,
@@ -33,13 +33,10 @@ async def chat_with_raja(chat_request: ChatRequest, request: Request) -> ChatRes
 
     Args:
         chat_request: Chat request with message and optional context.
-        request: FastAPI request object for accessing shared resources.
 
     Returns:
         ChatResponse with Raja's response and extracted entities.
     """
-    import asyncio
-
     from src.app.crews.raja_chat_crew import run_raja_chat
 
     logger.info(
@@ -47,13 +44,8 @@ async def chat_with_raja(chat_request: ChatRequest, request: Request) -> ChatRes
         f"message_length={len(chat_request.message)}"
     )
 
-    # Run the crew in the shared thread pool to not block the event loop
-    loop = asyncio.get_event_loop()
-    response = await loop.run_in_executor(
-        request.app.state.executor,
-        run_raja_chat,
-        chat_request,
-    )
+    # Run the crew with native async (no thread pool needed)
+    response = await run_raja_chat(chat_request)
 
     logger.info(f"Chat response: session_id={response.session_id}")
     return response

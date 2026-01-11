@@ -108,7 +108,7 @@ def create_bar_growth_crew() -> Crew:
     )
 
 
-def run_bar_growth_crew(
+async def run_bar_growth_crew(
     cabinet_contents: str,
     makeable_drinks: str,
     ranked_bottles: str,
@@ -118,6 +118,9 @@ def run_bar_growth_crew(
 
     This function provides a simple interface for running the bar growth
     workflow, handling pre-computed data injection and output parsing.
+
+    Uses native async execution via CrewAI's akickoff() for better
+    concurrency without thread pool overhead.
 
     Args:
         cabinet_contents: Formatted string of user's current bottles.
@@ -129,7 +132,7 @@ def run_bar_growth_crew(
         BarGrowthOutput containing personalized recommendations.
 
     Example:
-        result = run_bar_growth_crew(
+        result = await run_bar_growth_crew(
             cabinet_contents="Bourbon, Gin, Sweet Vermouth (3 bottles)",
             makeable_drinks="You can make 12 drinks: Old Fashioned, Martini...",
             ranked_bottles="1. Vodka: +8 drinks (Moscow Mule, Cosmopolitan...)",
@@ -143,7 +146,7 @@ def run_bar_growth_crew(
 
     crew = create_bar_growth_crew()
 
-    result = crew.kickoff(
+    result = await crew.akickoff(
         inputs={
             "cabinet_contents": cabinet_contents,
             "makeable_drinks": makeable_drinks,
