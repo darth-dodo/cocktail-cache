@@ -10,14 +10,15 @@ Complete API documentation for Cocktail Cache's REST endpoints.
 
 1. [Overview](#overview)
 2. [Authentication](#authentication)
-3. [Endpoints](#endpoints)
+3. [Health Check](#health-check)
+4. [Endpoints](#endpoints)
    - [Drinks](#drinks)
    - [Ingredients](#ingredients)
    - [Flow (Recommendations)](#flow-recommendations)
    - [Suggest Bottles](#suggest-bottles)
    - [Chat with Raja](#chat-with-raja)
-4. [Data Models](#data-models)
-5. [Error Handling](#error-handling)
+5. [Data Models](#data-models)
+6. [Error Handling](#error-handling)
 
 ---
 
@@ -65,6 +66,32 @@ flowchart LR
 ## Authentication
 
 The API is currently **open** and does not require authentication. Rate limiting is active (see [Rate Limiting](#rate-limiting) section).
+
+---
+
+## Health Check
+
+### GET /health
+
+Health check endpoint for container orchestration (Kubernetes, Docker).
+
+Returns a simple health status with no authentication required. Useful for liveness and readiness probes.
+
+**Response**:
+
+```json
+{
+  "status": "healthy",
+  "version": "0.1.0"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Always `"healthy"` when service is running |
+| `version` | string | Current application version |
+
+**Note**: This endpoint is at the root level (`/health`), not under `/api`.
 
 ---
 
@@ -560,5 +587,22 @@ sequenceDiagram
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: 2025-12-30*
+---
+
+## Session Management
+
+Sessions are managed automatically with TTL-based cleanup:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `SESSION_TTL_SECONDS` | 3600 (1 hour) | Maximum session lifetime |
+| `SESSION_CLEANUP_INTERVAL_SECONDS` | 300 (5 min) | Background cleanup interval |
+
+Sessions are automatically removed when they exceed the TTL. This applies to both:
+- **Flow sessions**: Created by `/api/flow` for recommendations
+- **Chat sessions**: Created by `/api/chat` for Raja conversations
+
+---
+
+*Document Version: 1.1*
+*Last Updated: 2026-01-11*

@@ -2,7 +2,7 @@
 
 > **⚠️ SINGLE SOURCE OF TRUTH**: This file is the authoritative reference for all implementation tasks, session progress, and feature status. All agents should read, reference, and update this file.
 
-> **Status**: Session 11 Complete - Raja Tools Integration
+> **Status**: Session 12 Complete - Backend Improvements
 >
 > **Build Order**: Data -> Tools -> Agents -> Crews -> Flow -> API -> UI -> UX Polish
 >
@@ -10,7 +10,26 @@
 >
 > **Live Demo**: https://cocktail-cache.onrender.com | **GitHub**: https://github.com/darth-dodo/cocktail-cache
 
-## Recent Changes (Session 11 - Raja Tools Integration)
+## Recent Changes (Session 12 - Backend Improvements)
+
+- **Session Memory Leak Fix**: Implemented TTL-based session cleanup for both flow and chat sessions
+  - Sessions stored with `(session, created_timestamp)` tuple format
+  - Background task runs every 5 minutes to clean up expired sessions
+  - Configurable via `SESSION_TTL_SECONDS` (default: 1 hour) and `SESSION_CLEANUP_INTERVAL_SECONDS` (default: 5 min)
+- **Shared ThreadPoolExecutor**: Single executor created in FastAPI lifespan, shared across all requests
+  - Eliminates overhead of creating new executors per request
+  - Proper shutdown handling on application termination
+- **Health Endpoint**: Added `/health` endpoint for container orchestration (Kubernetes, Docker)
+  - Returns `{"status": "healthy", "version": "0.1.0"}`
+  - No authentication required, suitable for liveness/readiness probes
+- **Config Defaults Fixed**:
+  - `CREWAI_TRACING` now defaults to `False` (was `True`)
+  - `OPENAI_API_KEY` defaults to empty string (prevents validation errors when not used)
+- **Exception Handlers Improved**: Proper Starlette typing for custom 404/500 handlers
+- **Documentation Updates**: Updated architecture.md, api.md with new features
+- **Test Suite**: 761 tests passing (maintained coverage)
+
+## Previous Changes (Session 11 - Raja Tools Integration)
 
 - **Tool-Based Architecture**: Integrated 4 cocktail tools directly with Raja bartender agent
   - `recipe_database`: Search drinks by cabinet ingredients
@@ -872,6 +891,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 | Session 9 | Docs & E2E | Documentation audit, Playwright testing guide | PASSED |
 | Session 10 | Simplification | Router split, utils extraction, logging cleanup | PASSED |
 | Session 11 | Tools Integration | Raja tools integration, 761 tests | PASSED |
+| Session 12 | Backend Improvements | Session TTL cleanup, health endpoint, shared executor | PASSED |
 
 ### Session 6 UX Progress
 
