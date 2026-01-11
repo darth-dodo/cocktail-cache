@@ -21,7 +21,7 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.post("", response_model=ChatResponse)
-async def chat_with_raja(request: ChatRequest) -> ChatResponse:
+async def chat_with_raja(chat_request: ChatRequest) -> ChatResponse:
     """Send a message to Raja and get a response.
 
     This is the main chat endpoint for conversational interaction with Raja,
@@ -32,29 +32,20 @@ async def chat_with_raja(request: ChatRequest) -> ChatResponse:
     Follow-up messages should include the session_id from the previous response.
 
     Args:
-        request: Chat request with message and optional context.
+        chat_request: Chat request with message and optional context.
 
     Returns:
         ChatResponse with Raja's response and extracted entities.
     """
-    import asyncio
-    from concurrent.futures import ThreadPoolExecutor
-
     from src.app.crews.raja_chat_crew import run_raja_chat
 
     logger.info(
-        f"Chat request: session_id={request.session_id}, "
-        f"message_length={len(request.message)}"
+        f"Chat request: session_id={chat_request.session_id}, "
+        f"message_length={len(chat_request.message)}"
     )
 
-    # Run the crew in a thread pool to not block the event loop
-    loop = asyncio.get_event_loop()
-    with ThreadPoolExecutor() as executor:
-        response = await loop.run_in_executor(
-            executor,
-            run_raja_chat,
-            request,
-        )
+    # Run the crew with native async (no thread pool needed)
+    response = await run_raja_chat(chat_request)
 
     logger.info(f"Chat response: session_id={response.session_id}")
     return response

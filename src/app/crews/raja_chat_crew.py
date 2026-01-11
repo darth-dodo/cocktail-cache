@@ -16,6 +16,7 @@ from datetime import datetime
 from crewai import Crew, Process, Task
 
 from src.app.agents.raja_bartender import create_raja_bartender
+from src.app.config import get_settings
 from src.app.models.chat import (
     ChatMessage,
     ChatRequest,
@@ -33,7 +34,37 @@ from src.app.utils.parsing import parse_json_from_llm_output
 logger = logging.getLogger(__name__)
 
 # In-memory session store (use Redis in production)
-_chat_sessions: dict[str, ChatSession] = {}
+# Each entry stores (session, created_timestamp) for TTL-based cleanup
+_chat_sessions: dict[str, tuple[ChatSession, float]] = {}
+
+
+def cleanup_expired_chat_sessions() -> int:
+    """Remove expired chat sessions based on SESSION_TTL_SECONDS.
+
+    Returns:
+        Number of sessions removed.
+    """
+    settings = get_settings()
+    now = time.time()
+    expired_ids = [
+        session_id
+        for session_id, (_, created_at) in _chat_sessions.items()
+        if now - created_at > settings.SESSION_TTL_SECONDS
+    ]
+    for session_id in expired_ids:
+        del _chat_sessions[session_id]
+    if expired_ids:
+        logger.info(f"Cleaned up {len(expired_ids)} expired chat sessions")
+    return len(expired_ids)
+
+
+def get_chat_session_count() -> int:
+    """Get the current number of active chat sessions.
+
+    Returns:
+        Number of active chat sessions.
+    """
+    return len(_chat_sessions)
 
 
 def get_or_create_session(
@@ -54,7 +85,7 @@ def get_or_create_session(
         ChatSession instance.
     """
     if session_id and session_id in _chat_sessions:
-        session = _chat_sessions[session_id]
+        session, created_at = _chat_sessions[session_id]
         session.last_active = datetime.utcnow()
 
         # Update context if provided
@@ -65,6 +96,8 @@ def get_or_create_session(
         if drink_type is not None:
             session.drink_type_preference = drink_type
 
+        # Update session in storage (preserve original created_at)
+        _chat_sessions[session_id] = (session, created_at)
         return session
 
     # Create new session
@@ -82,13 +115,13 @@ def get_or_create_session(
         content=(
             "Arrey yaar, welcome! Raja here - learned from best in the business. "
             "Tell me, what's the mood today? Celebrating something or just relaxing?\n\n"
-            "⚠️ *Quick note: I'm an AI - please verify recipes before mixing!*"
+            "*Quick note: I'm an AI - please verify recipes before mixing!*"
         ),
         intent=None,
     )
     new_session.history.add_message(greeting)
 
-    _chat_sessions[new_session.session_id] = new_session
+    _chat_sessions[new_session.session_id] = (new_session, time.time())
     logger.info(f"Created new chat session: {new_session.session_id}")
 
     return new_session
@@ -256,13 +289,13 @@ def _get_suggested_action(output: RajaChatOutput) -> str | None:
     return None
 
 
-def run_raja_chat(request: ChatRequest) -> ChatResponse:
+async def run_raja_chat(request: ChatRequest) -> ChatResponse:
     """Process a chat message and get Raja's response.
 
     This function:
     1. Gets or creates the chat session
     2. Adds the user message to history
-    3. Runs the Raja crew to generate response
+    3. Runs the Raja crew to generate response (native async)
     4. Updates session with Raja's response
     5. Returns structured response with metadata
 
@@ -295,10 +328,10 @@ def run_raja_chat(request: ChatRequest) -> ChatResponse:
     )
     session.history.add_message(user_message)
 
-    # Create and run crew
+    # Create and run crew with native async
     crew = create_raja_chat_crew(session, request.message)
 
-    result = crew.kickoff()
+    result = await crew.akickoff()
 
     # Parse output
     raja_output = _parse_raja_output(result)
@@ -376,7 +409,10 @@ def get_session(session_id: str) -> ChatSession | None:
     Returns:
         ChatSession if found, None otherwise.
     """
-    return _chat_sessions.get(session_id)
+    session_data = _chat_sessions.get(session_id)
+    if session_data:
+        return session_data[0]
+    return None
 
 
 def delete_session(session_id: str) -> bool:

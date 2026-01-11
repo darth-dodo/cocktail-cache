@@ -474,9 +474,10 @@ class TestStartFlowAction:
         data = response.json()
         session_id = data["session_id"]
 
-        # Verify session was stored
+        # Verify session was stored (sessions are stored as (state, timestamp) tuples)
         assert session_id in _sessions
-        assert _sessions[session_id].selected == "whiskey-sour"
+        state, _ = _sessions[session_id]
+        assert state.selected == "whiskey-sour"
 
 
 # =============================================================================
@@ -496,8 +497,10 @@ class TestAnotherFlowAction:
         mock_another_state: CocktailFlowState,
     ):
         """ANOTHER with valid session_id returns new recommendation."""
-        # First, store a session
-        _sessions["test-session-123"] = mock_flow_state
+        import time
+
+        # First, store a session (as tuple with timestamp)
+        _sessions["test-session-123"] = (mock_flow_state, time.time())
         mock_request_another.return_value = mock_another_state
 
         response = api_client.post(
@@ -557,7 +560,9 @@ class TestAnotherFlowAction:
         mock_another_state: CocktailFlowState,
     ):
         """ANOTHER updates the stored session state."""
-        _sessions["test-session-123"] = mock_flow_state
+        import time
+
+        _sessions["test-session-123"] = (mock_flow_state, time.time())
         mock_request_another.return_value = mock_another_state
 
         response = api_client.post(
@@ -570,8 +575,8 @@ class TestAnotherFlowAction:
 
         assert response.status_code == 200
 
-        # Verify session state was updated
-        updated_session = _sessions["test-session-123"]
+        # Verify session state was updated (sessions are stored as (state, timestamp) tuples)
+        updated_session, _ = _sessions["test-session-123"]
         assert updated_session.selected == "old-fashioned"
         assert "whiskey-sour" in updated_session.rejected
 
@@ -588,7 +593,9 @@ class TestMadeFlowAction:
         self, api_client: TestClient, mock_flow_state: CocktailFlowState
     ):
         """MADE records drink in history and returns success."""
-        _sessions["test-session-123"] = mock_flow_state
+        import time
+
+        _sessions["test-session-123"] = (mock_flow_state, time.time())
 
         response = api_client.post(
             "/api/flow",
@@ -607,8 +614,9 @@ class TestMadeFlowAction:
         assert "whiskey-sour" in data["message"]
         assert "excluded" in data["message"].lower()
 
-        # Verify drink was added to history
-        assert "whiskey-sour" in _sessions["test-session-123"].recent_history
+        # Verify drink was added to history (sessions are stored as (state, timestamp) tuples)
+        state, _ = _sessions["test-session-123"]
+        assert "whiskey-sour" in state.recent_history
 
     def test_made_missing_session_id(self, api_client: TestClient):
         """MADE without session_id returns 400 error."""
@@ -628,7 +636,9 @@ class TestMadeFlowAction:
         self, api_client: TestClient, mock_flow_state: CocktailFlowState
     ):
         """MADE without drink_id returns 400 error."""
-        _sessions["test-session-123"] = mock_flow_state
+        import time
+
+        _sessions["test-session-123"] = (mock_flow_state, time.time())
 
         response = api_client.post(
             "/api/flow",
@@ -662,8 +672,10 @@ class TestMadeFlowAction:
         self, api_client: TestClient, mock_flow_state: CocktailFlowState
     ):
         """MADE does not add duplicate entries to history."""
+        import time
+
         mock_flow_state.recent_history = ["whiskey-sour"]
-        _sessions["test-session-123"] = mock_flow_state
+        _sessions["test-session-123"] = (mock_flow_state, time.time())
 
         response = api_client.post(
             "/api/flow",
@@ -676,16 +688,18 @@ class TestMadeFlowAction:
 
         assert response.status_code == 200
 
-        # Verify no duplicate was added
-        history = _sessions["test-session-123"].recent_history
-        assert history.count("whiskey-sour") == 1
+        # Verify no duplicate was added (sessions are stored as (state, timestamp) tuples)
+        state, _ = _sessions["test-session-123"]
+        assert state.recent_history.count("whiskey-sour") == 1
 
     def test_made_adds_new_drink_to_history(
         self, api_client: TestClient, mock_flow_state: CocktailFlowState
     ):
         """MADE adds a new drink to existing history."""
+        import time
+
         mock_flow_state.recent_history = ["old-fashioned"]
-        _sessions["test-session-123"] = mock_flow_state
+        _sessions["test-session-123"] = (mock_flow_state, time.time())
 
         response = api_client.post(
             "/api/flow",
@@ -698,11 +712,11 @@ class TestMadeFlowAction:
 
         assert response.status_code == 200
 
-        # Verify both drinks are in history
-        history = _sessions["test-session-123"].recent_history
-        assert "old-fashioned" in history
-        assert "whiskey-sour" in history
-        assert len(history) == 2
+        # Verify both drinks are in history (sessions are stored as (state, timestamp) tuples)
+        state, _ = _sessions["test-session-123"]
+        assert "old-fashioned" in state.recent_history
+        assert "whiskey-sour" in state.recent_history
+        assert len(state.recent_history) == 2
 
 
 # =============================================================================
@@ -775,8 +789,8 @@ class TestCompleteFlowIntegration:
         assert made_data["success"] is True
         assert "old-fashioned" in made_data["message"]
 
-        # Verify final session state
-        final_state = _sessions[session_id]
+        # Verify final session state (sessions are stored as (state, timestamp) tuples)
+        final_state, _ = _sessions[session_id]
         assert "old-fashioned" in final_state.recent_history
 
     @patch("src.app.routers.flow.run_cocktail_flow")
@@ -1082,15 +1096,19 @@ class TestSessionManagement:
         )
         session2_id = response2.json()["session_id"]
 
-        # Verify both sessions exist and are independent
+        # Verify both sessions exist and are independent (sessions are stored as (state, timestamp) tuples)
         assert session1_id in _sessions
         assert session2_id in _sessions
-        assert _sessions[session1_id].selected == "old-fashioned"
-        assert _sessions[session2_id].selected == "martini"
+        state1, _ = _sessions[session1_id]
+        state2, _ = _sessions[session2_id]
+        assert state1.selected == "old-fashioned"
+        assert state2.selected == "martini"
 
     def test_made_on_one_session_does_not_affect_another(self, api_client: TestClient):
         """MADE action on one session does not affect other sessions."""
-        # Create two sessions directly
+        import time
+
+        # Create two sessions directly (as tuples with timestamp)
         state1 = CocktailFlowState(
             session_id="session-1",
             cabinet=["bourbon"],
@@ -1101,8 +1119,8 @@ class TestSessionManagement:
             cabinet=["gin"],
             recent_history=[],
         )
-        _sessions["session-1"] = state1
-        _sessions["session-2"] = state2
+        _sessions["session-1"] = (state1, time.time())
+        _sessions["session-2"] = (state2, time.time())
 
         # Mark drink as made in session 1
         api_client.post(
@@ -1114,6 +1132,8 @@ class TestSessionManagement:
             },
         )
 
-        # Verify only session 1 was affected
-        assert "old-fashioned" in _sessions["session-1"].recent_history
-        assert "old-fashioned" not in _sessions["session-2"].recent_history
+        # Verify only session 1 was affected (sessions are stored as (state, timestamp) tuples)
+        session1_state, _ = _sessions["session-1"]
+        session2_state, _ = _sessions["session-2"]
+        assert "old-fashioned" in session1_state.recent_history
+        assert "old-fashioned" not in session2_state.recent_history

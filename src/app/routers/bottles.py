@@ -312,9 +312,6 @@ async def suggest_bottles(
 
     if top_recommendations and core_bottles_in_cabinet > 0:
         try:
-            import asyncio
-            from concurrent.futures import ThreadPoolExecutor
-
             from src.app.crews.bar_growth_crew import run_bar_growth_crew
 
             cabinet_formatted = ", ".join(
@@ -348,16 +345,13 @@ async def suggest_bottles(
                 else "No essential items missing."
             )
 
-            loop = asyncio.get_event_loop()
-            with ThreadPoolExecutor() as executor:
-                ai_result = await loop.run_in_executor(
-                    executor,
-                    run_bar_growth_crew,
-                    cabinet_formatted,
-                    makeable_formatted,
-                    ranked_bottles_formatted,
-                    essentials_formatted,
-                )
+            # Run the crew with native async (no thread pool needed)
+            ai_result = await run_bar_growth_crew(
+                cabinet_formatted,
+                makeable_formatted,
+                ranked_bottles_formatted,
+                essentials_formatted,
+            )
 
             ai_summary = ai_result.summary
             ai_top_reasoning = ai_result.top_recommendation.reasoning

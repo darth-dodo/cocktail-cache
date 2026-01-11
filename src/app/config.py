@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,10 +29,24 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # CrewAI Settings
-    CREWAI_TRACING: bool = False  # Enable CrewAI flow tracing
+    CREWAI_TRACING: bool = False  # Opt-in for external telemetry (sends data to CrewAI)
 
     # Performance Settings
     PARALLEL_CREWS: bool = True  # Enable parallel Recipe + Bottle execution
+
+    # Session Settings
+    SESSION_TTL_SECONDS: int = 3600  # Session expiry time (default: 1 hour)
+    SESSION_CLEANUP_INTERVAL_SECONDS: int = 300  # Cleanup interval (default: 5 minutes)
+
+    @model_validator(mode="after")
+    def validate_api_key_for_production(self) -> "Settings":
+        """Validate ANTHROPIC_API_KEY is set in production environments."""
+        if self.APP_ENV == "production" and not self.ANTHROPIC_API_KEY:
+            raise ValueError(
+                "ANTHROPIC_API_KEY is required in production environment. "
+                "Set the ANTHROPIC_API_KEY environment variable."
+            )
+        return self
 
     @property
     def is_development(self) -> bool:

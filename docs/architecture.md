@@ -21,7 +21,7 @@
 
 ## Implementation Status
 
-> **Current Phase**: Session 8 Chat Improvements & Unit Toggle Complete
+> **Current Phase**: Session 12 Backend Improvements Complete
 
 ### Completed Components
 
@@ -45,8 +45,10 @@
 | Cabinet Panel | ✅ Complete | Ingredient management with autocomplete and categories |
 | Unit Toggle | ✅ Complete | oz/ml conversion with localStorage preference |
 | Error Pages | ✅ Complete | Custom 404/500 pages matching app theme |
+| Session Management | ✅ Complete | TTL-based cleanup for flow and chat sessions |
+| Health Endpoint | ✅ Complete | `/health` for container orchestration |
 | Deployment | ✅ Complete | Render.com with GitHub Actions CI/CD |
-| Unit Tests | ✅ Complete | 751 tests passing with 78% coverage |
+| Unit Tests | ✅ Complete | 761 tests passing with 78% coverage |
 
 ### Data Files Summary
 
@@ -744,6 +746,68 @@ class CocktailFlowState(BaseModel):
 ```
 
 **Note**: History, skill level, and drink type are stored in browser local storage and passed with each request.
+
+---
+
+## Application Lifecycle & Session Management
+
+### FastAPI Lifespan Management
+
+The application uses FastAPI's lifespan context manager to manage background tasks:
+
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Start background cleanup task for expired sessions
+    cleanup_task = asyncio.create_task(session_cleanup_task())
+
+    yield
+
+    # Shutdown: Cancel cleanup task
+    cleanup_task.cancel()
+```
+
+**Native Async with CrewAI**: The application uses CrewAI's native `akickoff()` method for async execution. This eliminates the need for ThreadPoolExecutor and allows direct `await` calls to crew functions, providing better async performance and simpler code.
+
+### Session TTL & Cleanup
+
+Both flow sessions and chat sessions have TTL-based cleanup to prevent memory leaks:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `SESSION_TTL_SECONDS` | 3600 (1 hour) | Maximum session lifetime |
+| `SESSION_CLEANUP_INTERVAL_SECONDS` | 300 (5 min) | Background cleanup interval |
+
+```python
+# Session storage with timestamp for TTL
+_sessions: dict[str, tuple[CocktailFlowState, float]] = {}
+
+def cleanup_expired_sessions() -> int:
+    """Remove expired sessions based on SESSION_TTL_SECONDS."""
+    settings = get_settings()
+    now = time.time()
+    expired_ids = [
+        session_id
+        for session_id, (_, created_at) in _sessions.items()
+        if now - created_at > settings.SESSION_TTL_SECONDS
+    ]
+    for session_id in expired_ids:
+        del _sessions[session_id]
+    return len(expired_ids)
+```
+
+### Health Check Endpoint
+
+A dedicated health endpoint is available for container orchestration:
+
+```
+GET /health → {"status": "healthy", "version": "0.1.0"}
+```
+
+This endpoint:
+- Has no authentication requirements
+- Is suitable for Kubernetes liveness/readiness probes
+- Is at the root level (not under `/api`)
 
 ---
 

@@ -9,12 +9,14 @@ Global rate limits protect upstream API quotas (privacy-first, no user tracking)
 """
 
 import logging
+import time
 from enum import Enum
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from src.app.config import get_settings
 from src.app.flows.cocktail_flow import (
     CocktailFlowState,
     request_another,
@@ -34,7 +36,37 @@ router = APIRouter(tags=["flow"])
 
 # In-memory session storage for MVP
 # In production, this would be Redis or similar persistent store
-_sessions: dict[str, CocktailFlowState] = {}
+# Each entry stores (state, created_timestamp) for TTL-based cleanup
+_sessions: dict[str, tuple[CocktailFlowState, float]] = {}
+
+
+def cleanup_expired_sessions() -> int:
+    """Remove expired sessions based on SESSION_TTL_SECONDS.
+
+    Returns:
+        Number of sessions removed.
+    """
+    settings = get_settings()
+    now = time.time()
+    expired_ids = [
+        session_id
+        for session_id, (_, created_at) in _sessions.items()
+        if now - created_at > settings.SESSION_TTL_SECONDS
+    ]
+    for session_id in expired_ids:
+        del _sessions[session_id]
+    if expired_ids:
+        logger.info(f"Cleaned up {len(expired_ids)} expired flow sessions")
+    return len(expired_ids)
+
+
+def get_session_count() -> int:
+    """Get the current number of active sessions.
+
+    Returns:
+        Number of active sessions.
+    """
+    return len(_sessions)
 
 
 class FlowAction(str, Enum):
@@ -337,7 +369,7 @@ async def _handle_start(request: FlowRequest) -> FlowResponse:
         include_bottle_advice=request.include_bottle_advice,
     )
 
-    _sessions[state.session_id] = state
+    _sessions[state.session_id] = (state, time.time())
     logger.info(f"Created session {state.session_id}, selected={state.selected}")
 
     return _state_to_response(state)
@@ -351,12 +383,13 @@ async def _handle_another(request: FlowRequest) -> FlowResponse:
             detail="session_id is required for ANOTHER action",
         )
 
-    state = _sessions.get(request.session_id)
-    if not state:
+    session_data = _sessions.get(request.session_id)
+    if not session_data:
         raise HTTPException(
             status_code=404,
             detail=f"Session not found: {request.session_id}",
         )
+    state, created_at = session_data
 
     logger.info(
         f"Requesting another for session {request.session_id}, "
@@ -364,7 +397,7 @@ async def _handle_another(request: FlowRequest) -> FlowResponse:
     )
 
     new_state = await request_another(state)
-    _sessions[new_state.session_id] = new_state
+    _sessions[new_state.session_id] = (new_state, created_at)
     logger.info(
         f"Updated session {new_state.session_id}, new selection={new_state.selected}"
     )
@@ -385,12 +418,13 @@ async def _handle_made(request: FlowRequest) -> FlowResponse:
             detail="drink_id is required for MADE action",
         )
 
-    state = _sessions.get(request.session_id)
-    if not state:
+    session_data = _sessions.get(request.session_id)
+    if not session_data:
         raise HTTPException(
             status_code=404,
             detail=f"Session not found: {request.session_id}",
         )
+    state, created_at = session_data
 
     logger.info(
         f"Marking drink '{request.drink_id}' as made for session {request.session_id}"
@@ -399,7 +433,7 @@ async def _handle_made(request: FlowRequest) -> FlowResponse:
     if request.drink_id not in state.recent_history:
         state.recent_history.append(request.drink_id)
 
-    _sessions[state.session_id] = state
+    _sessions[state.session_id] = (state, created_at)
 
     return FlowResponse(
         session_id=state.session_id,
