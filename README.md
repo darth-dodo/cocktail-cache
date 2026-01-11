@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/badge/GitHub-darth--dodo%2Fcocktail--cache-blue?logo=github" alt="GitHub">
   </a>
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
-  <img src="https://img.shields.io/badge/Tests-751_passing-brightgreen?logo=pytest" alt="Tests: 751 passing">
+  <img src="https://img.shields.io/badge/Tests-761_passing-brightgreen?logo=pytest" alt="Tests: 761 passing">
   <img src="https://img.shields.io/badge/Coverage-78%25-green?logo=codecov" alt="Coverage: 78%">
 </p>
 
@@ -102,14 +102,14 @@ No signup required. Just start chatting with Raja.
 | **Runtime** | Python 3.12 |
 | **API** | FastAPI |
 | **AI** | CrewAI + Anthropic Claude |
-| **Frontend** | HTMX + Jinja2 + Tailwind |
+| **Frontend** | Vanilla JS + Jinja2 + Tailwind |
 | **Deployment** | Render |
 
 ### Codebase Health
 
 | Metric | Value |
 |--------|-------|
-| **Test Suite** | 751 tests |
+| **Test Suite** | 761 tests |
 | **Code Coverage** | 78% |
 | **Models** | 100% covered |
 | **Services** | 96%+ covered |
@@ -183,7 +183,7 @@ MIT License — see [LICENSE](LICENSE) for details.
   <a href="https://crewai.com">CrewAI</a> •
   <a href="https://anthropic.com">Anthropic Claude</a> •
   <a href="https://fastapi.tiangolo.com">FastAPI</a> •
-  <a href="https://htmx.org">HTMX</a>
+  <a href="https://tailwindcss.com">Tailwind CSS</a>
 </p>
 
 <p align="center">
