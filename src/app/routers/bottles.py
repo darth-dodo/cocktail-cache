@@ -10,7 +10,7 @@ Global rate limits protect compute-intensive operations (privacy-first, no user 
 import logging
 from collections import defaultdict
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 from src.app.rate_limit import rate_limit_compute
@@ -182,6 +182,7 @@ def _is_essential_item(ingredient_id: str) -> bool:
 @rate_limit_compute
 async def suggest_bottles(
     bottles_request: SuggestBottlesRequest,
+    request: Request,
 ) -> SuggestBottlesResponse:
     """Get bottle purchase recommendations based on your cabinet.
 
@@ -313,7 +314,6 @@ async def suggest_bottles(
     if top_recommendations and core_bottles_in_cabinet > 0:
         try:
             import asyncio
-            from concurrent.futures import ThreadPoolExecutor
 
             from src.app.crews.bar_growth_crew import run_bar_growth_crew
 
@@ -348,16 +348,16 @@ async def suggest_bottles(
                 else "No essential items missing."
             )
 
+            # Run the crew in the shared thread pool to not block the event loop
             loop = asyncio.get_event_loop()
-            with ThreadPoolExecutor() as executor:
-                ai_result = await loop.run_in_executor(
-                    executor,
-                    run_bar_growth_crew,
-                    cabinet_formatted,
-                    makeable_formatted,
-                    ranked_bottles_formatted,
-                    essentials_formatted,
-                )
+            ai_result = await loop.run_in_executor(
+                request.app.state.executor,
+                run_bar_growth_crew,
+                cabinet_formatted,
+                makeable_formatted,
+                ranked_bottles_formatted,
+                essentials_formatted,
+            )
 
             ai_summary = ai_result.summary
             ai_top_reasoning = ai_result.top_recommendation.reasoning

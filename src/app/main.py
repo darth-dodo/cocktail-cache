@@ -1,5 +1,9 @@
 """FastAPI application entry point for Cocktail Cache."""
 
+import asyncio
+import logging
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -15,6 +19,8 @@ from src.app.config import get_settings
 from src.app.routers import api_router
 from src.app.services.data_loader import load_all_drinks
 
+logger = logging.getLogger(__name__)
+
 # Application paths
 APP_DIR = Path(__file__).parent
 TEMPLATES_DIR = APP_DIR / "templates"
@@ -23,12 +29,87 @@ STATIC_DIR = APP_DIR / "static"
 # Initialize settings
 settings = get_settings()
 
+
+async def session_cleanup_task() -> None:
+    """Background task to clean up expired sessions.
+
+    Runs periodically to remove sessions that have exceeded their TTL.
+    This prevents memory leaks from unbounded session storage.
+    """
+    from src.app.crews.raja_chat_crew import (
+        cleanup_expired_chat_sessions,
+        get_chat_session_count,
+    )
+    from src.app.routers.flow import cleanup_expired_sessions, get_session_count
+
+    logger.info(
+        f"Session cleanup task started "
+        f"(interval: {settings.SESSION_CLEANUP_INTERVAL_SECONDS}s, "
+        f"TTL: {settings.SESSION_TTL_SECONDS}s)"
+    )
+
+    while True:
+        try:
+            await asyncio.sleep(settings.SESSION_CLEANUP_INTERVAL_SECONDS)
+
+            # Clean up flow sessions
+            flow_cleaned = cleanup_expired_sessions()
+
+            # Clean up chat sessions
+            chat_cleaned = cleanup_expired_chat_sessions()
+
+            # Log summary if any sessions were cleaned
+            total_cleaned = flow_cleaned + chat_cleaned
+            if total_cleaned > 0:
+                logger.info(
+                    f"Session cleanup completed: "
+                    f"removed {flow_cleaned} flow + {chat_cleaned} chat sessions. "
+                    f"Active: {get_session_count()} flow, {get_chat_session_count()} chat"
+                )
+
+        except asyncio.CancelledError:
+            logger.info("Session cleanup task cancelled")
+            break
+        except Exception:
+            logger.exception("Error in session cleanup task")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan resources.
+
+    Creates a shared ThreadPoolExecutor for running blocking operations
+    without creating a new executor per request. Also starts background
+    cleanup task for expired sessions.
+    """
+    # Startup: Create shared executor
+    app.state.executor = ThreadPoolExecutor(max_workers=4)
+
+    # Start background cleanup task
+    cleanup_task = asyncio.create_task(session_cleanup_task())
+
+    logger.info("Application startup complete")
+
+    yield
+
+    # Shutdown: Cancel cleanup task and clean up executor
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+
+    app.state.executor.shutdown(wait=True)
+    logger.info("Application shutdown complete")
+
+
 # Create FastAPI application
 app = FastAPI(
     title="Cocktail Cache",
     description="AI-powered cocktail recommendation system",
     version="0.1.0",
     debug=settings.DEBUG,
+    lifespan=lifespan,
 )
 
 # Configure CORS middleware for development
@@ -55,10 +136,13 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 @app.get("/health", response_class=JSONResponse)
 async def health_check() -> dict:
-    """Health check endpoint for monitoring and orchestration."""
+    """Health check endpoint for container orchestration (Kubernetes, Docker).
+
+    Returns a simple health status with no authentication required.
+    Useful for liveness and readiness probes.
+    """
     return {
         "status": "healthy",
-        "environment": settings.APP_ENV,
         "version": "0.1.0",
     }
 
