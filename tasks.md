@@ -435,6 +435,8 @@ DEFAULT_TEMPERATURE = 0.7
 
 > **Note (Oct 2026):** Historical entry. `claude-3-5-haiku-20241022` was retired by Anthropic on February 19, 2026. All agents now use Claude Haiku 4.5 (`anthropic/claude-haiku-4-5-20251001`), set once in `src/app/agents/config/llm.yaml`.
 
+> **Note (2026-10-31):** Upgraded the default model to Claude Haiku 5.5 (`anthropic/claude-haiku-5-5`). Claude Haiku 5.5 rejects non-default `temperature`, `top_p` and `top_k` values, so `DEFAULT_TEMPERATURE` and every per-profile temperature were removed from `llm.yaml`; profiles now differ only by `max_tokens`.
+
 **Environment Variable Required:**
 ```bash
 ANTHROPIC_API_KEY=sk-ant-...
@@ -738,7 +740,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 - [x] Create `src/app/agents/raja_bartender.py` with conversational persona
 - [x] Raja backstory: 20-year veteran from Colaba, Bombay
-- [x] Higher temperature (0.85) for personality variation
+- [x] Higher temperature (0.85) for personality variation (removed 2026-10-31: Claude Haiku 5.5 rejects non-default sampling values)
 - [x] Natural Hindi phrases: "Arrey bhai!", "Ekdum first class!", "Kya baat hai!"
 - [x] Cultural references: Bollywood, cricket, monsoon, Leopold Cafe
 

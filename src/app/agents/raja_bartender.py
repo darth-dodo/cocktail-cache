@@ -54,8 +54,8 @@ def create_raja_bartender(
     Args:
         tools: List of additional tools for the agent. If provided and
             include_default_tools is True, these are added to defaults.
-        llm: Optional LLM configuration. Defaults to conversational profile
-            with higher temperature for personality variation.
+        llm: Optional LLM configuration. Defaults to the conversational
+            profile (shorter replies; personality comes from the prompt).
         include_default_tools: Whether to include the default cocktail tools.
             Defaults to True.
 
@@ -64,7 +64,7 @@ def create_raja_bartender(
     """
     config = get_agent_config("raja_bartender")
 
-    # Use conversational LLM profile for more personality
+    # Use the conversational LLM profile for chat-length replies
     default_llm = llm or get_llm(profile="conversational")
 
     # Build tools list

@@ -840,7 +840,7 @@ So that I learn while I discover new drinks.
 
 **Architecture Pattern**:
 - Single-agent crew optimized for conversation
-- Higher temperature (0.85) for personality variation
+- Personality driven by the backstory prompt (temperature removed for Claude Haiku 5.5)
 - Context injection via formatted conversation history
 - Structured Pydantic output with fallback parsing
 

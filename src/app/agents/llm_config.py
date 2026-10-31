@@ -2,6 +2,10 @@
 
 This module provides centralized LLM configuration for all agents,
 loading settings from config/llm.yaml.
+
+Temperature is only sent when a profile or caller sets it. The configured
+model, Claude Haiku 5.5, rejects non-default sampling values, so llm.yaml
+leaves temperature unset and the API default applies.
 """
 
 from crewai import LLM
@@ -36,7 +40,8 @@ def get_llm(
                  Overrides are applied on top of the profile settings.
         model: Override the model identifier.
         max_tokens: Override maximum tokens for the response.
-        temperature: Override sampling temperature (0.0-1.0).
+        temperature: Override sampling temperature. Leave as None for
+                     Claude Haiku 5.5, which rejects non-default values.
 
     Returns:
         A configured LLM instance.
