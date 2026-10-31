@@ -19,18 +19,15 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  # Type checking with mypy
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.14.1
+  # Type checking with mypy.
+  # Runs in the project venv via uv (same command as `make typecheck` and CI)
+  # so the hook uses the locked mypy, dependency stubs, and pyproject config
+  # instead of a separately resolved isolated environment that can drift.
+  - repo: local
     hooks:
       - id: mypy
-        additional_dependencies:
-          - types-requests
-          - types-PyYAML
-          - pydantic>=2.0
-          - crewai>=0.86.0
-        args:
-          - --ignore-missing-imports
-          - --disable-error-code=misc
-          - --disable-error-code=type-arg
-          - --disable-error-code=no-any-return
+        name: mypy
+        entry: uv run mypy src
+        language: system
+        types: [python]
+        pass_filenames: false
