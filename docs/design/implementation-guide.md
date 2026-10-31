@@ -298,13 +298,15 @@ src/app/agents/
 └── bottle_advisor.py    # Recommends next purchase
 ```
 
-**LLM Configuration (Claude Haiku):**
+**LLM Configuration (Claude Haiku 4.5):**
+
+> Design sketch. The shipped code reads the model ID from `src/app/agents/config/llm.yaml`, which is the single source of truth.
 
 ```python
 # src/app/agents/llm_config.py
 from crewai import LLM
 
-DEFAULT_MODEL = "anthropic/claude-3-5-haiku-20241022"
+DEFAULT_MODEL = "anthropic/claude-haiku-4-5-20251001"
 DEFAULT_MAX_TOKENS = 4096
 DEFAULT_TEMPERATURE = 0.7
 

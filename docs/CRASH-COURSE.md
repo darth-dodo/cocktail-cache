@@ -332,30 +332,32 @@ drink_recommender:
 
 ```yaml
 # src/app/agents/config/llm.yaml
+# The model ID is set once (&default_model) and reused by every profile.
 default:
-  model: "anthropic/claude-3-5-haiku-latest"
+  model: &default_model "anthropic/claude-haiku-4-5-20251001"
+  max_tokens: 4096
   temperature: 0.7
-  max_tokens: 1024
 
+# Alternative configurations for different use cases
 fast:
-  model: "anthropic/claude-3-5-haiku-latest"
+  model: *default_model
+  max_tokens: 2048
   temperature: 0.5
-  max_tokens: 1024
 
 creative:
-  model: "anthropic/claude-3-5-haiku-20241022"
+  model: *default_model
+  max_tokens: 4096
   temperature: 0.9
-  max_tokens: 2048
 
 precise:
-  model: "anthropic/claude-3-5-haiku-latest"
+  model: *default_model
+  max_tokens: 4096
   temperature: 0.3
-  max_tokens: 1024
 
 conversational:
-  model: "anthropic/claude-3-5-haiku-20241022"
-  temperature: 0.85
+  model: *default_model
   max_tokens: 1024
+  temperature: 0.85  # Higher for more personality variation
 ```
 
 ### Agent Inventory

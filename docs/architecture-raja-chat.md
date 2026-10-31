@@ -87,7 +87,7 @@ Add to `/Users/abhishek/stuff/ai-adventures/cocktail-cache/src/app/agents/config
 
 ```yaml
 conversational:
-  model: "anthropic/claude-3-5-haiku-20241022"
+  model: "anthropic/claude-haiku-4-5-20251001"
   max_tokens: 1024
   temperature: 0.85  # Higher for more personality variation
 ```

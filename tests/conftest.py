@@ -33,7 +33,7 @@ def mock_anthropic_response() -> dict:
                 "text": "Here is a cocktail recommendation...",
             }
         ],
-        "model": "claude-3-sonnet-20240229",
+        "model": "claude-test-model",
         "stop_reason": "end_turn",
     }
 

@@ -86,7 +86,7 @@ class LLMConfig(BaseModel):
 
     model: str = Field(
         ...,
-        description="LLM model identifier (e.g., 'anthropic/claude-3-5-haiku-20241022')",
+        description="LLM model identifier (e.g., 'anthropic/claude-haiku-4-5-20251001')",
     )
     max_tokens: int = Field(
         ...,
@@ -104,7 +104,7 @@ class LLMConfig(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "model": "anthropic/claude-3-5-haiku-20241022",
+                "model": "anthropic/claude-haiku-4-5-20251001",
                 "max_tokens": 4096,
                 "temperature": 0.7,
             }

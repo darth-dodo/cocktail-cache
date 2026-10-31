@@ -113,7 +113,7 @@ class TestRajaBartenderLLM:
 
     def test_accepts_custom_llm(self):
         """Agent should use provided custom LLM."""
-        custom_llm = LLM(model="anthropic/claude-3-haiku-20240307", temperature=0.5)
+        custom_llm = LLM(model="anthropic/claude-test-model", temperature=0.5)
         agent = create_raja_bartender(llm=custom_llm)
 
         assert agent.llm == custom_llm

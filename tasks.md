@@ -433,6 +433,8 @@ DEFAULT_MAX_TOKENS = 4096
 DEFAULT_TEMPERATURE = 0.7
 ```
 
+> **Note (Oct 2026):** Historical entry. `claude-3-5-haiku-20241022` was retired by Anthropic on February 19, 2026. All agents now use Claude Haiku 4.5 (`anthropic/claude-haiku-4-5-20251001`), set once in `src/app/agents/config/llm.yaml`.
+
 **Environment Variable Required:**
 ```bash
 ANTHROPIC_API_KEY=sk-ant-...
