@@ -80,13 +80,14 @@ class TaskConfig(BaseModel):
 class LLMConfig(BaseModel):
     """Configuration for an LLM profile.
 
-    Defines model settings including the model identifier,
-    token limits, and temperature for creativity control.
+    Defines model settings including the model identifier and token limits.
+    Temperature is optional and unset by default: Claude Haiku 5.5 rejects
+    non-default sampling values, so llm.yaml leaves it out.
     """
 
     model: str = Field(
         ...,
-        description="LLM model identifier (e.g., 'anthropic/claude-3-5-haiku-20241022')",
+        description="LLM model identifier (e.g., 'anthropic/claude-haiku-5-5')",
     )
     max_tokens: int = Field(
         ...,
@@ -94,18 +95,20 @@ class LLMConfig(BaseModel):
         le=32768,
         description="Maximum tokens in the response",
     )
-    temperature: float = Field(
-        ...,
+    temperature: float | None = Field(
+        default=None,
         ge=0.0,
         le=2.0,
-        description="Sampling temperature (0.0 = deterministic, higher = more creative)",
+        description=(
+            "Optional sampling temperature. Leave unset for Claude Haiku 5.5, "
+            "which rejects non-default values"
+        ),
     )
 
     class Config:
         json_schema_extra = {
             "example": {
-                "model": "anthropic/claude-3-5-haiku-20241022",
+                "model": "anthropic/claude-haiku-5-5",
                 "max_tokens": 4096,
-                "temperature": 0.7,
             }
         }

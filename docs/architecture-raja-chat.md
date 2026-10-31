@@ -87,9 +87,10 @@ Add to `/Users/abhishek/stuff/ai-adventures/cocktail-cache/src/app/agents/config
 
 ```yaml
 conversational:
-  model: "anthropic/claude-3-5-haiku-20241022"
+  model: *default_model  # anthropic/claude-haiku-5-5
   max_tokens: 1024
-  temperature: 0.85  # Higher for more personality variation
+  # No temperature: Claude Haiku 5.5 rejects non-default sampling values,
+  # so Raja's personality comes from the agent prompt.
 ```
 
 ---
@@ -997,7 +998,7 @@ src/app/
 - Easy to tune Raja's personality without code changes
 - Consistent with existing agent configuration patterns
 - Hindi phrases and cultural references in backstory guide LLM behavior
-- Higher temperature (0.85) allows natural variation in personality expression
+- Personality variation comes from the backstory prompt (the 0.85 temperature was removed with the Claude Haiku 5.5 upgrade, which rejects non-default sampling values)
 
 ---
 

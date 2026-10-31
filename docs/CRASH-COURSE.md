@@ -17,7 +17,7 @@ This crash course documents everything about **Cocktail Cache** — an AI-powere
 │  Frontend: HTMX + Jinja2 + Tailwind (glassmorphic UI)          │
 │  Backend: FastAPI with session management                       │
 │  AI System: CrewAI with 7 agents, 4 crews, 4 tools             │
-│  LLM: Anthropic Claude Haiku (all agents)                      │
+│  LLM: Anthropic Claude Haiku 5.5 (all agents)                  │
 │  Config: YAML-based agent/task/LLM definitions                  │
 │  Data: 142 drinks (103 cocktails + 39 mocktails)               │
 │  Deployment: Docker + Render.com                                │
@@ -332,29 +332,27 @@ drink_recommender:
 
 ```yaml
 # src/app/agents/config/llm.yaml
+# The model ID is set once (&default_model) and reused by every profile.
+# No temperature: Claude Haiku 5.5 rejects non-default sampling values.
 default:
-  model: "anthropic/claude-3-5-haiku-latest"
-  temperature: 0.7
-  max_tokens: 1024
+  model: &default_model "anthropic/claude-haiku-5-5"
+  max_tokens: 4096
 
+# Alternative configurations for different use cases
 fast:
-  model: "anthropic/claude-3-5-haiku-latest"
-  temperature: 0.5
-  max_tokens: 1024
-
-creative:
-  model: "anthropic/claude-3-5-haiku-20241022"
-  temperature: 0.9
+  model: *default_model
   max_tokens: 2048
 
+creative:
+  model: *default_model
+  max_tokens: 4096
+
 precise:
-  model: "anthropic/claude-3-5-haiku-latest"
-  temperature: 0.3
-  max_tokens: 1024
+  model: *default_model
+  max_tokens: 4096
 
 conversational:
-  model: "anthropic/claude-3-5-haiku-20241022"
-  temperature: 0.85
+  model: *default_model
   max_tokens: 1024
 ```
 

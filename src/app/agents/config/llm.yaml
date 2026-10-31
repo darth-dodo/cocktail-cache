@@ -1,28 +1,33 @@
 # LLM configuration for CrewAI agents
-# Default model is Claude Haiku 4.5 for fast, cost-effective inference
+# Default model is Claude Haiku 5.5 for fast, cost-effective inference.
+#
+# Single source of truth for the model ID: it is set once on the default
+# profile (YAML anchor &default_model) and reused by every other profile
+# via *default_model. Change the model here and nowhere else.
+#
+# No sampling parameters (temperature, top_p, top_k): Claude Haiku 5.5
+# rejects non-default values with a 400 error, and API version 2026-10-21
+# rejects them on every model. Profiles differ only by max_tokens; steer
+# tone and creativity from the agent prompts instead.
+# See https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide
 
 default:
-  model: "anthropic/claude-haiku-4-5-20251001"
+  model: &default_model "anthropic/claude-haiku-5-5"
   max_tokens: 4096
-  temperature: 0.7
 
 # Alternative configurations for different use cases
 fast:
-  model: "anthropic/claude-haiku-4-5-20251001"
+  model: *default_model
   max_tokens: 2048
-  temperature: 0.5
 
 creative:
-  model: "anthropic/claude-haiku-4-5-20251001"
+  model: *default_model
   max_tokens: 4096
-  temperature: 0.9
 
 precise:
-  model: "anthropic/claude-haiku-4-5-20251001"
+  model: *default_model
   max_tokens: 4096
-  temperature: 0.3
 
 conversational:
-  model: "anthropic/claude-haiku-4-5-20251001"
+  model: *default_model
   max_tokens: 1024
-  temperature: 0.85  # Higher for more personality variation
