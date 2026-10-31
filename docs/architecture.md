@@ -416,7 +416,7 @@ flowchart TB
 
 ### Agent Specifications
 
-> **LLM Configuration**: All agents use Claude Haiku 4.5 (`anthropic/claude-haiku-4-5-20251001`) by default, set once in `src/app/agents/config/llm.yaml`.
+> **LLM Configuration**: All agents use Claude Haiku 5.5 (`anthropic/claude-haiku-5-5`) by default, set once in `src/app/agents/config/llm.yaml`.
 > Custom LLM configurations can be passed to each factory function.
 
 #### Agent 0: Drink Recommender (Fast Mode)
@@ -557,20 +557,25 @@ The model ID lives in exactly one place: the `default` profile in
 `src/app/agents/config/llm.yaml`. Every other profile reuses it through a YAML
 anchor, so switching models is a one-line change.
 
+Profiles set no sampling parameters. Claude Haiku 5.5 returns a 400 error for
+non-default `temperature`, `top_p` or `top_k` values, and API version
+`2026-10-21` removes them for every model, so tone and creativity are steered
+from the agent prompts. `get_llm()` still accepts a `temperature` override for
+other models; leave it unset for Haiku 5.5.
+
 ```yaml
 # src/app/agents/config/llm.yaml
 default:
-  model: &default_model "anthropic/claude-haiku-4-5-20251001"
+  model: &default_model "anthropic/claude-haiku-5-5"
   max_tokens: 4096
-  temperature: 0.7
 
 fast:
   model: *default_model
   max_tokens: 2048
-  temperature: 0.5
 
-# creative (0.9), precise (0.3) and conversational (0.85, 1024 tokens)
-# follow the same pattern.
+# creative (4096), precise (4096) and conversational (1024 tokens)
+# follow the same pattern. No profile sets temperature: Claude Haiku 5.5
+# rejects non-default sampling values.
 ```
 
 ```python
@@ -580,12 +585,12 @@ from crewai import LLM
 from src.app.agents.config import get_llm_profile
 
 def get_default_llm() -> LLM:
-    """Get the default LLM configuration (Claude Haiku 4.5)."""
+    """Get the default LLM configuration (Claude Haiku 5.5)."""
     config = get_llm_profile("default")
     return LLM(
         model=config.model,
         max_tokens=config.max_tokens,
-        temperature=config.temperature,
+        temperature=config.temperature,  # None: not sent to the API
     )
 
 def get_llm(
@@ -1451,7 +1456,7 @@ flowchart TB
 
     subgraph RajaCrew["Raja Chat Crew"]
         subgraph Agent["Raja Bartender Agent"]
-            Role["Role: Raja - Your Bombay Bartender<br/>LLM: Claude Haiku (temp: 0.85)"]
+            Role["Role: Raja - Your Bombay Bartender<br/>LLM: Claude Haiku 5.5 (conversational)"]
 
             subgraph Personality["Personality Traits"]
                 P1["20 years in Colaba, Bombay"]
@@ -1526,7 +1531,7 @@ class ChatResponse(BaseModel):
 | Separate agent from recommendation flow | Different LLM settings, distinct context management |
 | Server-side session storage | Maintains continuity, limits context |
 | Context window of 8 messages | Balance between context and token usage |
-| Higher temperature (0.85) | More personality variation |
+| Prompt-driven personality (no temperature) | Claude Haiku 5.5 rejects non-default sampling values; the backstory carries the voice |
 | Single-agent crew | Simpler, faster for conversational use case |
 
 ---

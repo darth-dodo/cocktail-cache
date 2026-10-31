@@ -298,7 +298,7 @@ src/app/agents/
 └── bottle_advisor.py    # Recommends next purchase
 ```
 
-**LLM Configuration (Claude Haiku 4.5):**
+**LLM Configuration (Claude Haiku 5.5):**
 
 > Design sketch. The shipped code reads the model ID from `src/app/agents/config/llm.yaml`, which is the single source of truth.
 
@@ -306,12 +306,12 @@ src/app/agents/
 # src/app/agents/llm_config.py
 from crewai import LLM
 
-DEFAULT_MODEL = "anthropic/claude-haiku-4-5-20251001"
+DEFAULT_MODEL = "anthropic/claude-haiku-5-5"
 DEFAULT_MAX_TOKENS = 4096
-DEFAULT_TEMPERATURE = 0.7
 
 def get_default_llm() -> LLM:
-    return LLM(model=DEFAULT_MODEL, max_tokens=DEFAULT_MAX_TOKENS, temperature=DEFAULT_TEMPERATURE)
+    # No temperature: Claude Haiku 5.5 rejects non-default sampling values.
+    return LLM(model=DEFAULT_MODEL, max_tokens=DEFAULT_MAX_TOKENS)
 ```
 
 **Agent Factory Pattern:**
