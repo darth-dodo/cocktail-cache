@@ -2,7 +2,7 @@
 
 # Dependencies
 install:
-	uv sync
+	uv sync --extra dev
 	uv run pre-commit install
 
 # Development
